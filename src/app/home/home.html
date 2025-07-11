@@ -1,0 +1,57 @@
+<div class="min-h-screen bg-gray-100 p-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+        Sistema de Mantenimiento
+      </h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Botón CORTE -->
+        <button
+          (click)="selectFunction('corte')"
+          class="group relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-xl p-8 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+        >
+          <div class="text-center">
+            <div class="mb-4">
+              <!-- Icono de tijeras/corte -->
+              <svg
+                class="w-16 h-16 mx-auto"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.89-2 2-2 2 .89 2 2-.89 2-2 2zm0 12c-1.1 0-2-.89-2-2s.89-2 2-2 2 .89 2 2-.89 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3z"
+                />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">CORTE</h2>
+            <p class="text-orange-100">Máquinas cortadoras industriales</p>
+          </div>
+        </button>
+
+        <!-- Botón COSTURA -->
+        <button
+          (click)="selectFunction('costura')"
+          class="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-xl p-8 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+        >
+          <div class="text-center">
+            <div class="mb-4">
+              <!-- Icono de engranaje/costura -->
+              <svg
+                class="w-16 h-16 mx-auto"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97c0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1c0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"
+                />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">COSTURA</h2>
+            <p class="text-blue-100">Máquinas de coser industriales</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
