@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "@angular/material/prebuilt-themes/azure-blue.css";
+
+/* Variables de colores personalizados */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --danger-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Reset mejorado */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Roboto", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  user-select: none;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Componentes base mejorados */
+@layer components {
+  .app-container {
+    @apply min-h-screen;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .touch-card {
+    @apply bg-white rounded-2xl p-6 border-0 transition-all duration-300 cursor-pointer transform;
+    box-shadow: var(--card-shadow);
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  }
+
+  .touch-card:hover {
+    @apply -translate-y-2 scale-105;
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .touch-card:active {
+    @apply scale-95;
+    transition: transform 0.1s ease;
+  }
+
+  .area-card {
+    @apply touch-card;
+    background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+
+  .area-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 3px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #667eea);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .machine-card {
+    @apply touch-card;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-left: 6px solid #3b82f6;
+  }
+
+  .machine-card:hover {
+    border-left-color: #1d4ed8;
+  }
+
+  .floating-header {
+    @apply glass-effect shadow-xl;
+    border-bottom: 3px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .pulse-animation {
+    animation: pulse-soft 2s infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  .bounce-in {
+    animation: bounceIn 0.6s ease-out;
+  }
+
+  @keyframes bounceIn {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes slideUp {
+    0% {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* Utilidades personalizadas */
+.bg-gradient-primary {
+  background: var(--primary-gradient);
+}
+
+.bg-gradient-success {
+  background: var(--success-gradient);
+}
+
+.bg-gradient-warning {
+  background: var(--warning-gradient);
+}
+
+.bg-gradient-danger {
+  background: var(--danger-gradient);
+}
+
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.icon-glow {
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
