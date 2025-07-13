@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Corte } from './corte';
+import { TouchButton } from './touch-button';
 
-describe('Corte', () => {
-  let component: Corte;
-  let fixture: ComponentFixture<Corte>;
+describe('TouchButton', () => {
+  let component: TouchButton;
+  let fixture: ComponentFixture<TouchButton>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Corte]
+      imports: [TouchButton]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Corte);
+    fixture = TestBed.createComponent(TouchButton);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

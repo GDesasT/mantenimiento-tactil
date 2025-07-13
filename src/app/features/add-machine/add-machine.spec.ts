@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Refacciones } from './refacciones';
+import { AddMachine } from './add-machine';
 
-describe('Refacciones', () => {
-  let component: Refacciones;
-  let fixture: ComponentFixture<Refacciones>;
+describe('AddMachine', () => {
+  let component: AddMachine;
+  let fixture: ComponentFixture<AddMachine>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Refacciones]
+      imports: [AddMachine]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Refacciones);
+    fixture = TestBed.createComponent(AddMachine);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
