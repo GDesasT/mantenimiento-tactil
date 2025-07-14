@@ -1,54 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { DatabaseService } from './core/services/database';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule], // ← Agregar CommonModule
+  imports: [RouterOutlet],
   template: `
-    <div class="min-h-screen bg-gray-50">
-      <header class="bg-white shadow-sm border-b-2 border-gray-200">
+    <div class="app-container">
+      <nav class="professional-nav">
         <div class="container mx-auto px-6 py-4">
-          <h1 class="text-3xl font-bold text-gray-800">
-            🏭 Sistema de Mantenimiento
-          </h1>
-        </div>
-      </header>
+          <div class="flex items-center justify-between">
+            <div class="nav-brand">
+              <img src="logo.svg" alt="Global Safety Textiles" class="h-8" />
+            </div>
 
-      <main class="container mx-auto px-6 py-8">
-        <div *ngIf="isInitializing" class="text-center py-20">
-          <div class="inline-flex items-center justify-center">
-            <span class="text-2xl font-semibold text-gray-700"
-              >⏳ Inicializando sistema...</span
-            >
+            <div class="flex items-center space-x-4">
+              <div class="text-sm text-gray-600">
+                <span class="font-medium">Tool Room</span> •
+                <span>Industrial Solutions</span>
+              </div>
+            </div>
           </div>
         </div>
+      </nav>
 
-        <router-outlet *ngIf="!isInitializing"></router-outlet>
+      <!-- Contenido principal -->
+      <main class="container mx-auto px-6 py-8">
+        <router-outlet></router-outlet>
       </main>
+
+      <!-- Footer profesional -->
+      <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-6 text-center">
+          <p class="text-sm">
+            © 2024 Sistema de Mantenimiento Industrial.
+            <span class="text-gray-400"
+              >Desarrollado para Tool Room Management</span
+            >
+          </p>
+        </div>
+      </footer>
     </div>
   `,
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'mantenimiento-tactil';
-  isInitializing = true;
-
-  constructor(private databaseService: DatabaseService) {}
-
-  async ngOnInit() {
-    try {
-      console.log('🚀 Starting application...');
-      await this.databaseService.initializeDatabase();
-      console.log('✅ Application ready');
-
-      setTimeout(() => {
-        this.isInitializing = false;
-      }, 1000);
-    } catch (error) {
-      console.error('❌ Error initializing app:', error);
-      this.isInitializing = false;
-    }
-  }
 }

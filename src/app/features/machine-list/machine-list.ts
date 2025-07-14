@@ -3,36 +3,33 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { MachineService } from '../../core/services/machine';
+import { PartService } from '../../core/services/part';
 import { DatabaseService } from '../../core/services/database';
-import { Machine } from '../../core/models';
+import { Machine, PartCategory } from '../../core/models';
 
 @Component({
   selector: 'app-machine-list',
   standalone: true,
   imports: [CommonModule, TouchButtonComponent],
   template: `
-    <div class="machine-list-container slide-up">
-      <!-- Header con navegación mejorado -->
-      <div class="glass-effect rounded-3xl p-8 mb-12">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
+    <div class="app-container">
+      <!-- Header profesional -->
+      <div class="professional-header">
+        <div class="header-content">
+          <div class="header-left">
             <app-touch-button
               variant="secondary"
               size="md"
               icon="←"
               (clicked)="goBack()"
-              class="mr-6"
+              class="back-btn"
             >
               Atrás
             </app-touch-button>
 
-            <div>
-              <h2 class="text-4xl font-black gradient-text mb-2">
-                {{ getAreaTitle() }}
-              </h2>
-              <p class="text-xl text-gray-600 font-medium">
-                Gestión de máquinas de {{ selectedArea }}
-              </p>
+            <div class="header-text">
+              <h2 class="header-title">{{ getAreaTitle() }}</h2>
+              <p class="header-subtitle">Gestión de máquinas industriales</p>
             </div>
           </div>
 
@@ -47,78 +44,101 @@ import { Machine } from '../../core/models';
         </div>
       </div>
 
-      <!-- Lista de máquinas con mejor diseño -->
-      <div *ngIf="machines.length > 0" class="machines-grid">
-        <div
-          *ngFor="let machine of machines; let i = index"
-          class="machine-card bounce-in"
-          [style.animation-delay]="i * 0.1 + 's'"
-        >
-          <div class="machine-header mb-6">
-            <div class="machine-icon mb-4">
-              <span class="text-7xl icon-glow">{{ getAreaIcon() }}</span>
+      <div class="content-area">
+        <!-- Lista de máquinas -->
+        <div *ngIf="machines.length > 0" class="machines-container">
+          <div
+            *ngFor="let machine of machines; let i = index"
+            class="machine-card"
+          >
+            <!-- Header de máquina -->
+            <div class="machine-header">
+              <div class="machine-icon">{{ getAreaIcon() }}</div>
+              <h3 class="machine-name">{{ machine.name }}</h3>
+              <span class="machine-badge">{{ getAreaLabel() }}</span>
             </div>
 
-            <div class="machine-info text-center">
-              <h3 class="machine-name text-2xl font-black text-gray-800 mb-2">
-                {{ machine.name }}
-              </h3>
-              <p class="machine-area text-lg text-gray-600 font-medium">
-                {{ getAreaLabel() }}
-              </p>
+            <!-- Estadísticas -->
+            <div class="machine-stats" *ngIf="machineStats[machine.id!]">
+              <div class="stat-item stat-blue">
+                <div class="stat-number">
+                  {{ machineStats[machine.id!].mecanica }}
+                </div>
+                <div class="stat-label">MECÁNICAS</div>
+              </div>
+              <div class="stat-item stat-yellow">
+                <div class="stat-number">
+                  {{ machineStats[machine.id!].electronica }}
+                </div>
+                <div class="stat-label">ELECTRÓNICAS</div>
+              </div>
+              <div class="stat-item stat-green">
+                <div class="stat-number">
+                  {{ machineStats[machine.id!].consumible }}
+                </div>
+                <div class="stat-label">CONSUMIBLES</div>
+              </div>
             </div>
-          </div>
 
-          <div class="machine-actions space-y-4">
-            <app-touch-button
-              variant="primary"
-              size="lg"
-              [fullWidth]="true"
-              icon="🔧"
-              (clicked)="viewParts(machine)"
-            >
-              Ver Refacciones
-            </app-touch-button>
+            <!-- Estadísticas placeholder -->
+            <div class="machine-stats" *ngIf="!machineStats[machine.id!]">
+              <div class="stat-item stat-gray">
+                <div class="stat-number">0</div>
+                <div class="stat-label">MECÁNICAS</div>
+              </div>
+              <div class="stat-item stat-gray">
+                <div class="stat-number">0</div>
+                <div class="stat-label">ELECTRÓNICAS</div>
+              </div>
+              <div class="stat-item stat-gray">
+                <div class="stat-number">0</div>
+                <div class="stat-label">CONSUMIBLES</div>
+              </div>
+            </div>
 
-            <div class="flex gap-4">
+            <!-- Botones de acción -->
+            <div class="machine-actions">
               <app-touch-button
-                variant="warning"
-                size="md"
-                icon="✏️"
-                (clicked)="editMachine(machine)"
-                class="flex-1"
+                variant="primary"
+                size="lg"
+                icon="🔧"
+                [fullWidth]="true"
+                (clicked)="viewParts(machine)"
+                class="main-action"
               >
-                Editar
+                Ver Refacciones
               </app-touch-button>
 
-              <app-touch-button
-                variant="danger"
-                size="md"
-                icon="🗑️"
-                (clicked)="deleteMachine(machine)"
-                class="flex-1"
-              >
-                Eliminar
-              </app-touch-button>
+              <div class="secondary-actions">
+                <app-touch-button
+                  variant="warning"
+                  size="md"
+                  icon="✏️"
+                  (clicked)="editMachine(machine)"
+                >
+                  Editar
+                </app-touch-button>
+
+                <app-touch-button
+                  variant="danger"
+                  size="md"
+                  icon="🗑️"
+                  (clicked)="deleteMachine(machine)"
+                >
+                  Eliminar
+                </app-touch-button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Estado vacío mejorado -->
-      <div *ngIf="machines.length === 0" class="empty-state">
-        <div class="glass-effect rounded-3xl p-16 text-center bounce-in">
-          <div class="empty-icon mb-8">
-            <span class="text-9xl icon-glow pulse-animation">{{
-              getAreaIcon()
-            }}</span>
-          </div>
-          <h3 class="text-3xl font-black text-gray-800 mb-6">
-            No hay máquinas registradas
-          </h3>
-          <p class="text-xl text-gray-600 mb-12 max-w-md mx-auto">
-            Comienza agregando la primera máquina de {{ selectedArea }} para
-            gestionar sus refacciones
+        <!-- Estado vacío -->
+        <div *ngIf="machines.length === 0 && !isLoading" class="empty-state">
+          <div class="empty-icon">{{ getAreaIcon() }}</div>
+          <h3 class="empty-title">No hay máquinas registradas</h3>
+          <p class="empty-message">
+            Comienza agregando la primera máquina en
+            {{ getAreaLabel().toLowerCase() }}
           </p>
           <app-touch-button
             variant="success"
@@ -129,121 +149,283 @@ import { Machine } from '../../core/models';
             Agregar Primera Máquina
           </app-touch-button>
         </div>
-      </div>
 
-      <!-- Loading state mejorado -->
-      <div *ngIf="isLoading" class="loading-state">
-        <div class="glass-effect rounded-3xl p-16 text-center">
-          <div class="loading-spinner mb-6">
-            <span class="text-6xl animate-spin">⚙️</span>
-          </div>
-          <span class="text-2xl font-bold text-gray-700"
-            >Cargando máquinas...</span
-          >
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">Cargando máquinas...</span>
         </div>
       </div>
     </div>
   `,
   styles: [
     `
-      .machine-list-container {
-        min-height: 70vh;
-        padding: 2rem 0;
+      .app-container {
+        min-height: 100vh;
+        background: var(--gray-50);
       }
 
-      .machines-grid {
+      .professional-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-bottom: 3px solid var(--primary-700);
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .header-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 0 0.25rem 0;
+      }
+
+      .header-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .content-area {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .machines-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 2rem;
-        margin-top: 2rem;
       }
 
       .machine-card {
-        min-height: 400px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 2.5rem;
-        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-        border-left: 6px solid #3b82f6;
-        transition: all 0.3s ease;
+        background: white;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+        padding: 1.5rem;
+        transition: all 0.2s ease;
       }
 
       .machine-card:hover {
-        border-left-color: #1d4ed8;
-        transform: translateY(-4px) scale(1.02);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
       }
 
       .machine-header {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--gray-200);
       }
 
       .machine-icon {
-        filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.2));
+        font-size: 4rem;
+        margin-bottom: 1rem;
+      }
+
+      .machine-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin: 0 0 0.5rem 0;
+      }
+
+      .machine-badge {
+        background: var(--primary-100);
+        color: var(--primary-800);
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .machine-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 1rem 0.5rem;
+        border-radius: var(--border-radius-md);
+        background: var(--gray-50);
+      }
+
+      .stat-blue {
+        background: var(--primary-50);
+      }
+
+      .stat-yellow {
+        background: #fef3c7;
+      }
+
+      .stat-green {
+        background: #ecfdf5;
+      }
+
+      .stat-gray {
+        background: var(--gray-100);
+      }
+
+      .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-blue .stat-number {
+        color: var(--primary-600);
+      }
+
+      .stat-yellow .stat-number {
+        color: #d97706;
+      }
+
+      .stat-green .stat-number {
+        color: #059669;
+      }
+
+      .stat-gray .stat-number {
+        color: var(--gray-500);
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .machine-actions {
-        width: 100%;
-        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
       }
 
-      .empty-state,
-      .loading-state {
+      .secondary-actions {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 400px;
-        margin: 2rem 0;
+        gap: 0.75rem;
+      }
+
+      .secondary-actions app-touch-button {
+        flex: 1;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
+        border: 2px dashed var(--gray-300);
       }
 
       .empty-icon {
-        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+        font-size: 6rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.6;
+      }
+
+      .empty-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+      }
+
+      .empty-message {
+        color: var(--gray-600);
+        margin-bottom: 2rem;
+        font-size: 1.125rem;
+      }
+
+      .loading-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 4rem;
+        text-align: center;
       }
 
       .loading-spinner {
-        filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid var(--gray-300);
+        border-top: 3px solid var(--primary-600);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
       }
 
-      /* Animaciones */
-      .animate-spin {
-        animation: spin 2s linear infinite;
+      .loading-text {
+        color: var(--gray-600);
+        font-size: 1.125rem;
       }
 
       @keyframes spin {
-        from {
+        0% {
           transform: rotate(0deg);
         }
-        to {
+        100% {
           transform: rotate(360deg);
         }
       }
 
       /* Responsive */
       @media (max-width: 768px) {
-        .machines-grid {
+        .header-content {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+
+        .header-left {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .content-area {
+          padding: 1rem;
+        }
+
+        .machines-container {
           grid-template-columns: 1fr;
           gap: 1.5rem;
         }
 
-        .machine-card {
-          min-height: 350px;
-          padding: 2rem;
+        .machine-stats {
+          grid-template-columns: 1fr;
+          gap: 0.75rem;
         }
 
-        .glass-effect {
-          padding: 1.5rem !important;
-        }
-
-        .flex {
+        .secondary-actions {
           flex-direction: column;
         }
+      }
 
-        .flex > * {
-          margin-bottom: 0.5rem;
+      @media (max-width: 480px) {
+        .professional-header {
+          padding: 1rem;
+        }
+
+        .machine-card {
+          padding: 1rem;
         }
       }
     `,
@@ -252,23 +434,23 @@ import { Machine } from '../../core/models';
 export class MachineListComponent implements OnInit {
   selectedArea: 'corte' | 'costura' = 'costura';
   machines: Machine[] = [];
+  machineStats: { [key: number]: { [key in PartCategory]: number } } = {};
   isLoading = true;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private machineService: MachineService,
+    private partService: PartService,
     private databaseService: DatabaseService
   ) {}
 
   async ngOnInit() {
-    // Obtener área de la URL
     this.route.params.subscribe((params) => {
       this.selectedArea = params['area'] || 'costura';
       this.loadMachines();
     });
 
-    // Inicializar base de datos
     try {
       await this.databaseService.initializeDatabase();
     } catch (error) {
@@ -279,8 +461,28 @@ export class MachineListComponent implements OnInit {
   loadMachines() {
     this.isLoading = true;
     this.machineService.getMachinesByArea(this.selectedArea).subscribe({
-      next: (machines) => {
+      next: async (machines) => {
         this.machines = machines;
+
+        for (const machine of this.machines) {
+          if (machine.id) {
+            try {
+              const stats = await this.partService.getPartStats(machine.id);
+              this.machineStats[machine.id] = stats;
+            } catch (error) {
+              console.error(
+                `Error loading stats for machine ${machine.id}:`,
+                error
+              );
+              this.machineStats[machine.id] = {
+                mecanica: 0,
+                electronica: 0,
+                consumible: 0,
+              };
+            }
+          }
+        }
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -310,31 +512,38 @@ export class MachineListComponent implements OnInit {
 
   viewParts(machine: Machine) {
     console.log('🔧 View parts for:', machine.name);
-    alert(`Ver refacciones de: ${machine.name}`);
-    // TODO: Navegar a lista de refacciones
+    this.router.navigate(['/machines', this.selectedArea, machine.id, 'parts']);
   }
 
   addMachine() {
     console.log('➕ Add new machine to:', this.selectedArea);
-    this.router.navigate(['/machines', this.selectedArea, 'add']);
+    alert(
+      `Funcionalidad de agregar máquina en ${this.selectedArea} pendiente de implementar`
+    );
   }
 
   editMachine(machine: Machine) {
     console.log('✏️ Edit machine:', machine.name);
-    alert(`Editar máquina: ${machine.name}`);
-    // TODO: Navegar a formulario de editar
+    alert(
+      `Editar máquina: ${machine.name}\n\nFuncionalidad pendiente de implementar`
+    );
   }
 
   deleteMachine(machine: Machine) {
-    if (confirm(`¿Estás seguro de eliminar la máquina "${machine.name}"?`)) {
+    if (
+      confirm(
+        `¿Estás seguro de eliminar la máquina "${machine.name}"?\n\nEsta acción también eliminará todas sus refacciones asociadas.`
+      )
+    ) {
       this.machineService.deleteMachine(machine.id!).subscribe({
         next: () => {
-          console.log('🗑️ Machine deleted');
-          this.loadMachines(); // Recargar lista
+          console.log('🗑️ Machine deleted:', machine.name);
+          alert(`Máquina "${machine.name}" eliminada exitosamente`);
+          this.loadMachines();
         },
         error: (error) => {
           console.error('Error deleting machine:', error);
-          alert('Error al eliminar la máquina');
+          alert('Error al eliminar la máquina. Intenta nuevamente.');
         },
       });
     }
