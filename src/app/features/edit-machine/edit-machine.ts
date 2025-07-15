@@ -10,13 +10,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { MachineService } from '../../core/services/machine';
 import { DatabaseService } from '../../core/services/database';
+import { Machine } from '../../core/models';
 
 @Component({
-  selector: 'app-add-machine',
+  selector: 'app-edit-machine',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, TouchButtonComponent],
   template: `
-    <div class="add-machine-container">
+    <div class="edit-machine-container">
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
         <div class="flex items-center">
@@ -31,9 +32,7 @@ import { DatabaseService } from '../../core/services/database';
           </app-touch-button>
 
           <div>
-            <h2 class="text-3xl font-bold text-gray-800">
-              Agregar Nueva Máquina
-            </h2>
+            <h2 class="text-3xl font-bold text-gray-800">Editar Máquina</h2>
             <p class="text-lg text-gray-600">
               {{ getAreaTitle() }}
             </p>
@@ -42,31 +41,31 @@ import { DatabaseService } from '../../core/services/database';
       </div>
 
       <!-- Formulario -->
-      <div class="max-w-2xl mx-auto">
+      <div class="max-w-2xl mx-auto" *ngIf="machine">
         <form
           [formGroup]="machineForm"
           (ngSubmit)="onSubmit()"
           class="bg-white rounded-xl shadow-lg p-8"
         >
-          <!-- Área seleccionada (solo información) -->
+          <!-- Información actual -->
           <div class="mb-8">
-            <div class="area-indicator">
+            <div class="current-info">
               <div class="flex items-center justify-center mb-4">
                 <span class="text-6xl">{{ getAreaIcon() }}</span>
               </div>
               <div class="text-center">
                 <h3 class="text-2xl font-bold text-gray-800 mb-2">
-                  {{ getAreaTitle() }}
+                  Editando: {{ machine.name }}
                 </h3>
-                <p class="text-gray-600">La máquina se agregará a esta área</p>
+                <p class="text-gray-600">{{ getAreaTitle() }}</p>
               </div>
             </div>
           </div>
 
-          <!-- Campo: Nombre de la máquina -->
+          <!-- Campo: Nuevo nombre de la máquina -->
           <div class="mb-8">
             <label class="block text-xl font-semibold text-gray-700 mb-3">
-              Nombre de la Máquina *
+              Nuevo Nombre de la Máquina *
             </label>
             <input
               type="text"
@@ -99,7 +98,7 @@ import { DatabaseService } from '../../core/services/database';
                 El nombre debe tener al menos 2 caracteres
               </div>
               <div *ngIf="machineForm.get('name')?.errors?.['nameExists']">
-                Ya existe una máquina con este nombre en {{ selectedArea }}
+                Ya existe otra máquina con este nombre en {{ selectedArea }}
               </div>
             </div>
 
@@ -129,16 +128,50 @@ import { DatabaseService } from '../../core/services/database';
 
             <app-touch-button
               type="submit"
-              variant="success"
+              variant="warning"
               size="lg"
               [fullWidth]="true"
               [disabled]="machineForm.invalid || isSubmitting"
               [loading]="isSubmitting"
             >
-              {{ isSubmitting ? 'Guardando...' : 'Guardar Máquina' }}
+              {{ isSubmitting ? 'Guardando...' : 'Actualizar Máquina' }}
             </app-touch-button>
           </div>
         </form>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <span class="loading-text">Cargando máquina...</span>
+      </div>
+
+      <!-- Error al cargar -->
+      <div *ngIf="loadError" class="error-state">
+        <div class="error-icon">❌</div>
+        <h3 class="error-title">Error al cargar la máquina</h3>
+        <p class="error-message">{{ loadError }}</p>
+
+        <div class="error-actions">
+          <app-touch-button
+            variant="primary"
+            size="lg"
+            (clicked)="retryLoad()"
+            class="mr-4"
+          >
+            Reintentar
+          </app-touch-button>
+
+          <app-touch-button variant="secondary" size="lg" (clicked)="goBack()">
+            Volver
+          </app-touch-button>
+        </div>
+
+        <!-- Debug info -->
+        <div class="debug-info">
+          <p><strong>Área:</strong> {{ selectedArea }}</p>
+          <p><strong>Machine ID:</strong> {{ machineId }}</p>
+        </div>
       </div>
 
       <!-- Notificaciones -->
@@ -156,16 +189,17 @@ import { DatabaseService } from '../../core/services/database';
   `,
   styles: [
     `
-      .add-machine-container {
+      .edit-machine-container {
         min-height: 70vh;
         padding: 1rem 0;
       }
 
-      .area-indicator {
+      .current-info {
         background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
         border-radius: 1rem;
         padding: 2rem;
         margin-bottom: 2rem;
+        border: 2px solid #d1d5db;
       }
 
       .touch-input-field {
@@ -185,6 +219,86 @@ import { DatabaseService } from '../../core/services/database';
 
       .touch-input-field.border-red-500 {
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Estados de carga y error */
+      .loading-state,
+      .error-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+        max-width: 2xl;
+        margin: 0 auto;
+      }
+
+      .loading-spinner {
+        width: 3rem;
+        height: 3rem;
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1.5rem;
+      }
+
+      .loading-text {
+        color: #6b7280;
+        font-size: 1.25rem;
+        font-weight: 500;
+      }
+
+      .error-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .error-title {
+        font-size: 1.875rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 1rem;
+      }
+
+      .error-message {
+        color: #6b7280;
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+      }
+
+      .error-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .debug-info {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        text-align: left;
+        max-width: 300px;
+      }
+
+      .debug-info p {
+        margin: 0.5rem 0;
+        color: #6b7280;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
 
       /* Notificaciones */
@@ -242,22 +356,43 @@ import { DatabaseService } from '../../core/services/database';
         }
       }
 
-      /* Responsive para notificaciones */
+      /* Responsive */
       @media (max-width: 768px) {
+        .edit-machine-container {
+          padding: 0.5rem;
+        }
+
+        .current-info {
+          padding: 1.5rem;
+        }
+
         .notification {
           top: 1rem;
           right: 1rem;
           left: 1rem;
           max-width: none;
         }
+
+        .error-actions {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .debug-info {
+          max-width: 100%;
+        }
       }
     `,
   ],
 })
-export class AddMachineComponent implements OnInit {
+export class EditMachineComponent implements OnInit {
   machineForm: FormGroup;
   selectedArea: 'corte' | 'costura' = 'costura';
+  machineId: number = 0;
+  machine: Machine | null = null;
+  isLoading = true;
   isSubmitting = false;
+  loadError = '';
 
   // Variables para notificaciones
   showNotification = false;
@@ -277,9 +412,18 @@ export class AddMachineComponent implements OnInit {
   }
 
   async ngOnInit() {
-    // Obtener área de la URL
+    // Obtener parámetros de la URL
     this.route.params.subscribe((params) => {
       this.selectedArea = params['area'] || 'costura';
+      this.machineId = parseInt(params['machineId']); // Cambiar 'id' por 'machineId'
+
+      console.log('🔧 Edit machine params:', {
+        area: this.selectedArea,
+        machineId: this.machineId,
+        rawParams: params,
+      });
+
+      this.loadMachine();
     });
 
     // Inicializar base de datos
@@ -287,20 +431,67 @@ export class AddMachineComponent implements OnInit {
       await this.databaseService.initializeDatabase();
     } catch (error) {
       console.error('Error initializing database:', error);
+      this.loadError = 'Error al inicializar la base de datos';
+      this.isLoading = false;
+    }
+  }
+
+  loadMachine() {
+    this.isLoading = true;
+    this.loadError = '';
+
+    console.log('🔍 Loading machine with ID:', this.machineId);
+
+    // Validar que el ID sea válido
+    if (!this.machineId || isNaN(this.machineId)) {
+      this.loadError = 'ID de máquina inválido';
+      this.isLoading = false;
+      console.error('❌ Invalid machine ID:', this.machineId);
+      return;
     }
 
-    // Validación de nombre único
-    this.setupNameValidation();
+    this.machineService.getMachineById(this.machineId).subscribe({
+      next: (machine) => {
+        console.log('📦 Received machine data:', machine);
+
+        if (machine && machine.area === this.selectedArea) {
+          this.machine = machine;
+          this.machineForm.patchValue({
+            name: machine.name,
+          });
+          this.setupNameValidation();
+          this.isLoading = false;
+          console.log('✅ Machine loaded successfully:', machine.name);
+        } else if (machine && machine.area !== this.selectedArea) {
+          this.loadError = `Esta máquina pertenece al área de ${machine.area}, no a ${this.selectedArea}`;
+          this.isLoading = false;
+          console.error('❌ Machine area mismatch:', {
+            expected: this.selectedArea,
+            actual: machine.area,
+          });
+        } else {
+          this.loadError = 'Máquina no encontrada';
+          this.isLoading = false;
+          console.error('❌ Machine not found with ID:', this.machineId);
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error loading machine:', error);
+        this.loadError = 'Error al cargar la máquina desde la base de datos';
+        this.isLoading = false;
+      },
+    });
   }
 
   setupNameValidation() {
     const nameControl = this.machineForm.get('name');
 
     nameControl?.valueChanges.subscribe(async (name: string) => {
-      if (name && name.length >= 2) {
+      if (name && name.length >= 2 && name !== this.machine?.name) {
         const isUnique = await this.machineService.isNameUnique(
           name,
-          this.selectedArea
+          this.selectedArea,
+          this.machineId // Excluir la máquina actual de la validación
         );
 
         if (!isUnique) {
@@ -330,6 +521,11 @@ export class AddMachineComponent implements OnInit {
     this.router.navigate(['/machines', this.selectedArea]);
   }
 
+  retryLoad() {
+    console.log('🔄 Retrying to load machine...');
+    this.loadMachine();
+  }
+
   // Métodos para notificaciones
   showNotificationMessage(
     message: string,
@@ -354,22 +550,22 @@ export class AddMachineComponent implements OnInit {
   }
 
   async onSubmit() {
-    if (this.machineForm.valid && !this.isSubmitting) {
+    if (this.machineForm.valid && !this.isSubmitting && this.machine) {
       this.isSubmitting = true;
 
       try {
-        const machineData = {
+        const updatedData = {
+          ...this.machine,
           name: this.machineForm.value.name.trim(),
-          area: this.selectedArea,
         };
 
-        await this.machineService.createMachine(machineData).toPromise();
+        await this.machineService
+          .updateMachine(this.machineId, updatedData)
+          .toPromise();
 
-        console.log('✅ Machine created successfully');
+        console.log('✅ Machine updated successfully');
         this.showNotificationMessage(
-          `Máquina "${
-            machineData.name
-          }" agregada exitosamente a ${this.getAreaTitle()}`,
+          `Máquina actualizada exitosamente: "${updatedData.name}"`,
           'success'
         );
 
@@ -379,9 +575,9 @@ export class AddMachineComponent implements OnInit {
           this.router.navigate(['/machines', this.selectedArea]);
         }, 1500);
       } catch (error) {
-        console.error('Error creating machine:', error);
+        console.error('Error updating machine:', error);
         this.showNotificationMessage(
-          'Error al agregar la máquina. Intenta nuevamente.',
+          'Error al actualizar la máquina. Intenta nuevamente.',
           'error'
         );
         this.isSubmitting = false;

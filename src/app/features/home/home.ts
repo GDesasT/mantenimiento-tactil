@@ -8,105 +8,141 @@ import { TouchButtonComponent } from '../../shared/components/touch-button/touch
   standalone: true,
   imports: [CommonModule, TouchButtonComponent],
   template: `
-    <div class="home-container slide-up">
-      <div class="text-center mb-16">
-        <h2 class="text-5xl font-black gradient-text mb-6 text-shadow">
-          Sistema de Mantenimiento Táctil
-        </h2>
-        <p class="text-2xl text-gray-600 font-medium">
-          Selecciona el área de trabajo
-        </p>
+    <div class="app-container">
+      <!-- Header profesional -->
+      <div class="section-header text-center mb-8">
+        <h1 class="text-4xl font-bold text-gradient-pro mb-4">
+          Sistema de Gestión de Refacciones
+        </h1>
+        <p class="text-xl text-gray-600">Selecciona el área de trabajo</p>
       </div>
 
-      <div
-        class="area-selector grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto"
-      >
+      <!-- Áreas principales usando tu sistema -->
+      <div class="professional-grid grid-2 max-w-6xl mx-auto mb-12">
         <!-- Área de Corte -->
-        <div
-          class="area-card bounce-in"
-          (click)="selectArea('corte')"
-          style="animation-delay: 0.1s;"
-        >
-          <div class="area-icon mb-8">
-            <span class="text-9xl icon-glow pulse-animation">✂️</span>
-          </div>
-          <div class="area-info mb-8">
-            <h3
-              class="area-title text-4xl font-black text-gray-800 mb-4 tracking-tight"
+        <div class="area-card corte-area" (click)="selectArea('corte')">
+          <div class="area-content">
+            <div class="area-icon">
+              <span class="icon-emoji">✂️</span>
+            </div>
+
+            <h2 class="area-title">ÁREA DE CORTE</h2>
+            <p class="area-subtitle">Máquinas de corte industrial</p>
+
+            <app-touch-button
+              variant="primary"
+              size="xl"
+              [fullWidth]="true"
+              (clicked)="selectArea('corte')"
+              class="area-action-btn"
             >
-              ÁREA DE CORTE
-            </h3>
-            <p class="area-description text-xl text-gray-600 font-medium">
-              Máquinas de corte industrial
-            </p>
+              INGRESAR A CORTE
+            </app-touch-button>
           </div>
-          <app-touch-button
-            variant="primary"
-            size="xl"
-            [fullWidth]="true"
-            icon="🚀"
-            (clicked)="selectArea('corte')"
-            class="transform transition-all duration-300"
-          >
-            INGRESAR A CORTE
-          </app-touch-button>
         </div>
 
         <!-- Área de Costura -->
-        <div
-          class="area-card bounce-in"
-          (click)="selectArea('costura')"
-          style="animation-delay: 0.3s;"
-        >
-          <div class="area-icon mb-8">
-            <span class="text-9xl icon-glow pulse-animation">🧵</span>
-          </div>
-          <div class="area-info mb-8">
-            <h3
-              class="area-title text-4xl font-black text-gray-800 mb-4 tracking-tight"
+        <div class="area-card costura-area" (click)="selectArea('costura')">
+          <div class="area-content">
+            <div class="area-icon">
+              <span class="icon-emoji">🧵</span>
+            </div>
+
+            <h2 class="area-title">ÁREA DE COSTURA</h2>
+            <p class="area-subtitle">Máquinas de costura industrial</p>
+
+            <app-touch-button
+              variant="success"
+              size="xl"
+              [fullWidth]="true"
+              (clicked)="selectArea('costura')"
+              class="area-action-btn"
             >
-              ÁREA DE COSTURA
-            </h3>
-            <p class="area-description text-xl text-gray-600 font-medium">
-              Máquinas de costura industrial
-            </p>
+              INGRESAR A COSTURA
+            </app-touch-button>
           </div>
-          <app-touch-button
-            variant="primary"
-            size="xl"
-            [fullWidth]="true"
-            icon="⚡"
-            (clicked)="selectArea('costura')"
-            class="transform transition-all duration-300"
-          >
-            INGRESAR A COSTURA
-          </app-touch-button>
         </div>
       </div>
 
-      <div class="quick-actions mt-20 slide-up" style="animation-delay: 0.5s;">
-        <div class="glass-effect rounded-3xl p-8 mx-auto max-w-4xl">
-          <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">
-            Acciones Rápidas
+      <!-- Herramientas adicionales usando tu sistema -->
+      <div class="max-w-4xl mx-auto">
+        <div class="section-header text-center mb-8">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            Herramientas Adicionales
           </h3>
-          <div class="flex flex-wrap justify-center gap-6">
-            <app-touch-button
-              variant="success"
-              size="lg"
-              icon="➕"
-              (clicked)="addMachine()"
-            >
-              Agregar Máquina
-            </app-touch-button>
+          <p class="text-lg text-gray-600">Gestión avanzada del sistema</p>
+        </div>
 
-            <app-touch-button
-              variant="warning"
-              size="lg"
-              icon="🔍"
-              (clicked)="globalSearch()"
-            >
-              Búsqueda Global
-            </app-touch-button>
+        <div class="professional-grid grid-2 max-w-2xl mx-auto">
+          <!-- Búsqueda Global -->
+          <div class="professional-card hover:shadow-lg transition-all">
+            <div class="professional-content text-center">
+              <div class="tool-icon search-icon mb-4">
+                <svg
+                  class="w-12 h-12 mx-auto text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">
+                Búsqueda Global
+              </h3>
+              <p class="text-gray-600 mb-4 text-sm">
+                Encuentra cualquier refacción rápidamente
+              </p>
+
+              <app-touch-button
+                variant="primary"
+                size="md"
+                icon="🔍"
+                [fullWidth]="true"
+                (clicked)="globalSearch()"
+              >
+                BUSCAR
+              </app-touch-button>
+            </div>
+          </div>
+
+          <!-- Importar Excel -->
+          <div class="professional-card hover:shadow-lg transition-all">
+            <div class="professional-content text-center">
+              <div class="tool-icon excel-icon mb-4">
+                <svg
+                  class="w-12 h-12 mx-auto text-yellow-600"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"
+                  ></path>
+                  <path d="M14 2v6h6"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">
+                Importar Excel
+              </h3>
+              <p class="text-gray-600 mb-4 text-sm">
+                Carga datos masivamente desde archivos
+              </p>
+
+              <app-touch-button
+                variant="warning"
+                size="md"
+                icon="📊"
+                [fullWidth]="true"
+                (clicked)="goToExcelImport()"
+              >
+                IMPORTAR
+              </app-touch-button>
+            </div>
           </div>
         </div>
       </div>
@@ -114,41 +150,156 @@ import { TouchButtonComponent } from '../../shared/components/touch-button/touch
   `,
   styles: [
     `
-      .home-container {
-        padding: 3rem 0;
-        min-height: 85vh;
-      }
+      /* Usando TU sistema existente + complementos mínimos */
 
       .area-card {
         min-height: 500px;
+        border-radius: var(--border-radius-xl);
+        padding: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-lg);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+        background: var(--gradient-surface);
+      }
+
+      .area-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .area-card:hover::before {
+        left: 100%;
+      }
+
+      .area-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .corte-area {
+        background: var(--gradient-primary);
+        color: white;
+      }
+
+      .corte-area:hover {
+        background: linear-gradient(
+          135deg,
+          var(--primary-700) 0%,
+          var(--primary-900) 100%
+        );
+      }
+
+      .costura-area {
+        background: linear-gradient(
+          135deg,
+          #047857 0%,
+          #10b981 50%,
+          #34d399 100%
+        );
+        color: white;
+      }
+
+      .costura-area:hover {
+        background: linear-gradient(
+          135deg,
+          #065f46 0%,
+          #047857 50%,
+          #10b981 100%
+        );
+      }
+
+      .area-content {
+        height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         text-align: center;
-        padding: 4rem 3rem;
-        cursor: pointer;
+        position: relative;
+        z-index: 1;
       }
 
       .area-icon {
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius-xl);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.3);
       }
 
-      .quick-actions {
-        border-top: 3px solid rgba(59, 130, 246, 0.2);
-        padding-top: 3rem;
+      .icon-emoji {
+        font-size: 5rem;
+        line-height: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
       }
 
+      .area-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        letter-spacing: 0.05em;
+      }
+
+      .area-subtitle {
+        font-size: 1.25rem;
+        margin-bottom: 3rem;
+        opacity: 0.9;
+        font-weight: 500;
+      }
+
+      .area-action-btn {
+        margin-top: auto;
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        color: white !important;
+        backdrop-filter: blur(10px);
+      }
+
+      .area-action-btn:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        transform: translateY(-2px);
+      }
+
+      /* Responsive usando tu sistema */
       @media (max-width: 768px) {
+        .professional-grid.grid-2 {
+          grid-template-columns: 1fr;
+        }
+
         .area-card {
           min-height: 400px;
-          padding: 2rem;
+          padding: 1.5rem;
         }
 
-        .text-5xl {
-          font-size: 2.5rem;
+        .area-title {
+          font-size: 2rem;
         }
 
-        .text-9xl {
+        .area-subtitle {
+          font-size: 1rem;
+        }
+
+        .icon-emoji {
           font-size: 4rem;
         }
       }
@@ -163,15 +314,13 @@ export class HomeComponent {
     this.router.navigate(['/machines', area]);
   }
 
-  addMachine() {
-    console.log('➕ Add machine - showing area selector');
-    alert(
-      'Selecciona primero un área (Corte o Costura) y luego usa el botón "Agregar Máquina"'
-    );
+  globalSearch() {
+    console.log('🔍 Navigating to global search');
+    this.router.navigate(['/search']);
   }
 
-  globalSearch() {
-    console.log('🔍 Global search');
-    alert('Función: Búsqueda global (próximamente)');
+  goToExcelImport() {
+    console.log('📊 Navigating to Excel import');
+    this.router.navigate(['/excel-import']);
   }
 }
