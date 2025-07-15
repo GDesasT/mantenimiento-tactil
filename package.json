@@ -93,6 +93,14 @@
       {
         "from": "public",
         "to": "public"
+      },
+      {
+        "from": "public/icon.ico",
+        "to": "icon.ico"
+      },
+      {
+        "from": "public/icon.png",
+        "to": "icon.png"
       }
     ],
     "win": {
@@ -103,29 +111,15 @@
             "x64",
             "ia32"
           ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
         }
       ],
-      "icon": "public/icon.ico",
-      "verifyUpdateCodeSignature": false,
-      "requestedExecutionLevel": "asInvoker",
-      "signAndEditExecutable": false
+      "icon": "public/icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "public/icon.ico",
-      "uninstallerIcon": "public/icon.ico",
-      "installerHeaderIcon": "public/icon.ico",
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Sistema de Gestion de Refacciones"
+      "createStartMenuShortcut": true
     },
     "portable": {
       "artifactName": "${productName}-${version}-portable.exe"

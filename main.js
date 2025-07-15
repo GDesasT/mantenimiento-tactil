@@ -12,7 +12,7 @@ function createWindow() {
     minWidth: 1200,
     minHeight: 800,
     // Usar icono desde carpeta public
-    icon: path.join(__dirname, "public/icon.PNG"),
+    icon: path.join(__dirname, "public/icon.png"),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
