@@ -52,19 +52,24 @@ describe('EditMachineComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize form with machine data', () => {
+  it('should initialize form with machine data', async () => {
     const mockMachine = {
       id: 1,
       name: 'Test Machine',
       area: 'costura' as const,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     };
 
     mockDatabaseService.initializeDatabase.and.returnValue(Promise.resolve());
     mockMachineService.getMachineById.and.returnValue(of(mockMachine));
 
-    component.ngOnInit();
+    await component.ngOnInit();
 
-    expect(component.machineForm.get('name')?.value).toBe('');
+    // Esperar que el formulario se llene con los datos de la máquina
+    expect(component.machineForm.get('name')?.value).toBe('Test Machine');
+    expect(component.machine?.name).toBe('Test Machine');
+    expect(component.machine?.area).toBe('costura');
   });
 
   it('should validate form fields', () => {
