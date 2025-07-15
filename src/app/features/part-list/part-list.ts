@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { PartService } from '../../core/services/part';
@@ -10,7 +11,7 @@ import { Part, PartCategory, Machine } from '../../core/models';
 @Component({
   selector: 'app-part-list',
   standalone: true,
-  imports: [CommonModule, TouchButtonComponent],
+  imports: [CommonModule, FormsModule, TouchButtonComponent],
   template: `
     <div class="app-container">
       <!-- Header profesional -->
@@ -37,15 +38,42 @@ import { Part, PartCategory, Machine } from '../../core/models';
             </div>
           </div>
 
-          <app-touch-button
-            variant="success"
-            size="lg"
-            icon="+"
-            (clicked)="addPart()"
-            [disabled]="!machine"
-          >
-            Agregar Refacción
-          </app-touch-button>
+          <div class="header-right">
+            <!-- Admin mode toggle -->
+            <div class="admin-section">
+              <app-touch-button
+                *ngIf="!isAdminMode"
+                variant="secondary"
+                size="md"
+                icon="⚙️"
+                (clicked)="openAdminModal()"
+                class="admin-gear"
+              >
+                Admin
+              </app-touch-button>
+
+              <app-touch-button
+                *ngIf="isAdminMode"
+                variant="warning"
+                size="md"
+                icon="🔓"
+                (clicked)="exitAdminMode()"
+                class="admin-active"
+              >
+                Salir Admin
+              </app-touch-button>
+            </div>
+
+            <app-touch-button
+              variant="success"
+              size="lg"
+              icon="+"
+              (clicked)="addPart()"
+              [disabled]="!machine"
+            >
+              Agregar Refacción
+            </app-touch-button>
+          </div>
         </div>
       </div>
 
@@ -163,6 +191,7 @@ import { Part, PartCategory, Machine } from '../../core/models';
 
                 <div class="secondary-actions">
                   <app-touch-button
+                    *ngIf="isAdminMode"
                     variant="warning"
                     size="sm"
                     icon="✏️"
@@ -172,10 +201,11 @@ import { Part, PartCategory, Machine } from '../../core/models';
                   </app-touch-button>
 
                   <app-touch-button
+                    *ngIf="isAdminMode"
                     variant="danger"
                     size="sm"
                     icon="🗑️"
-                    (clicked)="showDeleteConfirm(part)"
+                    (clicked)="requestDeletePart(part)"
                   >
                     Eliminar
                   </app-touch-button>
@@ -319,6 +349,7 @@ import { Part, PartCategory, Machine } from '../../core/models';
           <!-- Acciones del modal -->
           <div class="modal-actions">
             <app-touch-button
+              *ngIf="isAdminMode"
               variant="warning"
               size="lg"
               icon="✏️"
@@ -339,11 +370,91 @@ import { Part, PartCategory, Machine } from '../../core/models';
         </div>
       </div>
 
-      <!-- Modal de confirmación de eliminación -->
+      <!-- Notificación de éxito -->
       <div
-        *ngIf="showDeleteModal"
+        *ngIf="showSuccessNotification"
+        class="success-notification animate-slideInRight"
+      >
+        <div class="notification-content">
+          <span class="notification-icon">✅</span>
+          <span class="notification-text">{{ successMessage }}</span>
+        </div>
+      </div>
+
+      <!-- Modal de administrador -->
+      <div
+        *ngIf="showAdminModal"
         class="modal-overlay"
-        (click)="closeDeleteModal()"
+        (click)="closeAdminModal()"
+      >
+        <div
+          class="modal-container admin-modal"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="modal-header">
+            <div class="modal-title">
+              <span class="modal-icon">🔐</span>
+              <h3>Modo Administrador</h3>
+            </div>
+            <button class="modal-close" (click)="closeAdminModal()">✕</button>
+          </div>
+
+          <div class="modal-content">
+            <div class="admin-form" (click)="$event.stopPropagation()">
+              <p class="admin-description">
+                Ingresa la contraseña de administrador para acceder a las
+                funciones de edición y eliminación.
+              </p>
+
+              <div class="input-group">
+                <label class="input-label">Contraseña:</label>
+                <input
+                  type="password"
+                  [(ngModel)]="adminPassword"
+                  class="admin-input"
+                  placeholder="Ingresa la contraseña"
+                  (click)="onInputInteraction($event)"
+                  (focus)="onInputInteraction($event)"
+                  (input)="onInputInteraction($event)"
+                  (keydown)="onInputInteraction($event)"
+                  (keypress)="
+                    $event.key === 'Enter' && checkAdminPassword();
+                    onInputInteraction($event)
+                  "
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <app-touch-button
+              variant="primary"
+              size="lg"
+              icon="🔓"
+              (clicked)="checkAdminPassword()"
+              [disabled]="!adminPassword.trim()"
+            >
+              Activar Modo Admin
+            </app-touch-button>
+
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              icon="✕"
+              (clicked)="closeAdminModal()"
+            >
+              Cancelar
+            </app-touch-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de eliminación con contraseña -->
+      <div
+        *ngIf="showPasswordDeleteModal"
+        class="modal-overlay"
+        (click)="closePasswordDeleteModal()"
       >
         <div
           class="modal-container delete-modal"
@@ -354,11 +465,13 @@ import { Part, PartCategory, Machine } from '../../core/models';
               <span class="modal-icon danger-icon">⚠️</span>
               <h3>Confirmar Eliminación</h3>
             </div>
-            <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+            <button class="modal-close" (click)="closePasswordDeleteModal()">
+              ✕
+            </button>
           </div>
 
           <div class="modal-content" *ngIf="partToDelete">
-            <div class="delete-warning">
+            <div class="delete-warning" (click)="$event.stopPropagation()">
               <div class="warning-content">
                 <h4 class="warning-title">
                   ¿Estás seguro de eliminar esta refacción?
@@ -381,6 +494,28 @@ import { Part, PartCategory, Machine } from '../../core/models';
                     </div>
                   </div>
                 </div>
+
+                <div class="password-section">
+                  <label class="input-label"
+                    >Ingresa tu contraseña para confirmar:</label
+                  >
+                  <input
+                    type="password"
+                    [(ngModel)]="deletePassword"
+                    class="admin-input"
+                    placeholder="Contraseña requerida"
+                    (click)="onInputInteraction($event)"
+                    (focus)="onInputInteraction($event)"
+                    (input)="onInputInteraction($event)"
+                    (keydown)="onInputInteraction($event)"
+                    (keypress)="
+                      $event.key === 'Enter' && confirmPasswordDelete();
+                      onInputInteraction($event)
+                    "
+                    autocomplete="off"
+                  />
+                </div>
+
                 <p class="warning-notice">
                   <strong>Esta acción no se puede deshacer.</strong>
                 </p>
@@ -393,8 +528,9 @@ import { Part, PartCategory, Machine } from '../../core/models';
               variant="danger"
               size="lg"
               icon="🗑️"
-              (clicked)="confirmDelete()"
+              (clicked)="confirmPasswordDelete()"
               [loading]="isDeleting"
+              [disabled]="!deletePassword.trim() || isDeleting"
             >
               {{ isDeleting ? 'Eliminando...' : 'Sí, Eliminar' }}
             </app-touch-button>
@@ -403,23 +539,12 @@ import { Part, PartCategory, Machine } from '../../core/models';
               variant="secondary"
               size="lg"
               icon="✕"
-              (clicked)="closeDeleteModal()"
+              (clicked)="closePasswordDeleteModal()"
               [disabled]="isDeleting"
             >
               Cancelar
             </app-touch-button>
           </div>
-        </div>
-      </div>
-
-      <!-- Notificación de éxito -->
-      <div
-        *ngIf="showSuccessNotification"
-        class="success-notification animate-slideInRight"
-      >
-        <div class="notification-content">
-          <span class="notification-icon">✅</span>
-          <span class="notification-text">{{ successMessage }}</span>
         </div>
       </div>
     </div>
@@ -451,6 +576,46 @@ import { Part, PartCategory, Machine } from '../../core/models';
         display: flex;
         align-items: center;
         gap: 1.5rem;
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .admin-section {
+        display: flex;
+        align-items: center;
+      }
+
+      .admin-gear {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        color: white !important;
+        transition: all 0.3s ease;
+      }
+
+      .admin-gear:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+      }
+
+      .admin-active {
+        background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+        border: 2px solid #b45309 !important;
+        color: white !important;
+        animation: adminPulse 2s infinite;
+      }
+
+      @keyframes adminPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+        }
       }
 
       .header-title {
@@ -1067,6 +1232,80 @@ import { Part, PartCategory, Machine } from '../../core/models';
         animation: slideInRight 0.5s ease-out;
       }
 
+      /* Admin Modal */
+      .admin-modal {
+        max-width: 500px;
+      }
+
+      .admin-form {
+        text-align: center;
+      }
+
+      .admin-description {
+        font-size: 1rem;
+        color: var(--gray-600);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+
+      .input-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .input-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        text-align: left;
+      }
+
+      .admin-input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--border-radius-md);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      .admin-input:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .admin-input::placeholder {
+        color: var(--gray-400);
+      }
+
+      .password-section {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #fef2f2;
+        border: 2px solid #fecaca;
+        border-radius: var(--border-radius-md);
+      }
+
+      .password-section .input-label {
+        color: #dc2626;
+        font-weight: bold;
+        margin-bottom: 0.75rem;
+        text-align: center;
+      }
+
+      .password-section .admin-input {
+        border-color: #fca5a5;
+        background: white;
+      }
+
+      .password-section .admin-input:focus {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+      }
+
       /* Responsive */
       @media (max-width: 768px) {
         .header-content {
@@ -1078,6 +1317,16 @@ import { Part, PartCategory, Machine } from '../../core/models';
         .header-left {
           flex-direction: column;
           gap: 1rem;
+        }
+
+        .header-right {
+          flex-direction: column;
+          gap: 1rem;
+          width: 100%;
+        }
+
+        .admin-section {
+          order: -1;
         }
 
         .content-area {
@@ -1174,10 +1423,19 @@ export class PartListComponent implements OnInit {
 
   // Modal states
   showDetailModal = false;
-  showDeleteModal = false;
   selectedPart: Part | null = null;
   partToDelete: Part | null = null;
   isDeleting = false;
+
+  // Admin mode
+  isAdminMode = false;
+  showAdminModal = false;
+  adminPassword = '';
+  private adminTimeout: any;
+
+  // Password delete modal
+  showPasswordDeleteModal = false;
+  deletePassword = '';
 
   // Notificación
   showSuccessNotification = false;
@@ -1363,39 +1621,6 @@ export class PartListComponent implements OnInit {
     }
   }
 
-  // Modal de eliminación
-  showDeleteConfirm(part: Part) {
-    this.partToDelete = part;
-    this.showDeleteModal = true;
-  }
-
-  closeDeleteModal() {
-    this.showDeleteModal = false;
-    this.partToDelete = null;
-    this.isDeleting = false;
-  }
-
-  confirmDelete() {
-    if (!this.partToDelete) return;
-
-    this.isDeleting = true;
-    const partName = this.partToDelete.description;
-
-    this.partService.deletePart(this.partToDelete.id!).subscribe({
-      next: () => {
-        console.log('🗑️ Part deleted:', partName);
-        this.closeDeleteModal();
-        this.showSuccess(`Refacción "${partName}" eliminada exitosamente`);
-        this.loadParts();
-      },
-      error: (error) => {
-        console.error('Error deleting part:', error);
-        this.isDeleting = false;
-        this.showSuccess('Error al eliminar la refacción. Intenta nuevamente.');
-      },
-    });
-  }
-
   // Notificación de éxito
   showSuccess(message: string) {
     this.successMessage = message;
@@ -1440,5 +1665,94 @@ export class PartListComponent implements OnInit {
       part.id,
       'edit',
     ]);
+  }
+
+  // Admin mode methods
+  openAdminModal() {
+    this.showAdminModal = true;
+    this.adminPassword = '';
+
+    // Focus the input after modal opens
+    setTimeout(() => {
+      const input = document.querySelector('.admin-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+      }
+    }, 100);
+  }
+
+  closeAdminModal() {
+    this.showAdminModal = false;
+    this.adminPassword = '';
+  }
+
+  // Prevent modal close on input interaction
+  onInputInteraction(event: Event) {
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  checkAdminPassword() {
+    if (this.adminPassword === 'Mantenimiento1.') {
+      this.isAdminMode = true;
+      this.closeAdminModal();
+      this.showSuccess('Modo administrador activado');
+
+      // Auto logout after 5 minutes
+      this.adminTimeout = setTimeout(() => {
+        this.exitAdminMode();
+      }, 5 * 60 * 1000);
+    } else {
+      this.showSuccess('Contraseña incorrecta');
+      this.adminPassword = '';
+    }
+  }
+
+  exitAdminMode() {
+    this.isAdminMode = false;
+    if (this.adminTimeout) {
+      clearTimeout(this.adminTimeout);
+    }
+    this.showSuccess('Modo administrador desactivado');
+  }
+
+  // Password delete methods
+  requestDeletePart(part: Part) {
+    this.partToDelete = part;
+    this.showPasswordDeleteModal = true;
+    this.deletePassword = '';
+  }
+
+  closePasswordDeleteModal() {
+    this.showPasswordDeleteModal = false;
+    this.partToDelete = null;
+    this.deletePassword = '';
+  }
+
+  confirmPasswordDelete() {
+    if (this.deletePassword !== 'Mantenimiento1.') {
+      this.showSuccess('Contraseña incorrecta');
+      this.deletePassword = '';
+      return;
+    }
+
+    if (!this.partToDelete) return;
+
+    this.isDeleting = true;
+    const partName = this.partToDelete.description;
+
+    this.partService.deletePart(this.partToDelete.id!).subscribe({
+      next: () => {
+        console.log('🗑️ Part deleted:', partName);
+        this.closePasswordDeleteModal();
+        this.showSuccess(`Refacción "${partName}" eliminada exitosamente`);
+        this.loadParts();
+      },
+      error: (error) => {
+        console.error('Error deleting part:', error);
+        this.isDeleting = false;
+        this.showSuccess('Error al eliminar la refacción. Intenta nuevamente.');
+      },
+    });
   }
 }

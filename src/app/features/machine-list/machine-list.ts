@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { MachineService } from '../../core/services/machine';
@@ -10,7 +11,7 @@ import { Machine, PartCategory } from '../../core/models';
 @Component({
   selector: 'app-machine-list',
   standalone: true,
-  imports: [CommonModule, TouchButtonComponent],
+  imports: [CommonModule, FormsModule, TouchButtonComponent],
   template: `
     <div class="app-container">
       <!-- Header profesional -->
@@ -33,14 +34,41 @@ import { Machine, PartCategory } from '../../core/models';
             </div>
           </div>
 
-          <app-touch-button
-            variant="success"
-            size="lg"
-            icon="+"
-            (clicked)="addMachine()"
-          >
-            Agregar Máquina
-          </app-touch-button>
+          <div class="header-actions">
+            <!-- Admin mode toggle -->
+            <div class="admin-section">
+              <app-touch-button
+                *ngIf="!isAdminMode"
+                variant="secondary"
+                size="md"
+                icon="⚙️"
+                (clicked)="toggleAdminMode()"
+                class="admin-gear"
+              >
+                Modo Admin
+              </app-touch-button>
+
+              <app-touch-button
+                *ngIf="isAdminMode"
+                variant="warning"
+                size="md"
+                icon="🔓"
+                (clicked)="exitAdminMode()"
+                class="admin-active"
+              >
+                Salir Admin
+              </app-touch-button>
+            </div>
+
+            <app-touch-button
+              variant="success"
+              size="lg"
+              icon="+"
+              (clicked)="addMachine()"
+            >
+              Agregar Máquina
+            </app-touch-button>
+          </div>
         </div>
       </div>
 
@@ -111,6 +139,7 @@ import { Machine, PartCategory } from '../../core/models';
 
               <div class="secondary-actions">
                 <app-touch-button
+                  *ngIf="isAdminMode"
                   variant="warning"
                   size="md"
                   icon="✏️"
@@ -120,6 +149,7 @@ import { Machine, PartCategory } from '../../core/models';
                 </app-touch-button>
 
                 <app-touch-button
+                  *ngIf="isAdminMode"
                   variant="danger"
                   size="md"
                   icon="🗑️"
@@ -202,6 +232,66 @@ import { Machine, PartCategory } from '../../core/models';
           </div>
         </div>
       </div>
+
+      <!-- Modal de contraseña de administrador -->
+      <div *ngIf="showAdminModal" class="confirmation-overlay">
+        <div class="confirmation-modal admin-modal">
+          <div class="confirmation-header admin-header">
+            <h3 class="confirmation-title">Modo Administrador</h3>
+            <span class="confirmation-icon">🔐</span>
+          </div>
+
+          <div class="confirmation-content">
+            <p class="confirmation-message">
+              Ingresa la contraseña de administrador para habilitar las opciones
+              de edición y eliminación de máquinas.
+            </p>
+
+            <!-- Campo de contraseña -->
+            <div class="password-section">
+              <label class="password-label">
+                <span class="password-icon">🔒</span>
+                Contraseña de administrador:
+              </label>
+              <input
+                type="password"
+                [(ngModel)]="adminPassword"
+                placeholder="Ingresa la contraseña"
+                class="password-input"
+                [class.error]="adminPasswordError"
+                (keyup.enter)="confirmAdminAccess()"
+                autofocus
+              />
+
+              <!-- Error de contraseña -->
+              <div *ngIf="adminPasswordError" class="password-error">
+                <span class="error-icon">❌</span>
+                {{ adminPasswordError }}
+              </div>
+            </div>
+          </div>
+
+          <div class="confirmation-actions">
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              (clicked)="hideAdminModal()"
+              [fullWidth]="true"
+            >
+              Cancelar
+            </app-touch-button>
+
+            <app-touch-button
+              variant="success"
+              size="lg"
+              (clicked)="confirmAdminAccess()"
+              [fullWidth]="true"
+            >
+              Activar Modo Admin
+            </app-touch-button>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [
@@ -224,6 +314,46 @@ import { Machine, PartCategory } from '../../core/models';
         align-items: center;
         max-width: 1400px;
         margin: 0 auto;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .admin-section {
+        display: flex;
+        align-items: center;
+      }
+
+      .admin-gear {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        color: white !important;
+        transition: all 0.3s ease;
+      }
+
+      .admin-gear:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+      }
+
+      .admin-active {
+        background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+        border: 2px solid #b45309 !important;
+        color: white !important;
+        animation: adminPulse 2s infinite;
+      }
+
+      @keyframes adminPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+        }
       }
 
       .header-left {
@@ -441,6 +571,17 @@ import { Machine, PartCategory } from '../../core/models';
           text-align: center;
         }
 
+        .header-actions {
+          width: 100%;
+          justify-content: center;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .admin-section {
+          order: -1;
+        }
+
         .header-left {
           flex-direction: column;
           gap: 1rem;
@@ -552,6 +693,10 @@ import { Machine, PartCategory } from '../../core/models';
         position: relative;
       }
 
+      .admin-header {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
       .confirmation-title {
         font-size: 1.5rem;
         font-weight: bold;
@@ -574,8 +719,68 @@ import { Machine, PartCategory } from '../../core/models';
         font-size: 1.125rem;
         color: var(--gray-700);
         line-height: 1.6;
-        margin: 0;
+        margin: 0 0 1.5rem 0;
         white-space: pre-line;
+      }
+
+      /* Sección de contraseña */
+      .password-section {
+        margin-top: 1.5rem;
+        text-align: left;
+      }
+
+      .password-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.75rem;
+      }
+
+      .password-icon {
+        font-size: 1.25rem;
+      }
+
+      .password-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--gray-300);
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: white;
+      }
+
+      .password-input:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .password-input.error {
+        border-color: #ef4444;
+        background: #fef2f2;
+      }
+
+      .password-input.error:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+
+      .password-error {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        color: #ef4444;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .error-icon {
+        font-size: 1rem;
       }
 
       .confirmation-actions {
@@ -634,11 +839,20 @@ import { Machine, PartCategory } from '../../core/models';
         .confirmation-actions {
           flex-direction: column;
         }
+
+        .password-label {
+          font-size: 0.875rem;
+        }
+
+        .password-input {
+          padding: 0.75rem;
+          font-size: 0.875rem;
+        }
       }
     `,
   ],
 })
-export class MachineListComponent implements OnInit {
+export class MachineListComponent implements OnInit, OnDestroy {
   selectedArea: 'corte' | 'costura' = 'costura';
   machines: Machine[] = [];
   machineStats: { [key: number]: { [key in PartCategory]: number } } = {};
@@ -654,6 +868,18 @@ export class MachineListComponent implements OnInit {
   confirmationMessage = '';
   confirmationTitle = '';
   machineToDelete: Machine | null = null;
+
+  // Variables para contraseña
+  deletePassword = '';
+  passwordError = '';
+  readonly ADMIN_PASSWORD = 'Mantenimiento1.';
+
+  // Variables para modo administrador
+  isAdminMode = false;
+  showAdminModal = false;
+  adminPassword = '';
+  adminPasswordError = '';
+  private adminTimeout: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -673,6 +899,13 @@ export class MachineListComponent implements OnInit {
       await this.databaseService.initializeDatabase();
     } catch (error) {
       console.error('Error initializing database:', error);
+    }
+  }
+
+  ngOnDestroy() {
+    // Limpiar timeout del modo admin al destruir el componente
+    if (this.adminTimeout) {
+      clearTimeout(this.adminTimeout);
     }
   }
 
@@ -775,6 +1008,7 @@ export class MachineListComponent implements OnInit {
   }
 
   confirmDelete() {
+    // En modo admin, proceder directamente con la eliminación
     if (this.machineToDelete) {
       this.performDelete(this.machineToDelete);
       this.hideConfirmation();
@@ -783,13 +1017,11 @@ export class MachineListComponent implements OnInit {
 
   editMachine(machine: Machine) {
     console.log('✏️ Edit machine:', machine.name);
-    this.showNotificationMessage(
-      `Editar máquina: ${machine.name} - Funcionalidad pendiente de implementar`,
-      'error'
-    );
+    this.router.navigate(['/machines', this.selectedArea, machine.id, 'edit']);
   }
 
   deleteMachine(machine: Machine) {
+    // En modo admin, mostrar confirmación simple sin contraseña adicional
     this.showConfirmationDialog(
       'Confirmar Eliminación',
       `¿Estás seguro de eliminar la máquina "${machine.name}"?\n\nEsta acción también eliminará todas sus refacciones asociadas.`,
@@ -815,5 +1047,67 @@ export class MachineListComponent implements OnInit {
         );
       },
     });
+  }
+
+  // Métodos para modo administrador
+  toggleAdminMode() {
+    if (this.isAdminMode) {
+      this.exitAdminMode();
+    } else {
+      // Si no está en modo admin, mostrar modal de contraseña
+      this.showAdminModal = true;
+      this.adminPassword = '';
+      this.adminPasswordError = '';
+    }
+  }
+
+  exitAdminMode() {
+    this.isAdminMode = false;
+    // Limpiar timeout si existe
+    if (this.adminTimeout) {
+      clearTimeout(this.adminTimeout);
+      this.adminTimeout = null;
+    }
+    this.showNotificationMessage('Modo administrador desactivado', 'success');
+  }
+
+  hideAdminModal() {
+    this.showAdminModal = false;
+    this.adminPassword = '';
+    this.adminPasswordError = '';
+  }
+
+  confirmAdminAccess() {
+    // Limpiar errores previos
+    this.adminPasswordError = '';
+
+    // Validar que se ingresó una contraseña
+    if (!this.adminPassword.trim()) {
+      this.adminPasswordError = 'La contraseña es obligatoria';
+      return;
+    }
+
+    // Validar contraseña
+    if (this.adminPassword !== this.ADMIN_PASSWORD) {
+      this.adminPasswordError = 'Contraseña incorrecta';
+      this.adminPassword = '';
+      return;
+    }
+
+    // Si la contraseña es correcta, activar modo admin
+    this.isAdminMode = true;
+    this.hideAdminModal();
+    this.showNotificationMessage('Modo administrador activado', 'success');
+
+    // Auto-desactivar modo admin después de 10 minutos por seguridad
+    this.adminTimeout = setTimeout(() => {
+      if (this.isAdminMode) {
+        this.isAdminMode = false;
+        this.showNotificationMessage(
+          'Modo administrador desactivado automáticamente por seguridad',
+          'success'
+        );
+      }
+    }, 10 * 60 * 1000); // 10 minutos
   }
 }

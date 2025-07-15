@@ -22,6 +22,8 @@ interface ImportResult {
   success: number;
   errors: string[];
   duplicates: number;
+  omittedRows: string[]; // Filas omitidas por falta de datos
+  duplicatedSaps: string[]; // SAPs que estaban duplicados
 }
 
 @Component({
@@ -77,29 +79,71 @@ interface ImportResult {
         <div class="instructions-section">
           <div class="professional-card animate-fadeInUp">
             <div class="professional-content">
-              <h3 class="section-title">📋 Tu Excel es Compatible</h3>
+              <h3 class="section-title">
+                📋 Formatos Requeridos para tus Archivos Excel
+              </h3>
 
               <div class="format-grid">
                 <div class="format-item">
-                  <div class="format-icon">✅</div>
+                  <div class="format-icon">📦</div>
                   <div class="format-content">
-                    <h4 class="format-title">Detección Automática</h4>
+                    <h4 class="format-title">📦 Formato para Refacciones</h4>
                     <ul class="format-list">
-                      <li><strong>SAP:</strong> Detectado automáticamente</li>
+                      <li><strong>SAP:</strong> Columna con código SAP</li>
+                      <li><strong>#PARTE:</strong> Columna con Part Number</li>
                       <li>
-                        <strong>#PARTE:</strong> Se usará como Part Number
+                        <strong>DESCRIPCION:</strong> Columna con descripción de
+                        la refacción
                       </li>
                       <li>
-                        <strong>DESCRIPCION:</strong> Descripción de la
-                        refacción
+                        <strong>UBICACION:</strong> Columna con ubicación física
+                        (opcional)
                       </li>
-                      <li><strong>UBICACION:</strong> Ubicación física</li>
                       <li>
-                        <strong>Categoría:</strong> Se detectará por
-                        hoja/posición
+                        <strong>MAQUINA:</strong> Columna con nombre de la
+                        máquina (opcional - si no se especifica, se asigna a
+                        GENERAL)
+                      </li>
+                      <li>
+                        <strong>⚠️ NOMBRES DE HOJAS OBLIGATORIOS:</strong>
+                        <span style="color: #dc2626; font-weight: bold;"
+                          >CONSUMIBLE</span
+                        >,
+                        <span style="color: #dc2626; font-weight: bold;"
+                          >ELECTRONICA</span
+                        >,
+                        <span style="color: #dc2626; font-weight: bold;"
+                          >MECANICA</span
+                        >
                       </li>
                       <li>
                         <strong>Máquinas:</strong> Se crearán automáticamente
+                        según la columna MAQUINA
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="format-item">
+                  <div class="format-icon">🔧</div>
+                  <div class="format-content">
+                    <h4 class="format-title">🔧 Formato para Máquinas</h4>
+                    <ul class="format-list">
+                      <li>
+                        <strong>Nombre:</strong> Columna con nombre de la
+                        máquina
+                      </li>
+                      <li>
+                        <strong>Area:</strong> Columna con área (costura o
+                        corte)
+                      </li>
+                      <li>
+                        <strong>Una sola hoja:</strong> Las máquinas van en una
+                        sola hoja de Excel
+                      </li>
+                      <li>
+                        <strong>Opcional:</strong> Este archivo es completamente
+                        opcional
                       </li>
                     </ul>
                   </div>
@@ -213,6 +257,13 @@ interface ImportResult {
                       <span class="upload-link">selecciona archivo</span>
                     </p>
                     <p class="upload-hint">Solo archivos .xlsx, .xls</p>
+                    <p
+                      class="upload-hint"
+                      style="color: #dc2626; font-weight: bold; margin-top: 0.5rem;"
+                    >
+                      ⚠️ Las hojas deben llamarse exactamente: CONSUMIBLE,
+                      ELECTRONICA, MECANICA
+                    </p>
                   </div>
 
                   <div class="file-preview" *ngIf="partsFile">
@@ -303,6 +354,12 @@ interface ImportResult {
                       <span class="upload-link">selecciona archivo</span>
                     </p>
                     <p class="upload-hint">Columnas: Nombre, Area</p>
+                    <p
+                      class="upload-hint"
+                      style="color: #059669; font-weight: bold; margin-top: 0.5rem;"
+                    >
+                      💡 Área debe ser: costura o corte
+                    </p>
                   </div>
 
                   <div class="file-preview" *ngIf="machinesFile">
@@ -481,15 +538,18 @@ interface ImportResult {
 
                 <div class="confirmation-input">
                   <label class="confirmation-label">
-                    Para confirmar, escribe: <strong>ELIMINAR</strong>
+                    <strong>Contraseña de administrador:</strong>
                   </label>
                   <input
-                    type="text"
-                    [(ngModel)]="confirmationText"
-                    placeholder="Escribe ELIMINAR"
+                    type="password"
+                    [(ngModel)]="deletePassword"
+                    placeholder="Ingresa la contraseña"
                     class="confirmation-field"
-                    (input)="onConfirmationChange()"
+                    (input)="onPasswordChange()"
                   />
+                  <div *ngIf="passwordError" class="password-error">
+                    {{ passwordError }}
+                  </div>
                 </div>
 
                 <p class="warning-notice">
@@ -1328,6 +1388,13 @@ interface ImportResult {
         margin-top: 1rem;
       }
 
+      .password-error {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+      }
+
       .results-summary {
         text-align: center;
       }
@@ -1645,8 +1712,10 @@ export class ExcelImportComponent implements OnInit {
   // Modales
   showDeleteModal = false;
   showResultsModal = false;
-  confirmationText = '';
   canConfirmDelete = false;
+  deletePassword = '';
+  passwordError = '';
+  readonly ADMIN_PASSWORD = 'Mantenimiento1.';
 
   // Notificaciones
   showNotification = false;
@@ -1734,22 +1803,36 @@ export class ExcelImportComponent implements OnInit {
   // Modal de confirmación de eliminación
   showDeleteConfirmation() {
     this.showDeleteModal = true;
-    this.confirmationText = '';
+    this.deletePassword = '';
+    this.passwordError = '';
     this.canConfirmDelete = false;
   }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
-    this.confirmationText = '';
+    this.deletePassword = '';
+    this.passwordError = '';
     this.canConfirmDelete = false;
   }
 
-  onConfirmationChange() {
-    this.canConfirmDelete = this.confirmationText.toUpperCase() === 'ELIMINAR';
+  onPasswordChange() {
+    this.passwordError = '';
+    this.canConfirmDelete = this.deletePassword === this.ADMIN_PASSWORD;
   }
 
   async confirmDeleteAll() {
-    if (!this.canConfirmDelete) return;
+    this.passwordError = '';
+
+    if (!this.deletePassword) {
+      this.passwordError = 'La contraseña es obligatoria';
+      return;
+    }
+
+    if (this.deletePassword !== this.ADMIN_PASSWORD) {
+      this.passwordError = 'Contraseña incorrecta';
+      this.deletePassword = '';
+      return;
+    }
 
     this.isDeleting = true;
 
@@ -1975,8 +2058,31 @@ export class ExcelImportComponent implements OnInit {
 
       console.log('✅ Parts import completed:', result);
 
-      // Mostrar modal de resultados
-      this.showResultsModal = true;
+      // Crear mensaje detallado de resultados
+      let message = `✅ Importación completada: ${result.success} refacciones importadas exitosamente`;
+
+      if (result.omittedRows.length > 0) {
+        message += `\n\n⚠️ Filas omitidas por falta de datos (${
+          result.omittedRows.length
+        }):\n${result.omittedRows.join('\n')}`;
+      }
+
+      if (result.duplicatedSaps.length > 0) {
+        message += `\n\n🔄 SAPs duplicados omitidos (${
+          result.duplicatedSaps.length
+        }):\n${result.duplicatedSaps.join('\n')}`;
+      }
+
+      if (result.errors.length > 0) {
+        message += `\n\n❌ Otros errores:\n${result.errors
+          .filter((error) => !result.omittedRows.includes(error))
+          .join('\n')}`;
+      }
+
+      this.showNotificationMessage(
+        message,
+        result.success > 0 ? 'success' : 'error'
+      );
     } catch (error) {
       console.error('❌ Error importing parts:', error);
       this.showNotificationMessage(
@@ -2013,7 +2119,13 @@ export class ExcelImportComponent implements OnInit {
   }
 
   private async processMachinesData(data: ExcelRow[]): Promise<ImportResult> {
-    const result: ImportResult = { success: 0, errors: [], duplicates: 0 };
+    const result: ImportResult = {
+      success: 0,
+      errors: [],
+      duplicates: 0,
+      omittedRows: [],
+      duplicatedSaps: [],
+    };
 
     for (const [index, row] of data.entries()) {
       try {
@@ -2072,7 +2184,13 @@ export class ExcelImportComponent implements OnInit {
   }
 
   private async processPartsFromAllSheets(file: File): Promise<ImportResult> {
-    const result: ImportResult = { success: 0, errors: [], duplicates: 0 };
+    const result: ImportResult = {
+      success: 0,
+      errors: [],
+      duplicates: 0,
+      omittedRows: [],
+      duplicatedSaps: [],
+    };
 
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -2090,18 +2208,9 @@ export class ExcelImportComponent implements OnInit {
           }
 
           const sheetCategoryMap: { [key: string]: string } = {
-            REFACCIONES: 'auto',
-            SENSORES: 'electronica',
             CONSUMIBLE: 'consumible',
-            MISCELANEO: 'mecanica',
-            LUBRICANTES: 'consumible',
-            LIJAS: 'consumible',
-            NEUMATICA: 'mecanica',
-            ROFIN: 'electronica',
             ELECTRONICA: 'electronica',
-            ELECTRONICO: 'electronica',
             MECANICA: 'mecanica',
-            MECANICO: 'mecanica',
           };
 
           console.log('🔍 Buscando máquinas existentes...');
@@ -2177,12 +2286,24 @@ export class ExcelImportComponent implements OnInit {
               'UBIC',
               'ubic',
             ]);
+            const machineIndex = this.findColumnIndex(headers, [
+              'MAQUINA',
+              'MÁQUINA',
+              'Maquina',
+              'Máquina',
+              'maquina',
+              'máquina',
+              'MACHINE',
+              'Machine',
+              'machine',
+            ]);
 
             console.log(`📍 Índices encontrados en ${sheetName}:`, {
               SAP: sapIndex,
               PARTE: partIndex,
               DESCRIPCION: descIndex,
               UBICACION: ubicIndex,
+              MAQUINA: machineIndex,
             });
 
             if (sapIndex === -1 || partIndex === -1 || descIndex === -1) {
@@ -2201,14 +2322,20 @@ export class ExcelImportComponent implements OnInit {
                 const partNumber = row[partIndex];
                 const description = row[descIndex];
                 const ubicacion = ubicIndex >= 0 ? row[ubicIndex] : '';
+                const machineName = machineIndex >= 0 ? row[machineIndex] : '';
 
                 if (!sap || !partNumber || !description) {
                   if (sap || partNumber || description) {
-                    result.errors.push(
-                      `Hoja "${sheetName}", Fila ${
-                        rowIndex + 2
-                      }: Faltan datos obligatorios`
-                    );
+                    const missingFields = [];
+                    if (!sap) missingFields.push('SAP');
+                    if (!partNumber) missingFields.push('#PARTE');
+                    if (!description) missingFields.push('DESCRIPCION');
+
+                    const omittedInfo = `Hoja "${sheetName}", Fila ${
+                      rowIndex + 2
+                    }: Faltan ${missingFields.join(', ')}`;
+                    result.errors.push(omittedInfo);
+                    result.omittedRows.push(omittedInfo);
                   }
                   continue;
                 }
@@ -2223,14 +2350,17 @@ export class ExcelImportComponent implements OnInit {
                 }
 
                 let machineId = await this.getOrCreateMachineForPart(
-                  description.toString(),
+                  machineName ? machineName.toString().trim() : '',
                   finalCategory,
                   existingMachines,
                   this.selectedAreaForParts
                 );
 
+                const machineNameForLog = machineName
+                  ? machineName.toString().trim()
+                  : 'GENERAL';
                 console.log(
-                  `🎯 Asignando "${description}" a máquina ID: ${machineId}`
+                  `🎯 Asignando "${description}" a máquina "${machineNameForLog}" (ID: ${machineId})`
                 );
 
                 const exists = await this.partService.isSapNumberUnique(
@@ -2238,6 +2368,11 @@ export class ExcelImportComponent implements OnInit {
                 );
                 if (!exists) {
                   result.duplicates++;
+                  result.duplicatedSaps.push(
+                    `SAP: ${sap.toString().trim()} (Hoja "${sheetName}", Fila ${
+                      rowIndex + 2
+                    })`
+                  );
                   continue;
                 }
 
@@ -2281,64 +2416,45 @@ export class ExcelImportComponent implements OnInit {
   }
 
   private async getOrCreateMachineForPart(
-    description: string,
+    machineName: string, // Ahora recibe directamente el nombre de la máquina
     category: string,
     existingMachines: { [key: string]: number },
     defaultArea: 'corte' | 'costura'
   ): Promise<number> {
-    const descLower = description.toLowerCase();
+    // Si se especificó una máquina específica, usarla
+    if (machineName && machineName.trim() !== '') {
+      const upperMachineName = machineName.trim().toUpperCase();
 
-    const machineNames = this.extractMachineNames(description);
-
-    if (category === 'consumible' && machineNames.length === 0) {
-      if (!existingMachines['GENERAL']) {
-        console.log('🏭 Creando máquina GENERAL para consumibles...');
-        try {
-          const generalMachine = await this.machineService
-            .createMachine({
-              name: 'GENERAL',
-              area: defaultArea,
-            })
-            .toPromise();
-          if (generalMachine) {
-            existingMachines['GENERAL'] = generalMachine.id!;
-            console.log(`✅ Máquina GENERAL creada (ID: ${generalMachine.id})`);
-          }
-        } catch (error) {
-          console.error('❌ Error creando máquina GENERAL:', error);
-        }
+      // Si la máquina ya existe, usarla
+      if (existingMachines[upperMachineName]) {
+        console.log(
+          `🎯 Usando máquina existente: ${machineName} (ID: ${existingMachines[upperMachineName]})`
+        );
+        return existingMachines[upperMachineName];
       }
-      return existingMachines['GENERAL'] || Object.values(existingMachines)[0];
-    }
 
-    if (machineNames.length > 0) {
-      for (const machineName of machineNames) {
-        if (existingMachines[machineName]) {
-          console.log(`✅ Usando máquina existente: ${machineName}`);
-          return existingMachines[machineName];
+      // Si no existe, crearla
+      console.log(`🏭 Creando nueva máquina: ${machineName}...`);
+      try {
+        const newMachine = await this.machineService
+          .createMachine({
+            name: machineName.trim(),
+            area: defaultArea,
+          })
+          .toPromise();
+        if (newMachine) {
+          existingMachines[upperMachineName] = newMachine.id!;
+          console.log(
+            `✅ Máquina ${machineName} creada (ID: ${newMachine.id})`
+          );
+          return newMachine.id!;
         }
-
-        console.log(`🏭 Creando nueva máquina: ${machineName}`);
-        try {
-          const newMachine = await this.machineService
-            .createMachine({
-              name: machineName,
-              area: defaultArea,
-            })
-            .toPromise();
-          if (newMachine) {
-            existingMachines[machineName] = newMachine.id!;
-            console.log(
-              `✅ Máquina ${machineName} creada (ID: ${newMachine.id})`
-            );
-            return newMachine.id!;
-          }
-        } catch (error) {
-          console.error(`❌ Error creando máquina ${machineName}:`, error);
-        }
+      } catch (error) {
+        console.error(`❌ Error creando máquina ${machineName}:`, error);
       }
     }
 
+    // Si no se especificó máquina o no se pudo crear, usar o crear GENERAL
     if (!existingMachines['GENERAL']) {
       console.log('🏭 Creando máquina GENERAL...');
       try {
@@ -2358,46 +2474,6 @@ export class ExcelImportComponent implements OnInit {
     }
 
     return existingMachines['GENERAL'] || Object.values(existingMachines)[0];
-  }
-
-  private extractMachineNames(description: string): string[] {
-    const descUpper = description.toUpperCase();
-    const machineNames: string[] = [];
-
-    const patterns = [
-      /MITSUBISHI[^A-Z]*([A-Z0-9\-]+)?/g,
-      /BROTHER[^A-Z]*([A-Z0-9\-]+)?/g,
-      /JUKI[^A-Z]*([A-Z0-9\-]+)?/g,
-      /SINGER[^A-Z]*([A-Z0-9\-]+)?/g,
-      /PFAFF[^A-Z]*([A-Z0-9\-]+)?/g,
-      /YAMATO[^A-Z]*([A-Z0-9\-]+)?/g,
-      /PEGASUS[^A-Z]*([A-Z0-9\-]+)?/g,
-      /KANSAI[^A-Z]*([A-Z0-9\-]+)?/g,
-      /UNION\s*SPECIAL[^A-Z]*([A-Z0-9\-]+)?/g,
-    ];
-
-    patterns.forEach((pattern) => {
-      let match;
-      while ((match = pattern.exec(descUpper)) !== null) {
-        let machineName = match[0].trim();
-
-        machineName = machineName.replace(/[^A-Z0-9\-\s]/g, '').trim();
-
-        if (machineName.length < 3) {
-          const brand = match[0].split(/[^A-Z]/)[0];
-          machineName = brand + '-01';
-        }
-
-        if (!machineNames.includes(machineName)) {
-          machineNames.push(machineName);
-          console.log(
-            `🔍 Detectado nombre de máquina: "${machineName}" en "${description}"`
-          );
-        }
-      }
-    });
-
-    return machineNames;
   }
 
   private findColumnIndex(headers: any[], possibleNames: string[]): number {
@@ -2422,18 +2498,15 @@ export class ExcelImportComponent implements OnInit {
   ): string {
     const desc = description.toLowerCase();
 
-    if (sheetName === 'REFACCIONES') {
-      if (rowIndex < 50) return 'mecanica';
-      if (rowIndex < 100) return 'electronica';
-      return 'consumible';
-    }
-
+    // Detección por palabras clave en la descripción
     if (
       desc.includes('sensor') ||
       desc.includes('cable') ||
       desc.includes('pcb') ||
       desc.includes('motor') ||
-      desc.includes('servo')
+      desc.includes('servo') ||
+      desc.includes('electronico') ||
+      desc.includes('electrico')
     ) {
       return 'electronica';
     }
@@ -2443,11 +2516,14 @@ export class ExcelImportComponent implements OnInit {
       desc.includes('aceite') ||
       desc.includes('filtro') ||
       desc.includes('lija') ||
-      desc.includes('consumible')
+      desc.includes('consumible') ||
+      desc.includes('grasa') ||
+      desc.includes('limpiador')
     ) {
       return 'consumible';
     }
 
+    // Por defecto, todo lo demás es mecánico
     return 'mecanica';
   }
 
@@ -2458,6 +2534,11 @@ export class ExcelImportComponent implements OnInit {
       }
     }
     return null;
+  }
+
+  private extractMachineNames(description: string): string[] {
+    // Simplemente retorna un array vacío para que no extraiga máquinas de la descripción
+    return [];
   }
 
   resetImport() {

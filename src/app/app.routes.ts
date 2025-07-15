@@ -26,8 +26,8 @@ export const routes: Routes = [
   {
     path: 'machines/:area/:machineId/edit',
     loadComponent: () =>
-      import('./features/add-machine/add-machine').then(
-        (m) => m.AddMachineComponent
+      import('./features/edit-machine/edit-machine').then(
+        (m) => m.EditMachineComponent
       ),
     title: 'Editar Máquina',
   },
