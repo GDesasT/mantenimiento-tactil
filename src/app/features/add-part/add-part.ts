@@ -18,243 +18,274 @@ import { Machine, PartCategory } from '../../core/models';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, TouchButtonComponent],
   template: `
-    <div class="add-part-container slide-up">
-      <!-- Header -->
-      <div class="glass-effect rounded-3xl p-8 mb-12">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
+    <div class="app-container">
+      <!-- Header profesional -->
+      <div class="professional-header">
+        <div class="header-content">
+          <div class="header-left">
             <app-touch-button
               variant="secondary"
               size="md"
               icon="←"
               (clicked)="goBack()"
-              class="mr-6"
+              class="back-btn"
             >
               Atrás
             </app-touch-button>
 
-            <div>
-              <h2 class="text-4xl font-black gradient-text mb-2">
-                ➕ Agregar Refacción
-              </h2>
-              <p class="text-xl text-gray-600 font-medium">
+            <div class="header-text">
+              <h2 class="header-title">➕ Agregar Refacción</h2>
+              <p class="header-subtitle">
                 🔧 {{ machine?.name || 'Cargando máquina...' }}
-                <span *ngIf="isPreselected()" class="ml-2">
+                <span *ngIf="isPreselected()">
                   • {{ getSelectedCategoryLabel() }}
                 </span>
               </p>
             </div>
           </div>
 
-          <!-- Mostrar badge de categoría si está preseleccionada -->
+          <!-- Badge de categoría si está preseleccionada -->
           <div *ngIf="isPreselected()" class="category-badge">
-            <span class="text-2xl mr-2">{{ getSelectedCategoryIcon() }}</span>
-            <span class="font-bold">{{ getSelectedCategoryLabel() }}</span>
+            <span class="badge-icon">{{ getSelectedCategoryIcon() }}</span>
+            <span class="badge-label">{{ getSelectedCategoryLabel() }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Formulario principal -->
-      <div class="max-w-4xl mx-auto">
-        <form [formGroup]="partForm" (ngSubmit)="onSubmit()" class="space-y-8">
-          <!-- Información de la máquina -->
-          <div class="machine-info-card glass-effect rounded-2xl p-6 mb-8">
-            <div class="flex items-center justify-center mb-4">
-              <span class="text-6xl">{{ getAreaIcon() }}</span>
-            </div>
-            <div class="text-center">
-              <h3 class="text-2xl font-bold text-gray-800 mb-2">
-                {{ machine?.name }}
-              </h3>
-              <p class="text-gray-600">{{ getAreaLabel() }}</p>
+      <div class="content-area">
+        <!-- Información de la máquina -->
+        <div class="machine-section">
+          <div class="professional-card animate-fadeInUp">
+            <div class="professional-content">
+              <div class="machine-info">
+                <div class="machine-icon">{{ getAreaIcon() }}</div>
+                <div class="machine-details">
+                  <h3 class="machine-name">{{ machine?.name }}</h3>
+                  <p class="machine-area">{{ getAreaLabel() }}</p>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- Grid de campos principales -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Formulario principal -->
+        <form [formGroup]="partForm" (ngSubmit)="onSubmit()">
+          <div class="form-grid">
             <!-- Lado izquierdo: Identificación -->
-            <div class="identification-section">
-              <h3 class="section-title">📋 Identificación</h3>
+            <div
+              class="form-section animate-fadeInUp"
+              style="animation-delay: 0.1s"
+            >
+              <div class="professional-card">
+                <div class="professional-content">
+                  <h3 class="section-title">📋 Identificación</h3>
 
-              <!-- SAP Number -->
-              <div class="form-group">
-                <label class="form-label"> 📦 Número SAP * </label>
-                <input
-                  type="text"
-                  formControlName="sapNumber"
-                  placeholder="Ej: 123456789"
-                  class="form-input"
-                  [class.error]="isFieldInvalid('sapNumber')"
-                  [class.success]="isFieldValid('sapNumber')"
-                />
-
-                <div *ngIf="isFieldInvalid('sapNumber')" class="field-error">
-                  <div *ngIf="partForm.get('sapNumber')?.errors?.['required']">
-                    El número SAP es obligatorio
+                  <!-- SAP Number -->
+                  <div class="form-group">
+                    <label class="form-label">📦 Número SAP *</label>
+                    <input
+                      type="text"
+                      formControlName="sapNumber"
+                      placeholder="Ej: 123456789"
+                      class="form-input"
+                      [class.error]="isFieldInvalid('sapNumber')"
+                      [class.success]="isFieldValid('sapNumber')"
+                    />
+                    <div
+                      *ngIf="isFieldInvalid('sapNumber')"
+                      class="field-error"
+                    >
+                      <div
+                        *ngIf="partForm.get('sapNumber')?.errors?.['required']"
+                      >
+                        El número SAP es obligatorio
+                      </div>
+                      <div
+                        *ngIf="partForm.get('sapNumber')?.errors?.['minlength']"
+                      >
+                        Debe tener al menos 3 caracteres
+                      </div>
+                      <div
+                        *ngIf="partForm.get('sapNumber')?.errors?.['sapExists']"
+                      >
+                        Ya existe una refacción con este SAP
+                      </div>
+                    </div>
+                    <div
+                      *ngIf="isFieldValid('sapNumber')"
+                      class="field-success"
+                    >
+                      ✓ SAP disponible
+                    </div>
                   </div>
-                  <div *ngIf="partForm.get('sapNumber')?.errors?.['minlength']">
-                    Debe tener al menos 3 caracteres
+
+                  <!-- Part Number -->
+                  <div class="form-group">
+                    <label class="form-label">🔖 Part Number *</label>
+                    <input
+                      type="text"
+                      formControlName="partNumber"
+                      placeholder="Ej: ABC-123-XYZ"
+                      class="form-input"
+                      [class.error]="isFieldInvalid('partNumber')"
+                      [class.success]="isFieldValid('partNumber')"
+                    />
+                    <div
+                      *ngIf="isFieldInvalid('partNumber')"
+                      class="field-error"
+                    >
+                      <div
+                        *ngIf="partForm.get('partNumber')?.errors?.['required']"
+                      >
+                        El Part Number es obligatorio
+                      </div>
+                      <div
+                        *ngIf="partForm.get('partNumber')?.errors?.['minlength']"
+                      >
+                        Debe tener al menos 2 caracteres
+                      </div>
+                    </div>
+                    <div
+                      *ngIf="isFieldValid('partNumber')"
+                      class="field-success"
+                    >
+                      ✓ Part Number válido
+                    </div>
                   </div>
-                  <div *ngIf="partForm.get('sapNumber')?.errors?.['sapExists']">
-                    Ya existe una refacción con este SAP
+
+                  <!-- Categoría -->
+                  <div class="form-group">
+                    <label class="form-label">
+                      📂 Categoría *
+                      <span *ngIf="isPreselected()" class="preselected-label">
+                        (Preseleccionada)
+                      </span>
+                    </label>
+                    <select
+                      formControlName="category"
+                      class="form-select"
+                      [class.error]="isFieldInvalid('category')"
+                      [class.success]="isFieldValid('category')"
+                      [disabled]="isPreselected()"
+                    >
+                      <option value="">Selecciona una categoría</option>
+                      <option value="mecanica">🔩 Mecánica</option>
+                      <option value="electronica">⚡ Electrónica</option>
+                      <option value="consumible">🔄 Consumible</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('category')" class="field-error">
+                      Debes seleccionar una categoría
+                    </div>
+                    <div *ngIf="isFieldValid('category')" class="field-success">
+                      ✓ Categoría seleccionada
+                    </div>
+                    <div *ngIf="isPreselected()" class="preselected-info">
+                      💡 Esta categoría fue seleccionada automáticamente
+                    </div>
                   </div>
-                </div>
-
-                <div *ngIf="isFieldValid('sapNumber')" class="field-success">
-                  ✓ SAP disponible
-                </div>
-              </div>
-
-              <!-- Part Number -->
-              <div class="form-group">
-                <label class="form-label"> 🔖 Part Number * </label>
-                <input
-                  type="text"
-                  formControlName="partNumber"
-                  placeholder="Ej: ABC-123-XYZ"
-                  class="form-input"
-                  [class.error]="isFieldInvalid('partNumber')"
-                  [class.success]="isFieldValid('partNumber')"
-                />
-
-                <div *ngIf="isFieldInvalid('partNumber')" class="field-error">
-                  <div *ngIf="partForm.get('partNumber')?.errors?.['required']">
-                    El Part Number es obligatorio
-                  </div>
-                  <div
-                    *ngIf="partForm.get('partNumber')?.errors?.['minlength']"
-                  >
-                    Debe tener al menos 2 caracteres
-                  </div>
-                </div>
-
-                <div *ngIf="isFieldValid('partNumber')" class="field-success">
-                  ✓ Part Number válido
-                </div>
-              </div>
-
-              <!-- Categoría -->
-              <div class="form-group">
-                <label class="form-label">
-                  📂 Categoría *
-                  <span *ngIf="isPreselected()" class="text-sm text-blue-600">
-                    (Preseleccionada)
-                  </span>
-                </label>
-                <select
-                  formControlName="category"
-                  class="form-select"
-                  [class.error]="isFieldInvalid('category')"
-                  [class.success]="isFieldValid('category')"
-                  [disabled]="isPreselected()"
-                >
-                  <option value="">Selecciona una categoría</option>
-                  <option value="mecanica">🔩 Mecánica</option>
-                  <option value="electronica">⚡ Electrónica</option>
-                  <option value="consumible">🔄 Consumible</option>
-                </select>
-
-                <div *ngIf="isFieldInvalid('category')" class="field-error">
-                  Debes seleccionar una categoría
-                </div>
-
-                <div *ngIf="isFieldValid('category')" class="field-success">
-                  ✓ Categoría seleccionada
-                </div>
-
-                <!-- Mostrar info si está preseleccionada -->
-                <div *ngIf="isPreselected()" class="text-sm text-blue-600 mt-2">
-                  💡 Esta categoría fue seleccionada automáticamente desde la
-                  navegación
                 </div>
               </div>
             </div>
 
             <!-- Lado derecho: Descripción y Ubicación -->
-            <div class="details-section">
-              <h3 class="section-title">📝 Detalles</h3>
+            <div
+              class="form-section animate-fadeInUp"
+              style="animation-delay: 0.2s"
+            >
+              <div class="professional-card">
+                <div class="professional-content">
+                  <h3 class="section-title">📝 Detalles</h3>
 
-              <!-- Descripción -->
-              <div class="form-group">
-                <label class="form-label"> 📄 Descripción * </label>
-                <textarea
-                  formControlName="description"
-                  placeholder="Describe la refacción detalladamente..."
-                  rows="4"
-                  class="form-textarea"
-                  [class.error]="isFieldInvalid('description')"
-                  [class.success]="isFieldValid('description')"
-                >
-                </textarea>
-
-                <div *ngIf="isFieldInvalid('description')" class="field-error">
-                  <div
-                    *ngIf="partForm.get('description')?.errors?.['required']"
-                  >
-                    La descripción es obligatoria
-                  </div>
-                  <div
-                    *ngIf="partForm.get('description')?.errors?.['minlength']"
-                  >
-                    Debe tener al menos 5 caracteres
-                  </div>
-                </div>
-
-                <div *ngIf="isFieldValid('description')" class="field-success">
-                  ✓ Descripción válida
-                </div>
-              </div>
-
-              <!-- Ubicación -->
-              <div class="form-group">
-                <label class="form-label"> 📍 Ubicación * </label>
-                <input
-                  type="text"
-                  formControlName="location"
-                  placeholder="Ej: Estante A-3, Cajón 5"
-                  class="form-input"
-                  [class.error]="isFieldInvalid('location')"
-                  [class.success]="isFieldValid('location')"
-                />
-
-                <div *ngIf="isFieldInvalid('location')" class="field-error">
-                  <div *ngIf="partForm.get('location')?.errors?.['required']">
-                    La ubicación es obligatoria
-                  </div>
-                  <div *ngIf="partForm.get('location')?.errors?.['minlength']">
-                    Debe tener al menos 2 caracteres
-                  </div>
-                </div>
-
-                <div *ngIf="isFieldValid('location')" class="field-success">
-                  ✓ Ubicación válida
-                </div>
-              </div>
-
-              <!-- Preview de la categoría -->
-              <div
-                *ngIf="partForm.get('category')?.value"
-                class="category-preview"
-              >
-                <h4 class="text-lg font-semibold mb-3">Vista previa:</h4>
-                <div
-                  class="preview-card"
-                  [class]="'preview-' + partForm.get('category')?.value"
-                >
-                  <div class="flex items-center">
-                    <span class="text-3xl mr-3">{{
-                      getCategoryIcon(partForm.get('category')?.value)
-                    }}</span>
-                    <div>
-                      <div class="font-bold">
-                        {{ getCategoryLabel(partForm.get('category')?.value) }}
+                  <!-- Descripción -->
+                  <div class="form-group">
+                    <label class="form-label">📄 Descripción *</label>
+                    <textarea
+                      formControlName="description"
+                      placeholder="Describe la refacción detalladamente..."
+                      rows="4"
+                      class="form-textarea"
+                      [class.error]="isFieldInvalid('description')"
+                      [class.success]="isFieldValid('description')"
+                    ></textarea>
+                    <div
+                      *ngIf="isFieldInvalid('description')"
+                      class="field-error"
+                    >
+                      <div
+                        *ngIf="partForm.get('description')?.errors?.['required']"
+                      >
+                        La descripción es obligatoria
                       </div>
-                      <div class="text-sm opacity-75">
-                        {{
-                          getCategoryDescription(
-                            partForm.get('category')?.value
-                          )
-                        }}
+                      <div
+                        *ngIf="partForm.get('description')?.errors?.['minlength']"
+                      >
+                        Debe tener al menos 5 caracteres
+                      </div>
+                    </div>
+                    <div
+                      *ngIf="isFieldValid('description')"
+                      class="field-success"
+                    >
+                      ✓ Descripción válida
+                    </div>
+                  </div>
+
+                  <!-- Ubicación -->
+                  <div class="form-group">
+                    <label class="form-label">📍 Ubicación *</label>
+                    <input
+                      type="text"
+                      formControlName="location"
+                      placeholder="Ej: Estante A-3, Cajón 5"
+                      class="form-input"
+                      [class.error]="isFieldInvalid('location')"
+                      [class.success]="isFieldValid('location')"
+                    />
+                    <div *ngIf="isFieldInvalid('location')" class="field-error">
+                      <div
+                        *ngIf="partForm.get('location')?.errors?.['required']"
+                      >
+                        La ubicación es obligatoria
+                      </div>
+                      <div
+                        *ngIf="partForm.get('location')?.errors?.['minlength']"
+                      >
+                        Debe tener al menos 2 caracteres
+                      </div>
+                    </div>
+                    <div *ngIf="isFieldValid('location')" class="field-success">
+                      ✓ Ubicación válida
+                    </div>
+                  </div>
+
+                  <!-- Preview de la categoría -->
+                  <div
+                    *ngIf="partForm.get('category')?.value"
+                    class="category-preview"
+                  >
+                    <h4 class="preview-title">Vista previa:</h4>
+                    <div
+                      class="preview-card"
+                      [class]="'preview-' + partForm.get('category')?.value"
+                    >
+                      <div class="preview-content">
+                        <span class="preview-icon">{{
+                          getCategoryIcon(partForm.get('category')?.value)
+                        }}</span>
+                        <div class="preview-info">
+                          <div class="preview-name">
+                            {{
+                              getCategoryLabel(partForm.get('category')?.value)
+                            }}
+                          </div>
+                          <div class="preview-description">
+                            {{
+                              getCategoryDescription(
+                                partForm.get('category')?.value
+                              )
+                            }}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -263,220 +294,486 @@ import { Machine, PartCategory } from '../../core/models';
             </div>
           </div>
 
-          <!-- Sección de imagen (opcional) -->
-          <div class="image-section glass-effect rounded-2xl p-6">
-            <h3 class="section-title">📸 Imagen (Opcional)</h3>
-
-            <div class="form-group">
-              <label class="form-label"> 🖼️ URL de Imagen </label>
-              <input
-                type="url"
-                formControlName="image"
-                placeholder="https://ejemplo.com/imagen.jpg"
-                class="form-input"
-              />
-
-              <div class="text-sm text-gray-500 mt-2">
-                💡 Puedes agregar una URL de imagen para ayudar a identificar la
-                refacción
+          <!-- Sección de imagen -->
+          <div
+            class="image-section animate-fadeInUp"
+            style="animation-delay: 0.3s"
+          >
+            <div class="professional-card">
+              <div class="professional-content">
+                <h3 class="section-title">📸 Imagen (Opcional)</h3>
+                <div class="form-group">
+                  <label class="form-label">🖼️ URL de Imagen</label>
+                  <input
+                    type="url"
+                    formControlName="image"
+                    placeholder="https://ejemplo.com/imagen.jpg"
+                    class="form-input"
+                  />
+                  <div class="field-hint">
+                    💡 Puedes agregar una URL de imagen para ayudar a
+                    identificar la refacción
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Botones de acción -->
-          <div class="action-buttons glass-effect rounded-2xl p-6">
-            <div class="flex gap-4">
-              <app-touch-button
-                type="button"
-                variant="secondary"
-                size="xl"
-                icon="❌"
-                [fullWidth]="true"
-                (clicked)="goBack()"
-              >
-                Cancelar
-              </app-touch-button>
+          <div
+            class="actions-section animate-fadeInUp"
+            style="animation-delay: 0.4s"
+          >
+            <div class="professional-card">
+              <div class="professional-content">
+                <div class="action-buttons">
+                  <app-touch-button
+                    type="button"
+                    variant="secondary"
+                    size="xl"
+                    icon="❌"
+                    [fullWidth]="true"
+                    (clicked)="goBack()"
+                  >
+                    Cancelar
+                  </app-touch-button>
 
-              <app-touch-button
-                type="submit"
-                variant="success"
-                size="xl"
-                icon="💾"
-                [fullWidth]="true"
-                [disabled]="partForm.invalid || isSubmitting"
-                [loading]="isSubmitting"
-              >
-                {{ isSubmitting ? 'Guardando...' : 'Guardar Refacción' }}
-              </app-touch-button>
+                  <app-touch-button
+                    type="submit"
+                    variant="success"
+                    size="xl"
+                    icon="💾"
+                    [fullWidth]="true"
+                    [disabled]="partForm.invalid || isSubmitting"
+                    [loading]="isSubmitting"
+                  >
+                    {{ isSubmitting ? 'Guardando...' : 'Guardar Refacción' }}
+                  </app-touch-button>
+                </div>
+              </div>
             </div>
           </div>
         </form>
+      </div>
+
+      <!-- Notificaciones -->
+      <div
+        *ngIf="showNotification"
+        class="notification"
+        [class]="notificationType + '-notification'"
+      >
+        <div class="notification-content">
+          <span class="notification-icon">{{ getNotificationIcon() }}</span>
+          <span class="notification-text">{{ notificationMessage }}</span>
+        </div>
       </div>
     </div>
   `,
   styles: [
     `
-      .add-part-container {
-        min-height: 70vh;
-        padding: 2rem 0;
+      .app-container {
+        min-height: 100vh;
+        background: var(--gray-50);
+        position: relative;
+      }
+
+      .professional-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-bottom: 3px solid var(--primary-700);
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .header-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 0 0.25rem 0;
+      }
+
+      .header-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+        font-size: 1rem;
       }
 
       .category-badge {
         display: flex;
         align-items: center;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        border-radius: 9999px;
-        border: 2px solid #cbd5e1;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius-lg);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
       }
 
-      .machine-info-card {
-        background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
+      .badge-icon {
+        font-size: 1.5rem;
+      }
+
+      .badge-label {
+        font-weight: bold;
+        font-size: 1rem;
+      }
+
+      .content-area {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .machine-section {
+        margin-bottom: 2rem;
+      }
+
+      .machine-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        text-align: center;
+        justify-content: center;
+      }
+
+      .machine-icon {
+        font-size: 4rem;
+        padding: 1rem;
+        background: var(--gray-100);
+        border-radius: var(--border-radius-xl);
+        border: 2px solid var(--gray-200);
+      }
+
+      .machine-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin: 0 0 0.5rem 0;
+      }
+
+      .machine-area {
+        color: var(--gray-600);
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-section,
+      .image-section,
+      .actions-section {
+        margin-bottom: 2rem;
       }
 
       .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1f2937;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--gray-900);
         margin-bottom: 1.5rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 3px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .form-group {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
       }
 
       .form-label {
         display: block;
-        font-size: 1.25rem;
+        font-size: 1rem;
         font-weight: 600;
-        color: #374151;
+        color: var(--gray-700);
         margin-bottom: 0.75rem;
+      }
+
+      .preselected-label {
+        font-size: 0.875rem;
+        color: var(--primary-600);
+        font-weight: normal;
       }
 
       .form-input,
       .form-select,
       .form-textarea {
         width: 100%;
-        padding: 1rem 1.5rem;
-        font-size: 1.125rem;
-        border: 3px solid #d1d5db;
-        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--border-radius-md);
         background: white;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .form-input:focus,
       .form-select:focus,
       .form-textarea:focus {
         outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        transform: translateY(-1px);
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
       }
 
       .form-input.error,
       .form-select.error,
       .form-textarea.error {
         border-color: #ef4444;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
       }
 
       .form-input.success,
       .form-select.success,
       .form-textarea.success {
         border-color: #10b981;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
       }
 
       .form-select[disabled] {
-        background-color: #f3f4f6;
+        background-color: var(--gray-100);
         cursor: not-allowed;
         opacity: 0.8;
       }
 
       .field-error {
         color: #dc2626;
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 0.875rem;
+        font-weight: 500;
         margin-top: 0.5rem;
       }
 
       .field-success {
         color: #059669;
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+      }
+
+      .field-hint {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.5rem;
+      }
+
+      .preselected-info {
+        font-size: 0.875rem;
+        color: var(--primary-600);
         margin-top: 0.5rem;
       }
 
       .category-preview {
-        margin-top: 2rem;
-        padding: 1.5rem;
-        border-radius: 1rem;
-        background: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-200);
+      }
+
+      .preview-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.75rem;
       }
 
       .preview-card {
         padding: 1rem;
-        border-radius: 0.75rem;
+        border-radius: var(--border-radius-md);
         border-left: 4px solid;
       }
 
       .preview-mecanica {
-        background: #dbeafe;
-        border-left-color: #3b82f6;
-        color: #1e40af;
+        background: var(--primary-50);
+        border-left-color: var(--primary-500);
       }
 
       .preview-electronica {
         background: #fef3c7;
         border-left-color: #f59e0b;
-        color: #d97706;
       }
 
       .preview-consumible {
-        background: #d1fae5;
+        background: #ecfdf5;
         border-left-color: #10b981;
-        color: #065f46;
       }
 
-      .image-section,
+      .preview-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .preview-icon {
+        font-size: 1.5rem;
+      }
+
+      .preview-name {
+        font-weight: bold;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+      }
+
+      .preview-description {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+      }
+
       .action-buttons {
-        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        display: flex;
+        gap: 1rem;
+      }
+
+      .action-buttons app-touch-button {
+        flex: 1;
+      }
+
+      /* Notificaciones */
+      .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1100;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        max-width: 400px;
+        animation: slideInRight 0.5s ease-out;
+      }
+
+      .success-notification {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        border: 2px solid #059669;
+      }
+
+      .error-notification {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        border: 2px solid #dc2626;
+      }
+
+      .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .notification-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .notification-text {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+
+      /* Animaciones */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out;
       }
 
       /* Responsive */
       @media (max-width: 1024px) {
-        .grid-cols-1.lg\\:grid-cols-2 {
+        .form-grid {
           grid-template-columns: 1fr;
+          gap: 1.5rem;
         }
       }
 
       @media (max-width: 768px) {
-        .add-part-container {
-          padding: 1rem 0;
+        .header-content {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
         }
 
-        .glass-effect {
-          padding: 1.5rem !important;
+        .header-left {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .content-area {
+          padding: 1rem;
+        }
+
+        .machine-info {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .machine-icon {
+          font-size: 3rem;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .notification {
+          top: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .professional-header {
+          padding: 1rem;
+        }
+
+        .professional-content {
+          padding: 1rem;
+        }
+
+        .header-title {
+          font-size: 1.5rem;
         }
 
         .form-input,
         .form-select,
         .form-textarea {
-          font-size: 1rem;
-          padding: 0.875rem 1.25rem;
-        }
-
-        .section-title {
-          font-size: 1.25rem;
-        }
-
-        .form-label {
-          font-size: 1.125rem;
+          font-size: 0.875rem;
+          padding: 0.625rem 0.75rem;
         }
       }
     `,
@@ -489,6 +786,11 @@ export class AddPartComponent implements OnInit {
   isSubmitting = false;
   selectedArea: string = 'costura';
   selectedCategory: string = '';
+
+  // Notificaciones
+  showNotification = false;
+  notificationMessage = '';
+  notificationType: 'success' | 'error' = 'success';
 
   constructor(
     private fb: FormBuilder,
@@ -632,6 +934,23 @@ export class AddPartComponent implements OnInit {
     return '';
   }
 
+  getNotificationIcon(): string {
+    return this.notificationType === 'success' ? '✅' : '❌';
+  }
+
+  showNotificationMessage(
+    message: string,
+    type: 'success' | 'error' = 'success'
+  ) {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    this.showNotification = true;
+
+    setTimeout(() => {
+      this.showNotification = false;
+    }, 4000);
+  }
+
   goBack() {
     if (this.isPreselected()) {
       this.router.navigate([
@@ -669,19 +988,28 @@ export class AddPartComponent implements OnInit {
         await this.partService.createPart(partData).toPromise();
 
         console.log('✅ Part created successfully');
-        alert(`Refacción "${partData.description}" agregada exitosamente`);
+        this.showNotificationMessage(
+          `Refacción "${partData.description}" agregada exitosamente`,
+          'success'
+        );
 
-        // Navegar a la lista de la categoría creada
-        this.router.navigate([
-          '/machines',
-          this.selectedArea,
-          this.machineId,
-          'parts',
-          partData.category,
-        ]);
+        // Esperar un momento para que se vea la notificación
+        setTimeout(() => {
+          // Navegar a la lista de la categoría creada
+          this.router.navigate([
+            '/machines',
+            this.selectedArea,
+            this.machineId,
+            'parts',
+            partData.category,
+          ]);
+        }, 1500);
       } catch (error) {
         console.error('Error creating part:', error);
-        alert('Error al agregar la refacción. Intenta nuevamente.');
+        this.showNotificationMessage(
+          'Error al agregar la refacción. Intenta nuevamente.',
+          'error'
+        );
         this.isSubmitting = false;
       }
     }

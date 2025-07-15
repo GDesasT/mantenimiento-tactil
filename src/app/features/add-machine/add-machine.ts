@@ -140,6 +140,18 @@ import { DatabaseService } from '../../core/services/database';
           </div>
         </form>
       </div>
+
+      <!-- Notificaciones -->
+      <div
+        *ngIf="showNotification"
+        class="notification"
+        [class]="notificationType + '-notification'"
+      >
+        <div class="notification-content">
+          <span class="notification-icon">{{ getNotificationIcon() }}</span>
+          <span class="notification-text">{{ notificationMessage }}</span>
+        </div>
+      </div>
     </div>
   `,
   styles: [
@@ -174,6 +186,71 @@ import { DatabaseService } from '../../core/services/database';
       .touch-input-field.border-red-500 {
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
       }
+
+      /* Notificaciones */
+      .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1100;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        max-width: 400px;
+        animation: slideInRight 0.5s ease-out;
+      }
+
+      .success-notification {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        border: 2px solid #059669;
+      }
+
+      .error-notification {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        border: 2px solid #dc2626;
+      }
+
+      .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .notification-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .notification-text {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+
+      /* Animación para la notificación */
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Responsive para notificaciones */
+      @media (max-width: 768px) {
+        .notification {
+          top: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
+      }
     `,
   ],
 })
@@ -181,6 +258,11 @@ export class AddMachineComponent implements OnInit {
   machineForm: FormGroup;
   selectedArea: 'corte' | 'costura' = 'costura';
   isSubmitting = false;
+
+  // Variables para notificaciones
+  showNotification = false;
+  notificationMessage = '';
+  notificationType: 'success' | 'error' = 'success';
 
   constructor(
     private fb: FormBuilder,
@@ -248,6 +330,29 @@ export class AddMachineComponent implements OnInit {
     this.router.navigate(['/machines', this.selectedArea]);
   }
 
+  // Métodos para notificaciones
+  showNotificationMessage(
+    message: string,
+    type: 'success' | 'error' = 'success'
+  ) {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    this.showNotification = true;
+
+    // Auto ocultar después de 3 segundos
+    setTimeout(() => {
+      this.hideNotification();
+    }, 3000);
+  }
+
+  hideNotification() {
+    this.showNotification = false;
+  }
+
+  getNotificationIcon(): string {
+    return this.notificationType === 'success' ? '✅' : '❌';
+  }
+
   async onSubmit() {
     if (this.machineForm.valid && !this.isSubmitting) {
       this.isSubmitting = true;
@@ -261,15 +366,24 @@ export class AddMachineComponent implements OnInit {
         await this.machineService.createMachine(machineData).toPromise();
 
         console.log('✅ Machine created successfully');
-        alert(
-          `Máquina "${machineData.name}" agregada exitosamente a ${this.selectedArea}`
+        this.showNotificationMessage(
+          `Máquina "${
+            machineData.name
+          }" agregada exitosamente a ${this.getAreaTitle()}`,
+          'success'
         );
 
-        // Regresar a la lista de máquinas
-        this.router.navigate(['/machines', this.selectedArea]);
+        // Esperar un momento para que se vea la notificación
+        setTimeout(() => {
+          // Regresar a la lista de máquinas
+          this.router.navigate(['/machines', this.selectedArea]);
+        }, 1500);
       } catch (error) {
         console.error('Error creating machine:', error);
-        alert('Error al agregar la máquina. Intenta nuevamente.');
+        this.showNotificationMessage(
+          'Error al agregar la máquina. Intenta nuevamente.',
+          'error'
+        );
         this.isSubmitting = false;
       }
     }

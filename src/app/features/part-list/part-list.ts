@@ -146,15 +146,7 @@ import { Part, PartCategory, Machine } from '../../core/models';
                 </div>
               </div>
 
-              <!-- Imagen si existe -->
-              <div *ngIf="part.image" class="part-image">
-                <img
-                  [src]="part.image"
-                  [alt]="part.description"
-                  class="part-img"
-                  (error)="onImageError($event)"
-                />
-              </div>
+              <!-- Las imágenes NO se muestran aquí - solo en el modal -->
 
               <!-- Acciones -->
               <div class="part-actions">
@@ -183,7 +175,7 @@ import { Part, PartCategory, Machine } from '../../core/models';
                     variant="danger"
                     size="sm"
                     icon="🗑️"
-                    (clicked)="deletePart(part)"
+                    (clicked)="showDeleteConfirm(part)"
                   >
                     Eliminar
                   </app-touch-button>
@@ -217,6 +209,219 @@ import { Part, PartCategory, Machine } from '../../core/models';
           <span class="loading-text">Cargando refacciones...</span>
         </div>
       </div>
+
+      <!-- Modal de detalle de refacción -->
+      <div
+        *ngIf="showDetailModal"
+        class="modal-overlay"
+        (click)="closeDetailModal()"
+      >
+        <div class="modal-container" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div class="modal-title">
+              <span class="modal-icon">👁️</span>
+              <h3>Detalle de Refacción</h3>
+            </div>
+            <button class="modal-close" (click)="closeDetailModal()">✕</button>
+          </div>
+
+          <div class="modal-content" *ngIf="selectedPart">
+            <!-- Categoria y descripción -->
+            <div class="modal-section">
+              <div
+                class="modal-category-badge"
+                [class]="'badge-' + selectedPart.category"
+              >
+                <span class="badge-icon">{{
+                  getCategoryIcon(selectedPart.category)
+                }}</span>
+                <span class="badge-label">{{
+                  getCategoryLabel(selectedPart.category)
+                }}</span>
+              </div>
+              <h2 class="modal-description">{{ selectedPart.description }}</h2>
+            </div>
+
+            <!-- Información detallada -->
+            <div class="modal-section">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <div class="detail-icon">📦</div>
+                  <div class="detail-info">
+                    <span class="detail-title">Número SAP</span>
+                    <span class="detail-data sap-highlight">{{
+                      selectedPart.sapNumber
+                    }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">🔖</div>
+                  <div class="detail-info">
+                    <span class="detail-title">Número de Parte</span>
+                    <span class="detail-data">{{
+                      selectedPart.partNumber
+                    }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">📍</div>
+                  <div class="detail-info">
+                    <span class="detail-title">Ubicación</span>
+                    <span class="detail-data location-highlight">{{
+                      selectedPart.location
+                    }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">🔧</div>
+                  <div class="detail-info">
+                    <span class="detail-title">Máquina</span>
+                    <span class="detail-data machine-highlight">{{
+                      machine?.name
+                    }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">🏭</div>
+                  <div class="detail-info">
+                    <span class="detail-title">Área</span>
+                    <span class="detail-data area-highlight">{{
+                      getAreaTitle()
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Imagen si existe - SOLO AQUÍ SE MUESTRA -->
+            <div *ngIf="selectedPart.image" class="modal-section">
+              <h4 class="image-section-title">📸 Imagen de la Refacción</h4>
+              <div class="modal-image-container">
+                <img
+                  [src]="selectedPart.image"
+                  [alt]="selectedPart.description"
+                  class="modal-image"
+                  (error)="onImageError($event)"
+                />
+                <div class="image-caption">
+                  <span class="caption-text">{{
+                    selectedPart.description
+                  }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones del modal -->
+          <div class="modal-actions">
+            <app-touch-button
+              variant="warning"
+              size="lg"
+              icon="✏️"
+              (clicked)="editPartFromModal()"
+            >
+              Editar Refacción
+            </app-touch-button>
+
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              icon="✕"
+              (clicked)="closeDetailModal()"
+            >
+              Cerrar
+            </app-touch-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de confirmación de eliminación -->
+      <div
+        *ngIf="showDeleteModal"
+        class="modal-overlay"
+        (click)="closeDeleteModal()"
+      >
+        <div
+          class="modal-container delete-modal"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="modal-header danger-header">
+            <div class="modal-title">
+              <span class="modal-icon danger-icon">⚠️</span>
+              <h3>Confirmar Eliminación</h3>
+            </div>
+            <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+          </div>
+
+          <div class="modal-content" *ngIf="partToDelete">
+            <div class="delete-warning">
+              <div class="warning-content">
+                <h4 class="warning-title">
+                  ¿Estás seguro de eliminar esta refacción?
+                </h4>
+                <p class="warning-description">
+                  Se eliminará permanentemente la refacción:
+                </p>
+                <div class="part-to-delete">
+                  <div class="part-preview">
+                    <span class="preview-icon">{{
+                      getCategoryIcon(partToDelete.category)
+                    }}</span>
+                    <div class="preview-info">
+                      <span class="preview-name">{{
+                        partToDelete.description
+                      }}</span>
+                      <span class="preview-sap"
+                        >SAP: {{ partToDelete.sapNumber }}</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <p class="warning-notice">
+                  <strong>Esta acción no se puede deshacer.</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <app-touch-button
+              variant="danger"
+              size="lg"
+              icon="🗑️"
+              (clicked)="confirmDelete()"
+              [loading]="isDeleting"
+            >
+              {{ isDeleting ? 'Eliminando...' : 'Sí, Eliminar' }}
+            </app-touch-button>
+
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              icon="✕"
+              (clicked)="closeDeleteModal()"
+              [disabled]="isDeleting"
+            >
+              Cancelar
+            </app-touch-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notificación de éxito -->
+      <div
+        *ngIf="showSuccessNotification"
+        class="success-notification animate-slideInRight"
+      >
+        <div class="notification-content">
+          <span class="notification-icon">✅</span>
+          <span class="notification-text">{{ successMessage }}</span>
+        </div>
+      </div>
     </div>
   `,
   styles: [
@@ -224,6 +429,7 @@ import { Part, PartCategory, Machine } from '../../core/models';
       .app-container {
         min-height: 100vh;
         background: var(--gray-50);
+        position: relative;
       }
 
       .professional-header {
@@ -402,24 +608,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         font-weight: 600;
       }
 
-      .part-image {
-        margin: 1rem 0;
-        text-align: center;
-      }
-
-      .part-img {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        border-radius: var(--border-radius-md);
-        border: 2px solid var(--gray-200);
-        transition: transform 0.2s ease;
-      }
-
-      .part-img:hover {
-        transform: scale(1.05);
-      }
-
       .part-actions {
         margin-top: auto;
         display: flex;
@@ -436,9 +624,447 @@ import { Part, PartCategory, Machine } from '../../core/models';
         flex: 1;
       }
 
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-container {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-2xl);
+        animation: scaleIn 0.3s ease;
+      }
+
+      .delete-modal {
+        max-width: 500px;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem 2rem 1rem;
+        border-bottom: 2px solid var(--gray-100);
+      }
+
+      .danger-header {
+        border-bottom-color: #fecaca;
+        background: linear-gradient(135deg, #fef2f2, #ffffff);
+      }
+
+      .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .modal-title h3 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin: 0;
+      }
+
+      .modal-icon {
+        font-size: 2rem;
+        padding: 0.5rem;
+        background: var(--primary-100);
+        border-radius: var(--border-radius-md);
+      }
+
+      .danger-icon {
+        background: #fef2f2;
+      }
+
+      .modal-close {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: none;
+        background: var(--gray-100);
+        border-radius: 50%;
+        color: var(--gray-600);
+        font-size: 1.25rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .modal-close:hover {
+        background: var(--gray-200);
+        color: var(--gray-800);
+      }
+
+      .modal-content {
+        padding: 2rem;
+      }
+
+      .modal-section {
+        margin-bottom: 2rem;
+      }
+
+      .modal-section:last-child {
+        margin-bottom: 0;
+      }
+
+      .modal-category-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius-lg);
+        margin-bottom: 1.5rem;
+      }
+
+      .badge-mecanica {
+        background: linear-gradient(
+          135deg,
+          var(--primary-100),
+          var(--primary-200)
+        );
+        border: 2px solid var(--primary-300);
+      }
+
+      .badge-electronica {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border: 2px solid #f59e0b;
+      }
+
+      .badge-consumible {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        border: 2px solid #10b981;
+      }
+
+      .badge-icon {
+        font-size: 2.5rem;
+      }
+
+      .badge-label {
+        font-size: 1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--gray-700);
+      }
+
+      .modal-description {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        text-align: center;
+        line-height: 1.4;
+        margin: 0;
+      }
+
+      .detail-grid {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-200);
+      }
+
+      .detail-icon {
+        font-size: 1.5rem;
+        width: 3rem;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: var(--border-radius-md);
+        border: 2px solid var(--gray-200);
+        flex-shrink: 0;
+      }
+
+      .detail-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .detail-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .detail-data {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+      }
+
+      .sap-highlight {
+        background: var(--primary-100);
+        color: var(--primary-800);
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: bold;
+      }
+
+      .location-highlight {
+        background: #ecfdf5;
+        color: #065f46;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: bold;
+      }
+
+      .machine-highlight {
+        background: #fef3c7;
+        color: #d97706;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: bold;
+      }
+
+      .area-highlight {
+        background: #f3e8ff;
+        color: #7c3aed;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: bold;
+      }
+
+      /* SECCIÓN DE IMAGEN - SOLO EN MODAL */
+      .image-section-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .modal-image-container {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: var(--border-radius-lg);
+        border: 2px solid var(--gray-200);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .modal-image {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-lg);
+        transition: transform 0.3s ease;
+      }
+
+      .modal-image:hover {
+        transform: scale(1.05);
+      }
+
+      .image-caption {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-300);
+      }
+
+      .caption-text {
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        font-weight: 500;
+        line-height: 1.4;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 2rem 2rem;
+      }
+
+      .modal-actions app-touch-button {
+        flex: 1;
+      }
+
+      /* Modal de eliminación */
+      .delete-warning {
+        text-align: center;
+      }
+
+      .warning-content {
+        padding: 1rem;
+      }
+
+      .warning-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #dc2626;
+        margin-bottom: 1rem;
+      }
+
+      .warning-description {
+        font-size: 1rem;
+        color: var(--gray-600);
+        margin-bottom: 1.5rem;
+      }
+
+      .part-to-delete {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #fef2f2;
+        border: 2px solid #fecaca;
+        border-radius: var(--border-radius-md);
+      }
+
+      .part-preview {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .preview-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+      }
+
+      .preview-info {
+        flex: 1;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .preview-name {
+        font-size: 1rem;
+        font-weight: bold;
+        color: var(--gray-900);
+      }
+
+      .preview-sap {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+      }
+
+      .warning-notice {
+        font-size: 0.875rem;
+        color: #dc2626;
+        font-weight: 600;
+        margin-top: 1rem;
+      }
+
+      /* Notificación de éxito */
+      .success-notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1100;
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        border: 2px solid #059669;
+        max-width: 400px;
+      }
+
+      .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .notification-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .notification-text {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
       .loading-text {
         color: var(--gray-600);
         font-size: 1.125rem;
+      }
+
+      /* Animaciones */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      .animate-slideInRight {
+        animation: slideInRight 0.5s ease-out;
       }
 
       /* Responsive */
@@ -480,6 +1106,33 @@ import { Part, PartCategory, Machine } from '../../core/models';
         .secondary-actions {
           flex-direction: column;
         }
+
+        .modal-container {
+          margin: 1rem;
+          max-height: calc(100vh - 2rem);
+        }
+
+        .modal-header,
+        .modal-content,
+        .modal-actions {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+
+        .detail-grid {
+          gap: 1rem;
+        }
+
+        .modal-actions {
+          flex-direction: column;
+        }
+
+        .success-notification {
+          top: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
       }
 
       @media (max-width: 480px) {
@@ -498,6 +1151,14 @@ import { Part, PartCategory, Machine } from '../../core/models';
         .part-description {
           font-size: 1.125rem;
         }
+
+        .modal-title h3 {
+          font-size: 1.25rem;
+        }
+
+        .modal-description {
+          font-size: 1.25rem;
+        }
       }
     `,
   ],
@@ -510,6 +1171,17 @@ export class PartListComponent implements OnInit {
   filteredParts: Part[] = [];
   selectedCategory: 'all' | PartCategory = 'all';
   isLoading = true;
+
+  // Modal states
+  showDetailModal = false;
+  showDeleteModal = false;
+  selectedPart: Part | null = null;
+  partToDelete: Part | null = null;
+  isDeleting = false;
+
+  // Notificación
+  showSuccessNotification = false;
+  successMessage = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -672,6 +1344,68 @@ export class PartListComponent implements OnInit {
     event.target.style.display = 'none';
   }
 
+  // Modal de detalle
+  viewPartDetail(part: Part) {
+    console.log('👁️ View part detail:', part.description);
+    this.selectedPart = part;
+    this.showDetailModal = true;
+  }
+
+  closeDetailModal() {
+    this.showDetailModal = false;
+    this.selectedPart = null;
+  }
+
+  editPartFromModal() {
+    if (this.selectedPart) {
+      this.closeDetailModal();
+      this.editPart(this.selectedPart);
+    }
+  }
+
+  // Modal de eliminación
+  showDeleteConfirm(part: Part) {
+    this.partToDelete = part;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.partToDelete = null;
+    this.isDeleting = false;
+  }
+
+  confirmDelete() {
+    if (!this.partToDelete) return;
+
+    this.isDeleting = true;
+    const partName = this.partToDelete.description;
+
+    this.partService.deletePart(this.partToDelete.id!).subscribe({
+      next: () => {
+        console.log('🗑️ Part deleted:', partName);
+        this.closeDeleteModal();
+        this.showSuccess(`Refacción "${partName}" eliminada exitosamente`);
+        this.loadParts();
+      },
+      error: (error) => {
+        console.error('Error deleting part:', error);
+        this.isDeleting = false;
+        this.showSuccess('Error al eliminar la refacción. Intenta nuevamente.');
+      },
+    });
+  }
+
+  // Notificación de éxito
+  showSuccess(message: string) {
+    this.successMessage = message;
+    this.showSuccessNotification = true;
+
+    setTimeout(() => {
+      this.showSuccessNotification = false;
+    }, 4000);
+  }
+
   goBack() {
     this.router.navigate([
       '/machines',
@@ -695,19 +1429,6 @@ export class PartListComponent implements OnInit {
     ]);
   }
 
-  viewPartDetail(part: Part) {
-    console.log('👁️ View part detail:', part.description);
-    alert(
-      `📋 Detalle de Refacción:\n\n` +
-        `📄 Descripción: ${part.description}\n` +
-        `📦 SAP: ${part.sapNumber}\n` +
-        `🔖 Part Number: ${part.partNumber}\n` +
-        `📂 Categoría: ${this.getCategoryLabel(part.category)}\n` +
-        `📍 Ubicación: ${part.location}\n` +
-        `🔧 Máquina: ${this.machine?.name}`
-    );
-  }
-
   editPart(part: Part) {
     console.log('✏️ Edit part:', part.description);
     this.router.navigate([
@@ -719,25 +1440,5 @@ export class PartListComponent implements OnInit {
       part.id,
       'edit',
     ]);
-  }
-
-  deletePart(part: Part) {
-    if (
-      confirm(
-        `¿Estás seguro de eliminar la refacción "${part.description}"?\n\nEsta acción no se puede deshacer.`
-      )
-    ) {
-      this.partService.deletePart(part.id!).subscribe({
-        next: () => {
-          console.log('🗑️ Part deleted:', part.description);
-          alert(`Refacción "${part.description}" eliminada exitosamente`);
-          this.loadParts();
-        },
-        error: (error) => {
-          console.error('Error deleting part:', error);
-          alert('Error al eliminar la refacción. Intenta nuevamente.');
-        },
-      });
-    }
   }
 }

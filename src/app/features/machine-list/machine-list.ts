@@ -156,6 +156,52 @@ import { Machine, PartCategory } from '../../core/models';
           <span class="loading-text">Cargando máquinas...</span>
         </div>
       </div>
+
+      <!-- Notificaciones -->
+      <div
+        *ngIf="showNotification"
+        class="notification"
+        [class]="notificationType + '-notification'"
+      >
+        <div class="notification-content">
+          <span class="notification-icon">{{ getNotificationIcon() }}</span>
+          <span class="notification-text">{{ notificationMessage }}</span>
+        </div>
+      </div>
+
+      <!-- Modal de confirmación -->
+      <div *ngIf="showConfirmation" class="confirmation-overlay">
+        <div class="confirmation-modal">
+          <div class="confirmation-header">
+            <h3 class="confirmation-title">{{ confirmationTitle }}</h3>
+            <span class="confirmation-icon">⚠️</span>
+          </div>
+
+          <div class="confirmation-content">
+            <p class="confirmation-message">{{ confirmationMessage }}</p>
+          </div>
+
+          <div class="confirmation-actions">
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              (clicked)="hideConfirmation()"
+              [fullWidth]="true"
+            >
+              Cancelar
+            </app-touch-button>
+
+            <app-touch-button
+              variant="danger"
+              size="lg"
+              (clicked)="confirmDelete()"
+              [fullWidth]="true"
+            >
+              Eliminar
+            </app-touch-button>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [
@@ -428,6 +474,167 @@ import { Machine, PartCategory } from '../../core/models';
           padding: 1rem;
         }
       }
+
+      /* Notificaciones */
+      .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1100;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        max-width: 400px;
+        animation: slideInRight 0.5s ease-out;
+      }
+
+      .success-notification {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        border: 2px solid #059669;
+      }
+
+      .error-notification {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        border: 2px solid #dc2626;
+      }
+
+      .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .notification-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .notification-text {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+
+      /* Modal de confirmación */
+      .confirmation-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .confirmation-modal {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow: hidden;
+        animation: scaleIn 0.3s ease-out;
+      }
+
+      .confirmation-header {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+      }
+
+      .confirmation-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0;
+      }
+
+      .confirmation-icon {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 2rem;
+      }
+
+      .confirmation-content {
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .confirmation-message {
+        font-size: 1.125rem;
+        color: var(--gray-700);
+        line-height: 1.6;
+        margin: 0;
+        white-space: pre-line;
+      }
+
+      .confirmation-actions {
+        padding: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        background: var(--gray-50);
+      }
+
+      /* Animaciones */
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Responsive para notificaciones y modales */
+      @media (max-width: 768px) {
+        .notification {
+          top: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
+
+        .confirmation-modal {
+          width: 95%;
+          margin: 1rem;
+        }
+
+        .confirmation-actions {
+          flex-direction: column;
+        }
+      }
     `,
   ],
 })
@@ -436,6 +643,17 @@ export class MachineListComponent implements OnInit {
   machines: Machine[] = [];
   machineStats: { [key: number]: { [key in PartCategory]: number } } = {};
   isLoading = true;
+
+  // Variables para notificaciones
+  showNotification = false;
+  notificationMessage = '';
+  notificationType: 'success' | 'error' = 'success';
+
+  // Variables para confirmación
+  showConfirmation = false;
+  confirmationMessage = '';
+  confirmationTitle = '';
+  machineToDelete: Machine | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -517,35 +735,85 @@ export class MachineListComponent implements OnInit {
 
   addMachine() {
     console.log('➕ Add new machine to:', this.selectedArea);
-    alert(
-      `Funcionalidad de agregar máquina en ${this.selectedArea} pendiente de implementar`
-    );
+    this.router.navigate(['/machines', this.selectedArea, 'add']);
+  }
+
+  // Métodos para notificaciones
+  showNotificationMessage(
+    message: string,
+    type: 'success' | 'error' = 'success'
+  ) {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    this.showNotification = true;
+
+    // Auto ocultar después de 4 segundos
+    setTimeout(() => {
+      this.hideNotification();
+    }, 4000);
+  }
+
+  hideNotification() {
+    this.showNotification = false;
+  }
+
+  getNotificationIcon(): string {
+    return this.notificationType === 'success' ? '✅' : '❌';
+  }
+
+  // Métodos para confirmación
+  showConfirmationDialog(title: string, message: string, machine: Machine) {
+    this.confirmationTitle = title;
+    this.confirmationMessage = message;
+    this.machineToDelete = machine;
+    this.showConfirmation = true;
+  }
+
+  hideConfirmation() {
+    this.showConfirmation = false;
+    this.machineToDelete = null;
+  }
+
+  confirmDelete() {
+    if (this.machineToDelete) {
+      this.performDelete(this.machineToDelete);
+      this.hideConfirmation();
+    }
   }
 
   editMachine(machine: Machine) {
     console.log('✏️ Edit machine:', machine.name);
-    alert(
-      `Editar máquina: ${machine.name}\n\nFuncionalidad pendiente de implementar`
+    this.showNotificationMessage(
+      `Editar máquina: ${machine.name} - Funcionalidad pendiente de implementar`,
+      'error'
     );
   }
 
   deleteMachine(machine: Machine) {
-    if (
-      confirm(
-        `¿Estás seguro de eliminar la máquina "${machine.name}"?\n\nEsta acción también eliminará todas sus refacciones asociadas.`
-      )
-    ) {
-      this.machineService.deleteMachine(machine.id!).subscribe({
-        next: () => {
-          console.log('🗑️ Machine deleted:', machine.name);
-          alert(`Máquina "${machine.name}" eliminada exitosamente`);
-          this.loadMachines();
-        },
-        error: (error) => {
-          console.error('Error deleting machine:', error);
-          alert('Error al eliminar la máquina. Intenta nuevamente.');
-        },
-      });
-    }
+    this.showConfirmationDialog(
+      'Confirmar Eliminación',
+      `¿Estás seguro de eliminar la máquina "${machine.name}"?\n\nEsta acción también eliminará todas sus refacciones asociadas.`,
+      machine
+    );
+  }
+
+  performDelete(machine: Machine) {
+    this.machineService.deleteMachine(machine.id!).subscribe({
+      next: () => {
+        console.log('🗑️ Machine deleted:', machine.name);
+        this.showNotificationMessage(
+          `Máquina "${machine.name}" eliminada exitosamente`,
+          'success'
+        );
+        this.loadMachines();
+      },
+      error: (error) => {
+        console.error('Error deleting machine:', error);
+        this.showNotificationMessage(
+          'Error al eliminar la máquina. Intenta nuevamente.',
+          'error'
+        );
+      },
+    });
   }
 }

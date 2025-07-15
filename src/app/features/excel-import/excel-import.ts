@@ -29,594 +29,1048 @@ interface ImportResult {
   standalone: true,
   imports: [CommonModule, FormsModule, TouchButtonComponent],
   template: `
-    <div class="excel-import-container">
-      <!-- Header -->
-      <div class="professional-card mb-8">
-        <div class="professional-content">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <app-touch-button
-                variant="secondary"
-                size="md"
-                icon="←"
-                (clicked)="goBack()"
-                class="mr-6"
-              >
-                Atrás
-              </app-touch-button>
+    <div class="app-container">
+      <!-- Header profesional -->
+      <div class="professional-header">
+        <div class="header-content">
+          <div class="header-left">
+            <app-touch-button
+              variant="secondary"
+              size="md"
+              icon="←"
+              (clicked)="goBack()"
+              class="back-btn"
+            >
+              Atrás
+            </app-touch-button>
 
-              <div>
-                <h2 class="text-4xl font-bold text-gray-900 mb-2">
-                  📊 Importación de Excel
-                </h2>
-                <p class="text-xl text-gray-600">
-                  Importar máquinas y refacciones desde archivos Excel
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Instrucciones -->
-      <div class="professional-card mb-8">
-        <div class="professional-content">
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">
-            📋 Tu Excel es Compatible
-          </h3>
-
-          <div class="format-notes">
-            <p class="text-sm text-gray-600 mb-2">
-              <strong>✅ Detección automática:</strong>
-            </p>
-            <ul class="text-sm text-gray-600 space-y-1">
-              <li>• <strong>SAP:</strong> Detectado automáticamente</li>
-              <li>• <strong>#PARTE:</strong> Se usará como Part Number</li>
-              <li>
-                • <strong>DESCRIPCION:</strong> Descripción de la refacción
-              </li>
-              <li>• <strong>UBICACION:</strong> Ubicación física</li>
-              <li>
-                • <strong>Categoría:</strong> Se detectará por hoja/posición
-              </li>
-              <li>
-                • <strong>Máquinas:</strong> Se crearán automáticamente al
-                detectar nombres en descripciones
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Controles globales -->
-      <div class="global-controls professional-card mb-8">
-        <div class="professional-content">
-          <h3 class="text-xl font-bold text-gray-900 mb-6">
-            ⚙️ Configuración de Importación
-          </h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Selector de área para refacciones -->
-            <div class="control-group">
-              <label class="form-label">
-                🏭 Área por defecto para nuevas máquinas
-              </label>
-              <select [(ngModel)]="selectedAreaForParts" class="form-select">
-                <option value="costura">🧵 Área de Costura</option>
-                <option value="corte">✂️ Área de Corte</option>
-              </select>
-              <p class="text-sm text-gray-600 mt-2">
-                Las máquinas detectadas en las refacciones se crearán en esta
-                área
-              </p>
-            </div>
-
-            <!-- Botón de limpieza -->
-            <div class="control-group">
-              <label class="form-label"> 🗑️ Limpiar datos importados </label>
-              <app-touch-button
-                variant="danger"
-                size="lg"
-                icon="🗑️"
-                [fullWidth]="true"
-                [disabled]="isDeleting"
-                [loading]="isDeleting"
-                (clicked)="clearAllImports()"
-              >
-                {{
-                  isDeleting
-                    ? 'Eliminando...'
-                    : 'Borrar Todas las Importaciones'
-                }}
-              </app-touch-button>
-              <p class="text-sm text-gray-600 mt-2">
-                ⚠️ Elimina todas las máquinas y refacciones del sistema
+            <div class="header-text">
+              <h2 class="header-title">📊 Importación de Excel</h2>
+              <p class="header-subtitle">
+                Importar máquinas y refacciones desde archivos Excel
               </p>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Área de importación -->
-      <div class="import-section">
-        <div class="professional-grid grid-2">
-          <!-- Importar Refacciones -->
-          <div class="import-card professional-card">
-            <div class="professional-content">
-              <div class="import-header mb-6">
-                <div class="import-icon bg-green-100 text-green-600 mb-4">
-                  <svg
-                    class="w-12 h-12"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"
-                    ></path>
-                    <path d="M14 2v6h6"></path>
-                  </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">
-                  Importar Refacciones
-                </h3>
-                <p class="text-gray-600">
-                  Cargar archivo Excel con listado de refacciones
-                </p>
+          <!-- Estadísticas del sistema -->
+          <div class="system-stats">
+            <div class="stats-item">
+              <div class="stats-icon">🔧</div>
+              <div class="stats-info">
+                <div class="stats-number">{{ machineCount }}</div>
+                <div class="stats-label">Máquinas</div>
               </div>
-
-              <div
-                class="upload-area"
-                [class.dragover]="isDragOverParts"
-                (dragover)="onDragOver($event, 'parts')"
-                (dragleave)="onDragLeave('parts')"
-                (drop)="onDrop($event, 'parts')"
-              >
-                <div class="upload-content">
-                  <svg
-                    class="upload-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    ></path>
-                  </svg>
-                  <p class="upload-text">
-                    Arrastra tu archivo Excel aquí o
-                    <button
-                      class="upload-link"
-                      (click)="triggerFileInput('parts')"
-                    >
-                      selecciona archivo
-                    </button>
-                  </p>
-                  <p class="upload-hint">Solo archivos .xlsx, .xls</p>
-                </div>
-              </div>
-
-              <input
-                #partsFileInput
-                type="file"
-                accept=".xlsx,.xls"
-                (change)="onFileSelected($event, 'parts')"
-                class="hidden"
-              />
-
-              <div *ngIf="partsFile" class="file-selected mb-4">
-                <div
-                  class="flex items-center justify-between p-3 bg-green-50 rounded-lg"
-                >
-                  <div class="flex items-center">
-                    <svg
-                      class="w-5 h-5 text-green-600 mr-2"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M4 3C2.9 3 2 3.9 2 5v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H4z"
-                      ></path>
-                    </svg>
-                    <span class="text-sm font-medium text-green-900">{{
-                      partsFile.name
-                    }}</span>
-                  </div>
-                  <button
-                    (click)="clearFile('parts')"
-                    class="text-green-600 hover:text-green-800"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <app-touch-button
-                variant="success"
-                size="lg"
-                [fullWidth]="true"
-                [disabled]="!partsFile || isProcessing"
-                [loading]="isProcessing && processingType === 'parts'"
-                (clicked)="importParts()"
-              >
-                {{
-                  isProcessing && processingType === 'parts'
-                    ? 'Procesando...'
-                    : 'Importar Refacciones'
-                }}
-              </app-touch-button>
             </div>
-          </div>
-
-          <!-- Importar Máquinas -->
-          <div class="import-card professional-card">
-            <div class="professional-content">
-              <div class="import-header mb-6">
-                <div class="import-icon bg-blue-100 text-blue-600 mb-4">
-                  <svg
-                    class="w-12 h-12"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"
-                    ></path>
-                    <path d="M14 2v6h6"></path>
-                  </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">
-                  Importar Máquinas
-                </h3>
-                <p class="text-gray-600">
-                  Cargar archivo Excel con listado de máquinas (Opcional)
-                </p>
+            <div class="stats-item">
+              <div class="stats-icon">📦</div>
+              <div class="stats-info">
+                <div class="stats-number">{{ partCount }}</div>
+                <div class="stats-label">Refacciones</div>
               </div>
-
-              <div
-                class="upload-area"
-                [class.dragover]="isDragOverMachines"
-                (dragover)="onDragOver($event, 'machines')"
-                (dragleave)="onDragLeave('machines')"
-                (drop)="onDrop($event, 'machines')"
-              >
-                <div class="upload-content">
-                  <svg
-                    class="upload-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    ></path>
-                  </svg>
-                  <p class="upload-text">
-                    Arrastra tu archivo Excel aquí o
-                    <button
-                      class="upload-link"
-                      (click)="triggerFileInput('machines')"
-                    >
-                      selecciona archivo
-                    </button>
-                  </p>
-                  <p class="upload-hint">
-                    Solo archivos .xlsx, .xls (Columnas: Nombre, Area)
-                  </p>
-                </div>
-              </div>
-
-              <input
-                #machinesFileInput
-                type="file"
-                accept=".xlsx,.xls"
-                (change)="onFileSelected($event, 'machines')"
-                class="hidden"
-              />
-
-              <div *ngIf="machinesFile" class="file-selected mb-4">
-                <div
-                  class="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
-                >
-                  <div class="flex items-center">
-                    <svg
-                      class="w-5 h-5 text-blue-600 mr-2"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M4 3C2.9 3 2 3.9 2 5v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H4z"
-                      ></path>
-                    </svg>
-                    <span class="text-sm font-medium text-blue-900">{{
-                      machinesFile.name
-                    }}</span>
-                  </div>
-                  <button
-                    (click)="clearFile('machines')"
-                    class="text-blue-600 hover:text-blue-800"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <app-touch-button
-                variant="primary"
-                size="lg"
-                [fullWidth]="true"
-                [disabled]="!machinesFile || isProcessing"
-                [loading]="isProcessing && processingType === 'machines'"
-                (clicked)="importMachines()"
-              >
-                {{
-                  isProcessing && processingType === 'machines'
-                    ? 'Procesando...'
-                    : 'Importar Máquinas'
-                }}
-              </app-touch-button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Resultados de importación -->
-      <div *ngIf="importResults" class="results-section professional-card mt-8">
-        <div class="professional-content">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">
-            📈 Resultados de Importación
-          </h3>
+      <div class="content-area">
+        <!-- Instrucciones -->
+        <div class="instructions-section">
+          <div class="professional-card animate-fadeInUp">
+            <div class="professional-content">
+              <h3 class="section-title">📋 Tu Excel es Compatible</h3>
 
-          <div class="results-grid">
-            <div class="result-item success">
-              <div class="result-number">{{ importResults.success }}</div>
-              <div class="result-label">Registros Importados</div>
-            </div>
-
-            <div
-              class="result-item warning"
-              *ngIf="importResults.duplicates > 0"
-            >
-              <div class="result-number">{{ importResults.duplicates }}</div>
-              <div class="result-label">Duplicados Omitidos</div>
-            </div>
-
-            <div
-              class="result-item error"
-              *ngIf="importResults.errors.length > 0"
-            >
-              <div class="result-number">{{ importResults.errors.length }}</div>
-              <div class="result-label">Errores</div>
+              <div class="format-grid">
+                <div class="format-item">
+                  <div class="format-icon">✅</div>
+                  <div class="format-content">
+                    <h4 class="format-title">Detección Automática</h4>
+                    <ul class="format-list">
+                      <li><strong>SAP:</strong> Detectado automáticamente</li>
+                      <li>
+                        <strong>#PARTE:</strong> Se usará como Part Number
+                      </li>
+                      <li>
+                        <strong>DESCRIPCION:</strong> Descripción de la
+                        refacción
+                      </li>
+                      <li><strong>UBICACION:</strong> Ubicación física</li>
+                      <li>
+                        <strong>Categoría:</strong> Se detectará por
+                        hoja/posición
+                      </li>
+                      <li>
+                        <strong>Máquinas:</strong> Se crearán automáticamente
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
+        <!-- Controles globales -->
+        <div class="controls-section">
           <div
-            *ngIf="importResults.errors.length > 0"
-            class="errors-section mt-6"
+            class="professional-card animate-fadeInUp"
+            style="animation-delay: 0.1s"
           >
-            <h4 class="text-lg font-semibold text-red-600 mb-3">
-              ⚠️ Errores Encontrados
-            </h4>
-            <div class="errors-list">
+            <div class="professional-content">
+              <h3 class="section-title">⚙️ Configuración de Importación</h3>
+
+              <div class="controls-grid">
+                <!-- Selector de área -->
+                <div class="control-card area-control">
+                  <div class="control-header">
+                    <div class="control-icon">🏭</div>
+                    <div class="control-title">Área por Defecto</div>
+                  </div>
+                  <select
+                    [(ngModel)]="selectedAreaForParts"
+                    class="professional-input"
+                  >
+                    <option value="costura">🧵 Área de Costura</option>
+                    <option value="corte">✂️ Área de Corte</option>
+                  </select>
+                  <p class="control-hint">
+                    Las máquinas detectadas en las refacciones se crearán en
+                    esta área
+                  </p>
+                </div>
+
+                <!-- Botón de limpieza -->
+                <div class="control-card cleanup-control">
+                  <div class="control-header">
+                    <div class="control-icon danger-icon">🗑️</div>
+                    <div class="control-title">Limpiar Sistema</div>
+                  </div>
+                  <app-touch-button
+                    variant="danger"
+                    size="lg"
+                    icon="🗑️"
+                    [fullWidth]="true"
+                    [disabled]="isDeleting"
+                    [loading]="isDeleting"
+                    (clicked)="showDeleteConfirmation()"
+                  >
+                    {{ isDeleting ? 'Eliminando...' : 'Borrar Todo' }}
+                  </app-touch-button>
+                  <p class="control-hint danger-hint">
+                    ⚠️ Elimina todas las máquinas y refacciones del sistema
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Área de importación -->
+        <div class="import-section">
+          <div class="professional-grid grid-2">
+            <!-- Importar Refacciones -->
+            <div
+              class="import-card professional-card parts-import animate-fadeInUp"
+              style="animation-delay: 0.2s"
+            >
+              <div class="professional-content">
+                <div class="import-header">
+                  <div class="import-icon-container parts-icon">
+                    <span class="import-emoji">📦</span>
+                  </div>
+                  <h3 class="import-title">Importar Refacciones</h3>
+                  <p class="import-subtitle">
+                    Cargar archivo Excel con listado de refacciones
+                  </p>
+                </div>
+
+                <div
+                  class="upload-area"
+                  [class.dragover]="isDragOverParts"
+                  [class.has-file]="partsFile"
+                  (dragover)="onDragOver($event, 'parts')"
+                  (dragleave)="onDragLeave('parts')"
+                  (drop)="onDrop($event, 'parts')"
+                  (click)="triggerFileInput('parts')"
+                >
+                  <div class="upload-content" *ngIf="!partsFile">
+                    <div class="upload-icon">
+                      <svg
+                        class="w-12 h-12"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <p class="upload-text">
+                      Arrastra tu archivo Excel aquí o
+                      <span class="upload-link">selecciona archivo</span>
+                    </p>
+                    <p class="upload-hint">Solo archivos .xlsx, .xls</p>
+                  </div>
+
+                  <div class="file-preview" *ngIf="partsFile">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                      <div class="file-name">{{ partsFile.name }}</div>
+                      <div class="file-size">{{ getFileSize(partsFile) }}</div>
+                    </div>
+                    <button
+                      (click)="clearFile('parts'); $event.stopPropagation()"
+                      class="file-remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  #partsFileInput
+                  type="file"
+                  accept=".xlsx,.xls"
+                  (change)="onFileSelected($event, 'parts')"
+                  class="hidden"
+                />
+
+                <app-touch-button
+                  variant="success"
+                  size="xl"
+                  icon="📦"
+                  [fullWidth]="true"
+                  [disabled]="!partsFile || isProcessing"
+                  [loading]="isProcessing && processingType === 'parts'"
+                  (clicked)="importParts()"
+                  class="import-action-btn"
+                >
+                  {{
+                    isProcessing && processingType === 'parts'
+                      ? 'Procesando...'
+                      : 'IMPORTAR REFACCIONES'
+                  }}
+                </app-touch-button>
+              </div>
+            </div>
+
+            <!-- Importar Máquinas -->
+            <div
+              class="import-card professional-card machines-import animate-fadeInUp"
+              style="animation-delay: 0.3s"
+            >
+              <div class="professional-content">
+                <div class="import-header">
+                  <div class="import-icon-container machines-icon">
+                    <span class="import-emoji">🔧</span>
+                  </div>
+                  <h3 class="import-title">Importar Máquinas</h3>
+                  <p class="import-subtitle">
+                    Cargar archivo Excel con listado de máquinas (Opcional)
+                  </p>
+                </div>
+
+                <div
+                  class="upload-area"
+                  [class.dragover]="isDragOverMachines"
+                  [class.has-file]="machinesFile"
+                  (dragover)="onDragOver($event, 'machines')"
+                  (dragleave)="onDragLeave('machines')"
+                  (drop)="onDrop($event, 'machines')"
+                  (click)="triggerFileInput('machines')"
+                >
+                  <div class="upload-content" *ngIf="!machinesFile">
+                    <div class="upload-icon">
+                      <svg
+                        class="w-12 h-12"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <p class="upload-text">
+                      Arrastra tu archivo Excel aquí o
+                      <span class="upload-link">selecciona archivo</span>
+                    </p>
+                    <p class="upload-hint">Columnas: Nombre, Area</p>
+                  </div>
+
+                  <div class="file-preview" *ngIf="machinesFile">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                      <div class="file-name">{{ machinesFile.name }}</div>
+                      <div class="file-size">
+                        {{ getFileSize(machinesFile) }}
+                      </div>
+                    </div>
+                    <button
+                      (click)="clearFile('machines'); $event.stopPropagation()"
+                      class="file-remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  #machinesFileInput
+                  type="file"
+                  accept=".xlsx,.xls"
+                  (change)="onFileSelected($event, 'machines')"
+                  class="hidden"
+                />
+
+                <app-touch-button
+                  variant="primary"
+                  size="xl"
+                  icon="🔧"
+                  [fullWidth]="true"
+                  [disabled]="!machinesFile || isProcessing"
+                  [loading]="isProcessing && processingType === 'machines'"
+                  (clicked)="importMachines()"
+                  class="import-action-btn"
+                >
+                  {{
+                    isProcessing && processingType === 'machines'
+                      ? 'Procesando...'
+                      : 'IMPORTAR MÁQUINAS'
+                  }}
+                </app-touch-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultados de importación -->
+        <div *ngIf="importResults" class="results-section">
+          <div class="professional-card animate-fadeInUp results-card">
+            <div class="professional-content">
+              <h3 class="section-title">📈 Resultados de Importación</h3>
+
+              <div class="results-grid">
+                <div class="result-card success-card">
+                  <div class="result-icon">✅</div>
+                  <div class="result-content">
+                    <div class="result-number">{{ importResults.success }}</div>
+                    <div class="result-label">Registros Importados</div>
+                  </div>
+                </div>
+
+                <div
+                  class="result-card warning-card"
+                  *ngIf="importResults.duplicates > 0"
+                >
+                  <div class="result-icon">⚠️</div>
+                  <div class="result-content">
+                    <div class="result-number">
+                      {{ importResults.duplicates }}
+                    </div>
+                    <div class="result-label">Duplicados Omitidos</div>
+                  </div>
+                </div>
+
+                <div
+                  class="result-card error-card"
+                  *ngIf="importResults.errors.length > 0"
+                >
+                  <div class="result-icon">❌</div>
+                  <div class="result-content">
+                    <div class="result-number">
+                      {{ importResults.errors.length }}
+                    </div>
+                    <div class="result-label">Errores</div>
+                  </div>
+                </div>
+              </div>
+
               <div
-                *ngFor="let error of importResults.errors"
-                class="error-item"
+                *ngIf="importResults.errors.length > 0"
+                class="errors-section"
               >
-                {{ error }}
+                <h4 class="errors-title">⚠️ Errores Encontrados</h4>
+                <div class="errors-container">
+                  <div
+                    *ngFor="let error of importResults.errors; let i = index"
+                    class="error-item"
+                    [style.animation-delay]="i * 0.05 + 's'"
+                  >
+                    <span class="error-icon">❌</span>
+                    <span class="error-text">{{ error }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="results-actions">
+                <app-touch-button
+                  variant="primary"
+                  size="lg"
+                  icon="🔄"
+                  (clicked)="resetImport()"
+                >
+                  Nueva Importación
+                </app-touch-button>
+
+                <app-touch-button
+                  variant="success"
+                  size="lg"
+                  icon="🔍"
+                  (clicked)="goToSearch()"
+                >
+                  Buscar Refacciones
+                </app-touch-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de confirmación de eliminación -->
+      <div
+        *ngIf="showDeleteModal"
+        class="modal-overlay"
+        (click)="closeDeleteModal()"
+      >
+        <div
+          class="modal-container delete-modal"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="modal-header danger-header">
+            <div class="modal-title">
+              <span class="modal-icon danger-icon">⚠️</span>
+              <h3>Confirmar Eliminación Total</h3>
+            </div>
+            <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+          </div>
+
+          <div class="modal-content">
+            <div class="delete-warning">
+              <div class="warning-content">
+                <h4 class="warning-title">
+                  ¿Estás seguro de eliminar TODO el sistema?
+                </h4>
+                <p class="warning-description">
+                  Esta acción eliminará permanentemente:
+                </p>
+
+                <div class="deletion-items">
+                  <div class="deletion-item">
+                    <span class="deletion-icon">🔧</span>
+                    <div class="deletion-info">
+                      <span class="deletion-count">{{ machineCount }}</span>
+                      <span class="deletion-type">Máquinas</span>
+                    </div>
+                  </div>
+                  <div class="deletion-item">
+                    <span class="deletion-icon">📦</span>
+                    <div class="deletion-info">
+                      <span class="deletion-count">{{ partCount }}</span>
+                      <span class="deletion-type">Refacciones</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="confirmation-input">
+                  <label class="confirmation-label">
+                    Para confirmar, escribe: <strong>ELIMINAR</strong>
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="confirmationText"
+                    placeholder="Escribe ELIMINAR"
+                    class="confirmation-field"
+                    (input)="onConfirmationChange()"
+                  />
+                </div>
+
+                <p class="warning-notice">
+                  <strong>⚠️ Esta acción no se puede deshacer.</strong>
+                </p>
               </div>
             </div>
           </div>
 
-          <div class="mt-6">
+          <div class="modal-actions">
+            <app-touch-button
+              variant="danger"
+              size="lg"
+              icon="🗑️"
+              [disabled]="!canConfirmDelete || isDeleting"
+              [loading]="isDeleting"
+              (clicked)="confirmDeleteAll()"
+            >
+              {{ isDeleting ? 'Eliminando...' : 'Sí, Eliminar Todo' }}
+            </app-touch-button>
+
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              icon="✕"
+              (clicked)="closeDeleteModal()"
+              [disabled]="isDeleting"
+            >
+              Cancelar
+            </app-touch-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de resultados de importación -->
+      <div
+        *ngIf="showResultsModal"
+        class="modal-overlay"
+        (click)="closeResultsModal()"
+      >
+        <div
+          class="modal-container results-modal"
+          (click)="$event.stopPropagation()"
+        >
+          <div
+            class="modal-header"
+            [class]="importResults?.success ? 'success-header' : 'error-header'"
+          >
+            <div class="modal-title">
+              <span class="modal-icon">{{
+                importResults?.success ? '✅' : '❌'
+              }}</span>
+              <h3>{{ getResultsTitle() }}</h3>
+            </div>
+            <button class="modal-close" (click)="closeResultsModal()">✕</button>
+          </div>
+
+          <div class="modal-content" *ngIf="importResults">
+            <div class="results-summary">
+              <div class="summary-grid">
+                <div class="summary-item success-item">
+                  <div class="summary-icon">✅</div>
+                  <div class="summary-info">
+                    <div class="summary-number">
+                      {{ importResults.success }}
+                    </div>
+                    <div class="summary-label">Importadas</div>
+                  </div>
+                </div>
+
+                <div
+                  class="summary-item warning-item"
+                  *ngIf="importResults.duplicates > 0"
+                >
+                  <div class="summary-icon">⚠️</div>
+                  <div class="summary-info">
+                    <div class="summary-number">
+                      {{ importResults.duplicates }}
+                    </div>
+                    <div class="summary-label">Duplicadas</div>
+                  </div>
+                </div>
+
+                <div
+                  class="summary-item error-item"
+                  *ngIf="importResults.errors.length > 0"
+                >
+                  <div class="summary-icon">❌</div>
+                  <div class="summary-info">
+                    <div class="summary-number">
+                      {{ importResults.errors.length }}
+                    </div>
+                    <div class="summary-label">Errores</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="summary-message">
+                <p>{{ getResultsMessage() }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
             <app-touch-button
               variant="primary"
               size="lg"
-              (clicked)="resetImport()"
+              icon="👍"
+              (clicked)="closeResultsModal()"
             >
-              Realizar Nueva Importación
+              Entendido
+            </app-touch-button>
+
+            <app-touch-button
+              variant="success"
+              size="lg"
+              icon="🔍"
+              (clicked)="goToSearchFromModal()"
+              *ngIf="importResults?.success"
+            >
+              Ver Refacciones
             </app-touch-button>
           </div>
+        </div>
+      </div>
+
+      <!-- Notificaciones -->
+      <div
+        *ngIf="showNotification"
+        class="notification"
+        [class]="notificationType + '-notification'"
+      >
+        <div class="notification-content">
+          <span class="notification-icon">{{ getNotificationIcon() }}</span>
+          <span class="notification-text">{{ notificationMessage }}</span>
         </div>
       </div>
     </div>
   `,
   styles: [
     `
-      .excel-import-container {
-        padding: 2rem 0;
-        min-height: 70vh;
+      .app-container {
+        min-height: 100vh;
+        background: var(--gray-50);
+        position: relative;
       }
 
-      .control-group {
-        padding: 1.5rem;
-        background: #f8fafc;
-        border-radius: 0.75rem;
-        border: 2px solid #e2e8f0;
+      .professional-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-bottom: 3px solid var(--primary-700);
       }
 
-      .form-label {
-        display: block;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.75rem;
-      }
-
-      .form-select {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        border: 2px solid #d1d5db;
-        border-radius: 0.5rem;
-        background: white;
-        transition: all 0.2s ease;
-        margin-bottom: 0.5rem;
-      }
-
-      .form-select:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      }
-
-      .global-controls {
-        border-left: 4px solid #8b5cf6;
-      }
-
-      .format-notes {
-        padding: 1rem;
-        background: white;
-        border-radius: 0.5rem;
-        border: 1px solid #d1d5db;
-      }
-
-      .import-section {
-        margin: 2rem 0;
-      }
-
-      .import-card {
-        border-left: 4px solid transparent;
-      }
-
-      .import-card:nth-child(1) {
-        border-left-color: #10b981;
-      }
-
-      .import-card:nth-child(2) {
-        border-left-color: #3b82f6;
-      }
-
-      .import-icon {
+      .header-content {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        width: 4rem;
-        height: 4rem;
-        border-radius: 0.75rem;
+        max-width: 1400px;
         margin: 0 auto;
       }
 
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .header-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 0 0.25rem 0;
+      }
+
+      .header-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .system-stats {
+        display: flex;
+        gap: 2rem;
+      }
+
+      .stats-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius-md);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      .stats-icon {
+        font-size: 1.5rem;
+      }
+
+      .stats-number {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 0.125rem;
+      }
+
+      .stats-label {
+        font-size: 0.75rem;
+        opacity: 0.9;
+      }
+
+      .content-area {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin-bottom: 1.5rem;
+      }
+
+      /* Instrucciones */
+      .instructions-section {
+        margin-bottom: 2rem;
+      }
+
+      .format-grid {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .format-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-200);
+      }
+
+      .format-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+      }
+
+      .format-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin-bottom: 0.75rem;
+      }
+
+      .format-list {
+        margin: 0;
+        padding-left: 1rem;
+        list-style: none;
+      }
+
+      .format-list li {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-bottom: 0.5rem;
+        position: relative;
+        padding-left: 1rem;
+      }
+
+      .format-list li::before {
+        content: '•';
+        color: var(--primary-600);
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+      }
+
+      /* Controles */
+      .controls-section {
+        margin-bottom: 2rem;
+      }
+
+      .controls-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+
+      .control-card {
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: var(--border-radius-lg);
+        border: 2px solid var(--gray-200);
+        transition: all 0.3s ease;
+      }
+
+      .control-card:hover {
+        border-color: var(--primary-300);
+        box-shadow: var(--shadow-md);
+      }
+
+      .area-control {
+        border-left: 4px solid var(--primary-600);
+      }
+
+      .cleanup-control {
+        border-left: 4px solid #ef4444;
+      }
+
+      .control-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .control-icon {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+        background: var(--primary-100);
+        border-radius: var(--border-radius-sm);
+      }
+
+      .danger-icon {
+        background: #fef2f2;
+      }
+
+      .control-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+      }
+
+      .control-hint {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.75rem;
+      }
+
+      .danger-hint {
+        color: #dc2626;
+      }
+
+      /* Importación */
+      .import-section {
+        margin-bottom: 2rem;
+      }
+
+      .import-card {
+        border: 2px solid transparent;
+        border-left: 6px solid;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .parts-import {
+        border-left-color: #10b981;
+      }
+
+      .machines-import {
+        border-left-color: var(--primary-600);
+      }
+
+      .import-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .import-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .import-icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 5rem;
+        height: 5rem;
+        border-radius: var(--border-radius-xl);
+        margin: 0 auto 1rem;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .parts-icon {
+        background: linear-gradient(135deg, #10b981, #34d399);
+      }
+
+      .machines-icon {
+        background: var(--gradient-primary);
+      }
+
+      .import-emoji {
+        font-size: 2rem;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+      }
+
+      .import-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+      }
+
+      .import-subtitle {
+        font-size: 1rem;
+        color: var(--gray-600);
+      }
+
       .upload-area {
-        border: 2px dashed #d1d5db;
-        border-radius: 0.75rem;
+        border: 3px dashed var(--gray-300);
+        border-radius: var(--border-radius-lg);
         padding: 3rem 2rem;
         text-align: center;
-        background: #f9fafb;
+        background: var(--gray-50);
         transition: all 0.3s ease;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
         cursor: pointer;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .upload-area:hover {
-        border-color: #3b82f6;
-        background: #eff6ff;
+        border-color: var(--primary-400);
+        background: var(--primary-50);
+        transform: scale(1.02);
       }
 
       .upload-area.dragover {
         border-color: #10b981;
         background: #ecfdf5;
-        transform: scale(1.02);
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
       }
 
-      .upload-content {
-        pointer-events: none;
+      .upload-area.has-file {
+        border-color: #10b981;
+        background: #ecfdf5;
       }
 
       .upload-icon {
-        width: 3rem;
-        height: 3rem;
-        color: #9ca3af;
-        margin: 0 auto 1rem;
+        color: var(--gray-400);
+        margin-bottom: 1rem;
       }
 
       .upload-text {
         font-size: 1.125rem;
-        color: #374151;
+        color: var(--gray-700);
         margin-bottom: 0.5rem;
+        font-weight: 500;
       }
 
       .upload-link {
-        color: #3b82f6;
-        font-weight: 600;
+        color: var(--primary-600);
+        font-weight: bold;
         text-decoration: underline;
-        pointer-events: auto;
-        cursor: pointer;
-      }
-
-      .upload-link:hover {
-        color: #1d4ed8;
       }
 
       .upload-hint {
         font-size: 0.875rem;
-        color: #6b7280;
+        color: var(--gray-500);
       }
 
-      .file-selected {
-        animation: slideInDown 0.3s ease;
+      .file-preview {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: white;
+        border-radius: var(--border-radius-md);
+        border: 2px solid #10b981;
+        box-shadow: var(--shadow-sm);
       }
 
+      .file-icon {
+        font-size: 2rem;
+      }
+
+      .file-info {
+        flex: 1;
+      }
+
+      .file-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+      }
+
+      .file-size {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+      }
+
+      .file-remove {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        border: 2px solid #ef4444;
+        background: #fef2f2;
+        color: #ef4444;
+        font-size: 0.875rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .file-remove:hover {
+        background: #ef4444;
+        color: white;
+      }
+
+      .import-action-btn {
+        font-size: 1rem;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+      }
+
+      /* Resultados */
       .results-section {
-        border-left: 4px solid #10b981;
+        margin-top: 2rem;
+      }
+
+      .results-card {
+        border-left: 6px solid #10b981;
       }
 
       .results-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
       }
 
-      .result-item {
-        text-align: center;
+      .result-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
         padding: 1.5rem;
-        border-radius: 0.75rem;
+        border-radius: var(--border-radius-lg);
         border: 2px solid;
+        transition: all 0.3s ease;
       }
 
-      .result-item.success {
+      .result-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .success-card {
         background: #ecfdf5;
         border-color: #10b981;
         color: #065f46;
       }
 
-      .result-item.warning {
+      .warning-card {
         background: #fffbeb;
         border-color: #f59e0b;
         color: #92400e;
       }
 
-      .result-item.error {
+      .error-card {
         background: #fef2f2;
         border-color: #ef4444;
         color: #991b1b;
       }
 
+      .result-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+      }
+
       .result-number {
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: 900;
         line-height: 1;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
       }
 
       .result-label {
@@ -624,28 +1078,373 @@ interface ImportResult {
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        opacity: 0.9;
       }
 
       .errors-section {
         padding: 1.5rem;
         background: #fef2f2;
-        border-radius: 0.75rem;
-        border: 1px solid #fecaca;
+        border-radius: var(--border-radius-lg);
+        border: 2px solid #fecaca;
+        margin-bottom: 2rem;
       }
 
-      .errors-list {
-        max-height: 200px;
+      .errors-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: #dc2626;
+        margin-bottom: 1rem;
+      }
+
+      .errors-container {
+        max-height: 300px;
         overflow-y: auto;
       }
 
       .error-item {
-        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
         margin-bottom: 0.5rem;
         background: white;
-        border-radius: 0.375rem;
+        border-radius: var(--border-radius-md);
         border-left: 3px solid #ef4444;
         font-size: 0.875rem;
+        animation: slideInLeft 0.3s ease;
+      }
+
+      .error-icon {
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+      }
+
+      .error-text {
         color: #991b1b;
+        line-height: 1.4;
+      }
+
+      .results-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      /* Modales */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-container {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-2xl);
+        animation: scaleIn 0.3s ease;
+      }
+
+      .delete-modal {
+        max-width: 500px;
+      }
+
+      .results-modal {
+        max-width: 450px;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem 2rem 1rem;
+        border-bottom: 2px solid var(--gray-100);
+      }
+
+      .danger-header {
+        border-bottom-color: #fecaca;
+        background: linear-gradient(135deg, #fef2f2, #ffffff);
+      }
+
+      .success-header {
+        border-bottom-color: #bbf7d0;
+        background: linear-gradient(135deg, #ecfdf5, #ffffff);
+      }
+
+      .error-header {
+        border-bottom-color: #fecaca;
+        background: linear-gradient(135deg, #fef2f2, #ffffff);
+      }
+
+      .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .modal-title h3 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin: 0;
+      }
+
+      .modal-icon {
+        font-size: 2rem;
+        padding: 0.5rem;
+        background: var(--primary-100);
+        border-radius: var(--border-radius-md);
+      }
+
+      .modal-icon.danger-icon {
+        background: #fef2f2;
+      }
+
+      .modal-close {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: none;
+        background: var(--gray-100);
+        border-radius: 50%;
+        color: var(--gray-600);
+        font-size: 1.25rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .modal-close:hover {
+        background: var(--gray-200);
+        color: var(--gray-800);
+      }
+
+      .modal-content {
+        padding: 2rem;
+      }
+
+      .delete-warning {
+        text-align: center;
+      }
+
+      .warning-content {
+        padding: 1rem;
+      }
+
+      .warning-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #dc2626;
+        margin-bottom: 1rem;
+      }
+
+      .warning-description {
+        font-size: 1rem;
+        color: var(--gray-600);
+        margin-bottom: 1.5rem;
+      }
+
+      .deletion-items {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background: #fef2f2;
+        border-radius: var(--border-radius-md);
+        border: 2px solid #fecaca;
+      }
+
+      .deletion-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .deletion-icon {
+        font-size: 2rem;
+      }
+
+      .deletion-count {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #dc2626;
+        display: block;
+      }
+
+      .deletion-type {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .confirmation-input {
+        margin: 1.5rem 0;
+        text-align: left;
+      }
+
+      .confirmation-label {
+        display: block;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.75rem;
+      }
+
+      .confirmation-field {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--border-radius-md);
+        text-transform: uppercase;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .confirmation-field:focus {
+        outline: none;
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+
+      .warning-notice {
+        font-size: 0.875rem;
+        color: #dc2626;
+        font-weight: 600;
+        margin-top: 1rem;
+      }
+
+      .results-summary {
+        text-align: center;
+      }
+
+      .summary-grid {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .summary-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        border: 2px solid;
+        min-width: 100px;
+      }
+
+      .success-item {
+        background: #ecfdf5;
+        border-color: #10b981;
+      }
+
+      .warning-item {
+        background: #fffbeb;
+        border-color: #f59e0b;
+      }
+
+      .error-item {
+        background: #fef2f2;
+        border-color: #ef4444;
+      }
+
+      .summary-icon {
+        font-size: 1.5rem;
+      }
+
+      .summary-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+      }
+
+      .summary-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.8;
+      }
+
+      .summary-message {
+        font-size: 1rem;
+        color: var(--gray-700);
+        line-height: 1.5;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 2rem 2rem;
+      }
+
+      .modal-actions app-touch-button {
+        flex: 1;
+      }
+
+      /* Notificaciones */
+      .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1100;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        max-width: 400px;
+        animation: slideInRight 0.5s ease-out;
+      }
+
+      .success-notification {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        border: 2px solid #059669;
+      }
+
+      .error-notification {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        border: 2px solid #dc2626;
+      }
+
+      .warning-notification {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        color: white;
+        border: 2px solid #d97706;
+      }
+
+      .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .notification-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .notification-text {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
       }
 
       .hidden {
@@ -653,10 +1452,30 @@ interface ImportResult {
       }
 
       /* Animaciones */
-      @keyframes slideInDown {
+      @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
         }
         to {
           opacity: 1;
@@ -664,19 +1483,72 @@ interface ImportResult {
         }
       }
 
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
       /* Responsive */
+      @media (max-width: 1024px) {
+        .controls-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .professional-grid.grid-2 {
+          grid-template-columns: 1fr;
+        }
+
+        .system-stats {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+
       @media (max-width: 768px) {
-        .excel-import-container {
-          padding: 1rem 0;
+        .header-content {
+          flex-direction: column;
+          gap: 1.5rem;
+          text-align: center;
+        }
+
+        .header-left {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .content-area {
+          padding: 1rem;
         }
 
         .upload-area {
           padding: 2rem 1rem;
+          min-height: 150px;
         }
 
         .upload-icon {
-          width: 2rem;
-          height: 2rem;
+          width: 2.5rem;
+          height: 2.5rem;
         }
 
         .upload-text {
@@ -685,6 +1557,65 @@ interface ImportResult {
 
         .results-grid {
           grid-template-columns: 1fr;
+        }
+
+        .results-actions {
+          flex-direction: column;
+        }
+
+        .system-stats {
+          width: 100%;
+        }
+
+        .stats-item {
+          padding: 0.75rem 1rem;
+        }
+
+        .modal-container {
+          margin: 1rem;
+          max-height: calc(100vh - 2rem);
+        }
+
+        .modal-actions {
+          flex-direction: column;
+        }
+
+        .deletion-items {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .summary-grid {
+          flex-direction: column;
+        }
+
+        .notification {
+          top: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .professional-header {
+          padding: 1rem;
+        }
+
+        .professional-content {
+          padding: 1rem;
+        }
+
+        .header-title {
+          font-size: 1.5rem;
+        }
+
+        .import-title {
+          font-size: 1.25rem;
+        }
+
+        .control-card {
+          padding: 1rem;
         }
       }
     `,
@@ -703,9 +1634,24 @@ export class ExcelImportComponent implements OnInit {
   processingType: 'machines' | 'parts' | null = null;
   importResults: ImportResult | null = null;
 
-  // Nuevos controles
+  // Estadísticas del sistema
+  machineCount = 0;
+  partCount = 0;
+
+  // Controles
   selectedAreaForParts: 'corte' | 'costura' = 'costura';
   isDeleting = false;
+
+  // Modales
+  showDeleteModal = false;
+  showResultsModal = false;
+  confirmationText = '';
+  canConfirmDelete = false;
+
+  // Notificaciones
+  showNotification = false;
+  notificationMessage = '';
+  notificationType: 'success' | 'error' | 'warning' = 'success';
 
   constructor(
     private router: Router,
@@ -717,32 +1663,93 @@ export class ExcelImportComponent implements OnInit {
   async ngOnInit() {
     try {
       await this.databaseService.initializeDatabase();
+      await this.loadSystemStats();
     } catch (error) {
       console.error('Error initializing database:', error);
     }
+  }
+
+  async loadSystemStats() {
+    try {
+      const machines = await this.machineService.loadMachines().toPromise();
+      const parts = await this.partService.loadParts().toPromise();
+
+      this.machineCount = machines?.length || 0;
+      this.partCount = parts?.length || 0;
+
+      console.log(
+        `📊 System stats: ${this.machineCount} machines, ${this.partCount} parts`
+      );
+    } catch (error) {
+      console.error('Error loading system stats:', error);
+    }
+  }
+
+  getFileSize(file: File): string {
+    const bytes = file.size;
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  getNotificationIcon(): string {
+    const icons = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+    };
+    return icons[this.notificationType];
+  }
+
+  showNotificationMessage(
+    message: string,
+    type: 'success' | 'error' | 'warning' = 'success'
+  ) {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    this.showNotification = true;
+
+    setTimeout(() => {
+      this.showNotification = false;
+    }, 4000);
   }
 
   goBack() {
     this.router.navigate(['/']);
   }
 
-  async clearAllImports() {
-    const confirmation = confirm(
-      '⚠️ ¿Estás seguro de eliminar TODAS las máquinas y refacciones?\n\n' +
-        'Esta acción no se puede deshacer.\n\n' +
-        '• Se eliminarán todas las máquinas\n' +
-        '• Se eliminarán todas las refacciones\n' +
-        '• El sistema quedará vacío\n\n' +
-        'Escribir "ELIMINAR" para confirmar'
-    );
+  goToSearch() {
+    this.router.navigate(['/search']);
+  }
 
-    if (!confirmation) return;
+  goToSearchFromModal() {
+    this.closeResultsModal();
+    this.goToSearch();
+  }
 
-    const secondConfirm = prompt('Para confirmar, escribe: ELIMINAR');
-    if (secondConfirm !== 'ELIMINAR') {
-      alert('❌ Cancelado. No se eliminó nada.');
-      return;
-    }
+  // Modal de confirmación de eliminación
+  showDeleteConfirmation() {
+    this.showDeleteModal = true;
+    this.confirmationText = '';
+    this.canConfirmDelete = false;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.confirmationText = '';
+    this.canConfirmDelete = false;
+  }
+
+  onConfirmationChange() {
+    this.canConfirmDelete = this.confirmationText.toUpperCase() === 'ELIMINAR';
+  }
+
+  async confirmDeleteAll() {
+    if (!this.canConfirmDelete) return;
 
     this.isDeleting = true;
 
@@ -771,19 +1778,57 @@ export class ExcelImportComponent implements OnInit {
         console.log(`🗑️ Eliminadas ${allMachines.length} máquinas`);
       }
 
-      alert(
-        '✅ Eliminación completada!\n\nTodas las máquinas y refacciones han sido eliminadas del sistema.'
+      // Actualizar estadísticas
+      await this.loadSystemStats();
+
+      this.showNotificationMessage(
+        'Eliminación completada! Todas las máquinas y refacciones han sido eliminadas del sistema.',
+        'success'
       );
 
       // Limpiar resultados y archivos
       this.resetImport();
+      this.closeDeleteModal();
     } catch (error) {
       console.error('❌ Error eliminando datos:', error);
-      alert(
-        '❌ Error al eliminar los datos. Algunos elementos pueden no haberse eliminado.'
+      this.showNotificationMessage(
+        'Error al eliminar los datos. Algunos elementos pueden no haberse eliminado.',
+        'error'
       );
     } finally {
       this.isDeleting = false;
+    }
+  }
+
+  // Modal de resultados
+  closeResultsModal() {
+    this.showResultsModal = false;
+  }
+
+  getResultsTitle(): string {
+    if (!this.importResults) return '';
+    return this.importResults.success > 0
+      ? 'Importación Completada'
+      : 'Importación Fallida';
+  }
+
+  getResultsMessage(): string {
+    if (!this.importResults) return '';
+
+    if (this.importResults.success > 0) {
+      return `Se importaron exitosamente ${
+        this.importResults.success
+      } refacciones. ${
+        this.importResults.duplicates > 0
+          ? `Se omitieron ${this.importResults.duplicates} duplicados. `
+          : ''
+      }${
+        this.importResults.errors.length > 0
+          ? `Se encontraron ${this.importResults.errors.length} errores.`
+          : ''
+      }`;
+    } else {
+      return 'No se pudo importar ninguna refacción. Verifica que las columnas tengan nombres: SAP, #PARTE, DESCRIPCION y que no haya filas vacías.';
     }
   }
 
@@ -836,7 +1881,10 @@ export class ExcelImportComponent implements OnInit {
 
   private handleFile(file: File, type: 'machines' | 'parts') {
     if (!this.isValidExcelFile(file)) {
-      alert('Por favor selecciona un archivo Excel válido (.xlsx o .xls)');
+      this.showNotificationMessage(
+        'Por favor selecciona un archivo Excel válido (.xlsx o .xls)',
+        'warning'
+      );
       return;
     }
 
@@ -882,10 +1930,28 @@ export class ExcelImportComponent implements OnInit {
       const result = await this.processMachinesData(data);
       this.importResults = result;
 
+      // Actualizar estadísticas
+      await this.loadSystemStats();
+
       console.log('✅ Machines import completed:', result);
+
+      if (result.success > 0) {
+        this.showNotificationMessage(
+          `${result.success} máquinas importadas exitosamente`,
+          'success'
+        );
+      } else {
+        this.showNotificationMessage(
+          'No se pudieron importar las máquinas',
+          'error'
+        );
+      }
     } catch (error) {
       console.error('❌ Error importing machines:', error);
-      alert('Error al procesar el archivo de máquinas');
+      this.showNotificationMessage(
+        'Error al procesar el archivo de máquinas',
+        'error'
+      );
     } finally {
       this.isProcessing = false;
       this.processingType = null;
@@ -904,21 +1970,18 @@ export class ExcelImportComponent implements OnInit {
       const result = await this.processPartsFromAllSheets(this.partsFile);
       this.importResults = result;
 
+      // Actualizar estadísticas
+      await this.loadSystemStats();
+
       console.log('✅ Parts import completed:', result);
 
-      if (result.success > 0) {
-        alert(
-          `✅ Importación completada!\n\n📊 Resumen:\n• ${result.success} refacciones importadas\n• ${result.duplicates} duplicados omitidos\n• ${result.errors.length} errores`
-        );
-      } else if (result.errors.length > 0) {
-        alert(
-          `⚠️ No se pudo importar ninguna refacción.\n\nVerifica:\n• Que las columnas tengan nombres: SAP, #PARTE, DESCRIPCION\n• Que no haya filas vacías\n• Que el formato sea correcto`
-        );
-      }
+      // Mostrar modal de resultados
+      this.showResultsModal = true;
     } catch (error) {
       console.error('❌ Error importing parts:', error);
-      alert(
-        `❌ Error al procesar el archivo:\n\n${error}\n\nVerifica que el archivo Excel esté en el formato correcto.`
+      this.showNotificationMessage(
+        `Error al procesar el archivo: ${error}\n\nVerifica que el archivo Excel esté en el formato correcto.`,
+        'error'
       );
     } finally {
       this.isProcessing = false;
