@@ -34,30 +34,31 @@ import { Machine, PartCategory } from '../../core/models';
             </div>
           </div>
 
-          <div class="header-right">
-            <!-- Control Admin discreto -->
-            <app-touch-button
-              *ngIf="!isAdminMode"
-              variant="secondary"
-              size="sm"
-              icon="⚙️"
-              (clicked)="toggleAdminMode()"
-              class="admin-btn"
-              title="Modo Administrador"
-            >
-            </app-touch-button>
+          <div class="header-actions">
+            <!-- Admin mode toggle -->
+            <div class="admin-section">
+              <app-touch-button
+                *ngIf="!isAdminMode"
+                variant="secondary"
+                size="md"
+                icon="⚙️"
+                (clicked)="toggleAdminMode()"
+                class="admin-gear"
+              >
+                Modo Admin
+              </app-touch-button>
 
-            <app-touch-button
-              *ngIf="isAdminMode"
-              variant="warning"
-              size="sm"
-              icon="🔓"
-              (clicked)="exitAdminMode()"
-              class="admin-btn-active"
-              title="Salir Modo Admin"
-            >
-              Admin
-            </app-touch-button>
+              <app-touch-button
+                *ngIf="isAdminMode"
+                variant="warning"
+                size="md"
+                icon="🔓"
+                (clicked)="exitAdminMode()"
+                class="admin-active"
+              >
+                Salir Admin
+              </app-touch-button>
+            </div>
 
             <app-touch-button
               variant="success"
@@ -77,7 +78,6 @@ import { Machine, PartCategory } from '../../core/models';
           <div
             *ngFor="let machine of machines; let i = index"
             class="machine-card"
-            (click)="viewParts(machine)"
           >
             <!-- Header de máquina -->
             <div class="machine-header">
@@ -126,11 +126,18 @@ import { Machine, PartCategory } from '../../core/models';
 
             <!-- Botones de acción -->
             <div class="machine-actions">
-              <div class="main-action-info">
-                <span class="tap-hint">👆 Toca para ver refacciones</span>
-              </div>
+              <app-touch-button
+                variant="primary"
+                size="md"
+                icon="🔧"
+                [fullWidth]="true"
+                (clicked)="viewParts(machine)"
+                class="main-action"
+              >
+                Ver Refacciones
+              </app-touch-button>
 
-              <div class="secondary-actions" (click)="$event.stopPropagation()">
+              <div class="secondary-actions">
                 <app-touch-button
                   *ngIf="isAdminMode"
                   variant="warning"
@@ -315,9 +322,6 @@ import { Machine, PartCategory } from '../../core/models';
                   class="admin-input"
                   (keyup.enter)="confirmAdminAccess()"
                   (input)="clearAdminError()"
-                  (click)="clearAdminError()"
-                  (focus)="clearAdminError()"
-                  autocomplete="off"
                 />
                 <div *ngIf="adminError" class="admin-error">
                   {{ adminError }}
@@ -360,32 +364,6 @@ import { Machine, PartCategory } from '../../core/models';
         -webkit-tap-highlight-color: transparent;
       }
 
-      .admin-btn {
-        opacity: 0.6;
-        transition: all 0.3s ease;
-        margin-right: 12px;
-      }
-
-      .admin-btn:hover {
-        opacity: 1;
-      }
-
-      .admin-btn-active {
-        background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
-        color: white !important;
-        margin-right: 12px;
-        animation: subtle-glow 2s ease-in-out infinite alternate;
-      }
-
-      @keyframes subtle-glow {
-        from {
-          box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-        }
-        to {
-          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
-        }
-      }
-
       .professional-header {
         background: var(--gradient-primary);
         color: white;
@@ -419,10 +397,42 @@ import { Machine, PartCategory } from '../../core/models';
         font-size: 1rem;
       }
 
-      .header-right {
+      .header-actions {
         display: flex;
         align-items: center;
         gap: 1rem;
+      }
+
+      .admin-section {
+        display: flex;
+        align-items: center;
+      }
+
+      .admin-gear {
+        animation: pulse-admin 2s infinite;
+      }
+
+      .admin-active {
+        animation: glow-admin 1.5s ease-in-out infinite alternate;
+      }
+
+      @keyframes pulse-admin {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+        }
+      }
+
+      @keyframes glow-admin {
+        from {
+          box-shadow: 0 0 5px rgba(245, 158, 11, 0.5);
+        }
+        to {
+          box-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+        }
       }
 
       .content-area {
@@ -431,12 +441,14 @@ import { Machine, PartCategory } from '../../core/models';
         margin: 0 auto;
       }
 
+
       .machines-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 1.25rem;
         max-width: 100%;
       }
+
 
       @media (min-width: 1600px) {
         .machines-container {
@@ -456,46 +468,16 @@ import { Machine, PartCategory } from '../../core/models';
         flex-direction: column;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
-        cursor: pointer;
-        position: relative;
-        user-select: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
       }
 
       .machine-card:hover {
         box-shadow: var(--shadow-lg);
         transform: translateY(-2px);
-        border-color: var(--primary-300);
       }
 
       .machine-card:active {
-        transform: translateY(-1px) scale(0.99);
+        transform: translateY(-1px);
         box-shadow: var(--shadow-md);
-        border-color: var(--primary-500);
-      }
-
-      .machine-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(
-          135deg,
-          rgba(59, 130, 246, 0.05),
-          rgba(59, 130, 246, 0.02)
-        );
-        border-radius: var(--border-radius-lg);
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        pointer-events: none;
-      }
-
-      .machine-card:hover::before {
-        opacity: 1;
       }
 
       .machine-header {
@@ -526,6 +508,7 @@ import { Machine, PartCategory } from '../../core/models';
         font-size: 0.75rem;
         font-weight: 600;
       }
+
 
       .machine-stats {
         display: grid;
@@ -602,38 +585,12 @@ import { Machine, PartCategory } from '../../core/models';
         max-width: 100%;
       }
 
+
       .machine-actions {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
         margin-top: auto;
-      }
-
-      .main-action-info {
-        text-align: center;
-        padding: 0.75rem;
-        background: var(--primary-50);
-        border: 2px dashed var(--primary-200);
-        border-radius: var(--border-radius-md);
-        margin-bottom: 0.5rem;
-      }
-
-      .tap-hint {
-        font-size: 0.875rem;
-        color: var(--primary-700);
-        font-weight: 600;
-        animation: pulse-tap 2s infinite;
-      }
-
-      @keyframes pulse-tap {
-        0%,
-        100% {
-          opacity: 0.8;
-        }
-        50% {
-          opacity: 1;
-          transform: scale(1.02);
-        }
       }
 
       .main-action {
@@ -668,6 +625,7 @@ import { Machine, PartCategory } from '../../core/models';
         bottom: -4px;
         z-index: -1;
       }
+
 
       .empty-state {
         text-align: center;
@@ -728,6 +686,7 @@ import { Machine, PartCategory } from '../../core/models';
           transform: rotate(360deg);
         }
       }
+
 
       .modal-overlay {
         position: fixed;
@@ -967,6 +926,7 @@ import { Machine, PartCategory } from '../../core/models';
         flex: 1;
       }
 
+
       .notification {
         position: fixed;
         top: 2rem;
@@ -1014,6 +974,7 @@ import { Machine, PartCategory } from '../../core/models';
         line-height: 1.4;
       }
 
+
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -1044,6 +1005,7 @@ import { Machine, PartCategory } from '../../core/models';
           transform: translateX(0);
         }
       }
+
 
       @media (max-width: 1200px) {
         .machines-container {
@@ -1243,15 +1205,11 @@ import { Machine, PartCategory } from '../../core/models';
         }
       }
 
+
       @media (hover: hover) {
         .machine-card:hover {
           box-shadow: var(--shadow-xl);
           transform: translateY(-4px);
-          border-color: var(--primary-300);
-        }
-
-        .machine-card:hover::before {
-          opacity: 1;
         }
       }
 
@@ -1259,26 +1217,11 @@ import { Machine, PartCategory } from '../../core/models';
         .machine-card:hover {
           transform: none;
           box-shadow: var(--shadow-md);
-          border-color: var(--gray-200);
-        }
-
-        .machine-card:hover::before {
-          opacity: 0;
         }
 
         .machine-card:active {
-          transform: scale(0.97);
+          transform: scale(0.99);
           box-shadow: var(--shadow-lg);
-          border-color: var(--primary-500);
-        }
-
-        .main-action-info {
-          background: var(--primary-100);
-          border-color: var(--primary-300);
-        }
-
-        .tap-hint {
-          animation: pulse-tap 1.5s infinite;
         }
       }
     `,
@@ -1290,15 +1233,18 @@ export class MachineListComponent implements OnInit, OnDestroy {
   machineStats: { [key: number]: { [key in PartCategory]: number } } = {};
   isLoading = true;
 
+
   showNotification = false;
   notificationMessage = '';
   notificationType: 'success' | 'error' | 'warning' = 'success';
+
 
   isAdminMode = false;
   showAdminModal = false;
   adminPassword = '';
   adminError = '';
   readonly ADMIN_PASSWORD = 'Mantenimiento1.';
+
 
   showDeleteModal = false;
   machineToDelete: Machine | null = null;
@@ -1321,7 +1267,9 @@ export class MachineListComponent implements OnInit, OnDestroy {
     await this.loadMachines();
   }
 
-  ngOnDestroy() {}
+  ngOnDestroy() {
+
+  }
 
   async loadMachines() {
     this.isLoading = true;
@@ -1330,6 +1278,7 @@ export class MachineListComponent implements OnInit, OnDestroy {
         (await this.machineService
           .getMachinesByArea(this.selectedArea)
           .toPromise()) || [];
+
 
       for (const machine of this.machines) {
         if (machine.id) {
@@ -1368,15 +1317,15 @@ export class MachineListComponent implements OnInit, OnDestroy {
   }
 
   addMachine() {
-    this.router.navigate(['/machines', this.selectedArea, 'add']);
+    this.router.navigate(['/add-machine', this.selectedArea]);
   }
 
   viewParts(machine: Machine) {
-    this.router.navigate(['/machines', this.selectedArea, machine.id, 'parts']);
+    this.router.navigate(['/machine', machine.id, 'parts']);
   }
 
   editMachine(machine: Machine) {
-    this.router.navigate(['/machines', this.selectedArea, machine.id, 'edit']);
+    this.router.navigate(['/edit-machine', machine.id]);
   }
 
   deleteMachine(machine: Machine) {

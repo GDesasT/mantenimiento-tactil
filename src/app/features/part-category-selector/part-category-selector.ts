@@ -49,35 +49,57 @@ import { Machine, PartCategory } from '../../core/models';
       </div>
 
       <div class="content-area">
-        <!-- Información de la máquina -->
-        <div class="machine-info-section">
-          <div class="professional-card machine-info-card">
-            <div class="professional-content machine-info-content">
-              <div class="machine-icon">
-                <span class="icon-large">{{ getAreaIcon() }}</span>
-              </div>
-              <h3 class="machine-name">{{ machine?.name }}</h3>
-              <p class="machine-area">{{ getAreaLabel() }}</p>
+        <!-- Control Admin pequeño -->
+        <div class="admin-toggle-corner">
+          <app-touch-button
+            *ngIf="!isAdminMode"
+            variant="secondary"
+            size="xs"
+            icon="⚙️"
+            (clicked)="toggleAdminMode()"
+            class="admin-corner-btn"
+            title="Modo Admin"
+          >
+          </app-touch-button>
 
-              <!-- Estadísticas usando TU sistema -->
-              <div class="machine-stats" *ngIf="stats">
-                <div class="metric-card">
-                  <div class="metric-value text-blue-600">
-                    {{ stats.mecanica }}
-                  </div>
-                  <div class="metric-label">Mecánicas</div>
+          <app-touch-button
+            *ngIf="isAdminMode"
+            variant="warning"
+            size="xs"
+            icon="🔓"
+            (clicked)="exitAdminMode()"
+            class="admin-corner-btn active"
+            title="Salir Admin"
+          >
+          </app-touch-button>
+        </div>
+
+        <!-- Información compacta de la máquina -->
+        <div class="machine-info-compact">
+          <div class="compact-card">
+            <!-- Layout horizontal: nombre a la izquierda, estadísticas a la derecha -->
+            <div class="compact-layout">
+              <div class="compact-left">
+                <span class="compact-icon">{{ getAreaIcon() }}</span>
+                <div class="compact-text">
+                  <h3 class="compact-name">{{ machine?.name }}</h3>
+                  <span class="compact-area">{{ getAreaLabel() }}</span>
                 </div>
-                <div class="metric-card">
-                  <div class="metric-value text-yellow-600">
-                    {{ stats.electronica }}
-                  </div>
-                  <div class="metric-label">Electrónicas</div>
+              </div>
+
+              <!-- Estadísticas a la derecha -->
+              <div class="compact-right" *ngIf="stats">
+                <div class="compact-stat blue">
+                  <span class="stat-value">{{ stats.mecanica }}</span>
+                  <span class="stat-label">Mecánicas</span>
                 </div>
-                <div class="metric-card">
-                  <div class="metric-value text-green-600">
-                    {{ stats.consumible }}
-                  </div>
-                  <div class="metric-label">Consumibles</div>
+                <div class="compact-stat yellow">
+                  <span class="stat-value">{{ stats.electronica }}</span>
+                  <span class="stat-label">Electrónicas</span>
+                </div>
+                <div class="compact-stat green">
+                  <span class="stat-value">{{ stats.consumible }}</span>
+                  <span class="stat-label">Consumibles</span>
                 </div>
               </div>
             </div>
@@ -116,15 +138,9 @@ import { Machine, PartCategory } from '../../core/models';
                 </div>
 
                 <div class="category-footer">
-                  <app-touch-button
-                    variant="primary"
-                    size="xl"
-                    icon="🔩"
-                    [fullWidth]="true"
-                    (clicked)="selectCategory('mecanica')"
-                  >
-                    Ver Refacciones Mecánicas
-                  </app-touch-button>
+                  <div class="tap-hint-category">
+                    <span class="tap-text">👆 Toca para ver refacciones</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -158,15 +174,9 @@ import { Machine, PartCategory } from '../../core/models';
                 </div>
 
                 <div class="category-footer">
-                  <app-touch-button
-                    variant="warning"
-                    size="xl"
-                    icon="⚡"
-                    [fullWidth]="true"
-                    (clicked)="selectCategory('electronica')"
-                  >
-                    Ver Refacciones Electrónicas
-                  </app-touch-button>
+                  <div class="tap-hint-category">
+                    <span class="tap-text">👆 Toca para ver refacciones</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -200,15 +210,9 @@ import { Machine, PartCategory } from '../../core/models';
                 </div>
 
                 <div class="category-footer">
-                  <app-touch-button
-                    variant="success"
-                    size="xl"
-                    icon="🔄"
-                    [fullWidth]="true"
-                    (clicked)="selectCategory('consumible')"
-                  >
-                    Ver Refacciones Consumibles
-                  </app-touch-button>
+                  <div class="tap-hint-category">
+                    <span class="tap-text">👆 Toca para ver refacciones</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -301,54 +305,107 @@ import { Machine, PartCategory } from '../../core/models';
       }
 
       .content-area {
+        position: relative;
         padding: 2rem;
         max-width: 1400px;
         margin: 0 auto;
       }
 
-      /* Información de máquina */
-      .machine-info-section {
-        margin-bottom: 3rem;
+      .machine-info-compact {
+        margin-bottom: 24px;
       }
 
-      .machine-info-card {
-        background: var(--gradient-secondary);
-        border-left: 4px solid var(--primary-600);
+      .compact-card {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
-      .machine-info-content {
+      .compact-layout {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .compact-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+      }
+
+      .compact-right {
+        display: flex;
+        gap: 20px;
+        flex-shrink: 0;
+      }
+
+      .compact-icon {
+        font-size: 32px;
+        color: #2d3748;
+        flex-shrink: 0;
+      }
+
+      .compact-text {
+        flex: 1;
+      }
+
+      .compact-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0 0 2px 0;
+        line-height: 1.2;
+      }
+
+      .compact-area {
+        font-size: 13px;
+        color: #718096;
+        font-weight: 500;
+      }
+
+      .compact-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+      }
+
+      .compact-stat .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+
+      .compact-stat .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         text-align: center;
       }
 
-      .icon-large {
-        font-size: 5rem;
-        margin-bottom: 1rem;
-        display: block;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+      .compact-stat.blue .stat-value {
+        color: #3182ce;
       }
 
-      .machine-name {
-        font-size: 2rem;
-        font-weight: bold;
-        color: var(--gray-900);
-        margin: 0 0 0.5rem 0;
+      .compact-stat.yellow .stat-value {
+        color: #d69e2e;
       }
 
-      .machine-area {
-        font-size: 1.125rem;
-        color: var(--gray-600);
-        margin: 0 0 2rem 0;
+      .compact-stat.green .stat-value {
+        color: #38a169;
       }
 
-      .machine-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        max-width: 400px;
-        margin: 0 auto;
+      .compact-stat.blue .stat-label,
+      .compact-stat.yellow .stat-label,
+      .compact-stat.green .stat-label {
+        color: #718096;
       }
 
-      /* Categorías */
       .categories-section {
         margin-bottom: 3rem;
       }
@@ -370,11 +427,45 @@ import { Machine, PartCategory } from '../../core/models';
         min-height: 500px;
         display: flex;
         flex-direction: column;
+        position: relative;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(59, 130, 246, 0.05),
+          rgba(59, 130, 246, 0.02)
+        );
+        border-radius: var(--border-radius-lg);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
       }
 
       .category-card:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-xl);
+      }
+
+      .category-card:hover::before {
+        opacity: 1;
+      }
+
+      .category-card:active {
+        transform: translateY(-2px) scale(0.99);
+        box-shadow: var(--shadow-lg);
       }
 
       .mechanical-card {
@@ -491,9 +582,36 @@ import { Machine, PartCategory } from '../../core/models';
 
       .category-footer {
         margin-top: auto;
+        padding: 1rem;
+        text-align: center;
       }
 
-      /* Acciones adicionales */
+      .tap-hint-category {
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px dashed rgba(0, 0, 0, 0.2);
+        border-radius: var(--border-radius-md);
+        backdrop-filter: blur(10px);
+      }
+
+      .tap-text {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.7);
+        animation: pulse-tap-category 2s infinite;
+      }
+
+      @keyframes pulse-tap-category {
+        0%,
+        100% {
+          opacity: 0.7;
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.02);
+        }
+      }
+
       .actions-section {
         margin-bottom: 2rem;
       }
@@ -518,7 +636,6 @@ import { Machine, PartCategory } from '../../core/models';
         font-size: 1.125rem;
       }
 
-      /* Responsive */
       @media (max-width: 768px) {
         .header-content {
           flex-direction: column;
@@ -558,6 +675,21 @@ import { Machine, PartCategory } from '../../core/models';
           width: 100%;
           max-width: 300px;
         }
+
+        .compact-layout {
+          flex-direction: column;
+          gap: 16px;
+          align-items: flex-start;
+        }
+
+        .compact-right {
+          width: 100%;
+          justify-content: space-around;
+        }
+
+        .compact-stat {
+          min-width: 70px;
+        }
       }
 
       @media (max-width: 480px) {
@@ -581,6 +713,107 @@ import { Machine, PartCategory } from '../../core/models';
           font-size: 1.25rem;
         }
       }
+
+      @media (hover: hover) {
+        .category-card:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-xl);
+        }
+
+        .category-card:hover::before {
+          opacity: 1;
+        }
+
+        .mechanical-card:hover {
+          border-color: var(--primary-600);
+          box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.3);
+        }
+
+        .electronic-card:hover {
+          border-color: #f59e0b;
+          box-shadow: 0 25px 50px -12px rgba(245, 158, 11, 0.3);
+        }
+
+        .consumable-card:hover {
+          border-color: #10b981;
+          box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.3);
+        }
+      }
+
+      @media (hover: none) {
+        .category-card:hover {
+          transform: none;
+          box-shadow: var(--shadow-md);
+        }
+
+        .category-card:hover::before {
+          opacity: 0;
+        }
+
+        .category-card:active {
+          transform: scale(0.97);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .mechanical-card:active {
+          border-color: var(--primary-600);
+        }
+
+        .electronic-card:active {
+          border-color: #f59e0b;
+        }
+
+        .consumable-card:active {
+          border-color: #10b981;
+        }
+
+        .tap-hint-category {
+          background: rgba(255, 255, 255, 0.9);
+          border-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .tap-text {
+          animation: pulse-tap-category 1.5s infinite;
+        }
+      }
+
+      .admin-toggle-corner {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 50;
+      }
+
+      .admin-corner-btn {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+      }
+
+      .admin-corner-btn:hover {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+
+      .admin-corner-btn.active {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
+        color: white !important;
+        opacity: 1;
+        animation: pulse-admin 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse-admin {
+        0%,
+        100% {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        50% {
+          box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+        }
+      }
     `,
   ],
 })
@@ -590,6 +823,7 @@ export class PartCategorySelectorComponent implements OnInit {
   stats: { [key in PartCategory]: number } | null = null;
   isLoading = true;
   selectedArea: 'corte' | 'costura' = 'costura';
+  isAdminMode = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -695,5 +929,15 @@ export class PartCategorySelectorComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/machines', this.machine?.area]);
+  }
+
+  toggleAdminMode() {
+    this.isAdminMode = true;
+    console.log('🔧 Admin mode activated');
+  }
+
+  exitAdminMode() {
+    this.isAdminMode = false;
+    console.log('🔓 Admin mode deactivated');
   }
 }

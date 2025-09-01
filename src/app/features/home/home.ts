@@ -163,6 +163,12 @@ import { TouchButtonComponent } from '../../shared/components/touch-button/touch
         position: relative;
         overflow: hidden;
         background: var(--gradient-surface);
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
 
       .area-card::before {
@@ -188,6 +194,11 @@ import { TouchButtonComponent } from '../../shared/components/touch-button/touch
       .area-card:hover {
         transform: translateY(-8px) scale(1.02);
         box-shadow: var(--shadow-xl);
+      }
+
+      .area-card:active {
+        transform: translateY(-4px) scale(0.99);
+        box-shadow: var(--shadow-lg);
       }
 
       .corte-area {
@@ -301,6 +312,34 @@ import { TouchButtonComponent } from '../../shared/components/touch-button/touch
 
         .icon-emoji {
           font-size: 4rem;
+        }
+      }
+
+      /* Optimización táctil específica */
+      @media (hover: hover) {
+        .area-card:hover {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: var(--shadow-xl);
+        }
+
+        .area-card:hover::before {
+          left: 100%;
+        }
+      }
+
+      @media (hover: none) {
+        .area-card:hover {
+          transform: none;
+          box-shadow: var(--shadow-lg);
+        }
+
+        .area-card:hover::before {
+          left: -100%;
+        }
+
+        .area-card:active {
+          transform: scale(0.97);
+          box-shadow: var(--shadow-lg);
         }
       }
     `,
