@@ -133,11 +133,14 @@ function createWindow() {
       console.log("Electron-reload no disponible");
     }
   } else {
-    const htmlPath = path.join(__dirname, "dist/mantenimiento-tactil/browser/index.html");
+    const htmlPath = path.join(
+      __dirname,
+      "dist/mantenimiento-tactil/browser/index.html"
+    );
     console.log("📁 Cargando aplicación desde:", htmlPath);
-    
+
     // Verificar si el archivo existe
-    const fs = require('fs');
+    const fs = require("fs");
     if (fs.existsSync(htmlPath)) {
       mainWindow.loadFile(htmlPath);
     } else {

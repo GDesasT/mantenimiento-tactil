@@ -412,7 +412,7 @@ export class HomeComponent {
 
   checkForUpdates() {
     console.log('🔍 Verificando actualizaciones...');
-    
+
     // En desarrollo, mostrar alerta
     if (typeof window !== 'undefined' && !window.electron) {
       alert('Esta función solo está disponible en la aplicación Electron');
@@ -421,7 +421,8 @@ export class HomeComponent {
 
     // En Electron, usar IPC para verificar actualizaciones
     if (window.electron && window.electron.ipcRenderer) {
-      window.electron.ipcRenderer.invoke('check-for-updates')
+      window.electron.ipcRenderer
+        .invoke('check-for-updates')
         .then(() => {
           console.log('✅ Verificación de actualizaciones iniciada');
         })

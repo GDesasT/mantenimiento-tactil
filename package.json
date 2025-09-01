@@ -1,6 +1,6 @@
 {
   "name": "mantenimiento-tactil",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "author": "DTSoftware",
   "description": "Sistema de Gestion de Refacciones",
   "main": "main.js",
