@@ -3,6 +3,13 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 
+// Declarar electron como variable global para acceder desde el renderer
+declare global {
+  interface Window {
+    electron?: any;
+  }
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -141,6 +148,46 @@ import { TouchButtonComponent } from '../../shared/components/touch-button/touch
                 (clicked)="goToExcelImport()"
               >
                 IMPORTAR
+              </app-touch-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de verificar actualizaciones -->
+        <div class="max-w-md mx-auto mt-8">
+          <div class="professional-card hover:shadow-lg transition-all">
+            <div class="professional-content text-center">
+              <div class="tool-icon mb-4">
+                <svg
+                  class="w-12 h-12 mx-auto text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </div>
+
+              <h4 class="text-xl font-bold text-gray-800 mb-2">
+                Verificar Actualizaciones
+              </h4>
+              <p class="text-gray-600 text-sm mb-6">
+                Busca e instala actualizaciones automáticamente
+              </p>
+
+              <app-touch-button
+                variant="success"
+                size="md"
+                icon="🔄"
+                [fullWidth]="true"
+                (clicked)="checkForUpdates()"
+              >
+                VERIFICAR ACTUALIZACIONES
               </app-touch-button>
             </div>
           </div>
@@ -361,5 +408,26 @@ export class HomeComponent {
   goToExcelImport() {
     console.log('📊 Navigating to Excel import');
     this.router.navigate(['/excel-import']);
+  }
+
+  checkForUpdates() {
+    console.log('🔍 Verificando actualizaciones...');
+    
+    // En desarrollo, mostrar alerta
+    if (typeof window !== 'undefined' && !window.electron) {
+      alert('Esta función solo está disponible en la aplicación Electron');
+      return;
+    }
+
+    // En Electron, usar IPC para verificar actualizaciones
+    if (window.electron && window.electron.ipcRenderer) {
+      window.electron.ipcRenderer.invoke('check-for-updates')
+        .then(() => {
+          console.log('✅ Verificación de actualizaciones iniciada');
+        })
+        .catch((error: any) => {
+          console.error('❌ Error verificando actualizaciones:', error);
+        });
+    }
   }
 }

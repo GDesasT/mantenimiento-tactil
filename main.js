@@ -19,6 +19,8 @@ if (!isDev) {
 
 autoUpdater.on("checking-for-update", () => {
   console.log("🔍 Verificando actualizaciones...");
+  console.log("📍 URL de actualización:", autoUpdater.getFeedURL());
+  console.log("📍 Versión actual:", app.getVersion());
   if (mainWindow) {
     mainWindow.webContents.send("update-status", "checking");
   }
@@ -45,10 +47,14 @@ autoUpdater.on("update-available", (info) => {
 
 autoUpdater.on("update-not-available", () => {
   console.log("ℹ️ No hay actualizaciones disponibles");
+  console.log("📍 Versión actual:", app.getVersion());
+  console.log("📍 Última verificación:", new Date().toLocaleString());
 });
 
 autoUpdater.on("error", (err) => {
   console.error("❌ Error en actualización:", err);
+  console.error("📍 Detalles del error:", err.message);
+  console.error("📍 URL consultada:", autoUpdater.getFeedURL());
   if (mainWindow) {
     dialog.showErrorBox(
       "Error de Actualización",
@@ -97,6 +103,7 @@ function createWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       webSecurity: true,
+      preload: path.join(__dirname, "preload.js"),
     },
     show: false,
     titleBarStyle: "default",
