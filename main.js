@@ -1,17 +1,96 @@
-const { app, BrowserWindow, Menu, dialog } = require("electron");
+const { app, BrowserWindow, Menu, dialog, ipcMain } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const path = require("path");
 const isDev = process.env.NODE_ENV === "development";
 
 let mainWindow;
 
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+
+if (!isDev) {
+  autoUpdater.setFeedURL({
+    provider: "github",
+    owner: "GDesasT",
+    repo: "mantenimiento-tactil",
+    private: false,
+  });
+}
+
+autoUpdater.on("checking-for-update", () => {
+  console.log("🔍 Verificando actualizaciones...");
+  if (mainWindow) {
+    mainWindow.webContents.send("update-status", "checking");
+  }
+});
+
+autoUpdater.on("update-available", (info) => {
+  console.log("✅ Actualización disponible:", info.version);
+  if (mainWindow) {
+    dialog
+      .showMessageBox(mainWindow, {
+        type: "info",
+        title: "Actualización Disponible",
+        message: `Nueva versión disponible: ${info.version}`,
+        detail: "Se descargará automáticamente en segundo plano.",
+        buttons: ["Descargar Ahora", "Más Tarde"],
+      })
+      .then((result) => {
+        if (result.response === 0) {
+          autoUpdater.downloadUpdate();
+        }
+      });
+  }
+});
+
+autoUpdater.on("update-not-available", () => {
+  console.log("ℹ️ No hay actualizaciones disponibles");
+});
+
+autoUpdater.on("error", (err) => {
+  console.error("❌ Error en actualización:", err);
+  if (mainWindow) {
+    dialog.showErrorBox(
+      "Error de Actualización",
+      `Error al verificar actualizaciones: ${err.message}`
+    );
+  }
+});
+
+autoUpdater.on("download-progress", (progressObj) => {
+  const logMessage = `📥 Descargando: ${Math.round(progressObj.percent)}%`;
+  console.log(logMessage);
+  if (mainWindow) {
+    mainWindow.webContents.send("download-progress", progressObj);
+  }
+});
+
+autoUpdater.on("update-downloaded", () => {
+  console.log("✅ Actualización descargada");
+  if (mainWindow) {
+    dialog
+      .showMessageBox(mainWindow, {
+        type: "info",
+        title: "Actualización Lista",
+        message: "La actualización se ha descargado correctamente.",
+        detail: "La aplicación se reiniciará para aplicar los cambios.",
+        buttons: ["Reiniciar Ahora", "Reiniciar Al Cerrar"],
+      })
+      .then((result) => {
+        if (result.response === 0) {
+          autoUpdater.quitAndInstall();
+        }
+      });
+  }
+});
+
 function createWindow() {
-  // Crear la ventana principal
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 1200,
     minHeight: 800,
-    // Usar icono desde carpeta public
+
     icon: path.join(__dirname, "public/icon.png"),
     webPreferences: {
       nodeIntegration: false,
@@ -23,19 +102,15 @@ function createWindow() {
     titleBarStyle: "default",
     frame: true,
     autoHideMenuBar: true,
-    // ACTUALIZADO: Título correcto
+
     title: "Sistema de Gestión de Refacciones",
   });
 
-  // Cargar la aplicación
   if (isDev) {
-    // En desarrollo: conectar al servidor Angular
     mainWindow.loadURL("http://localhost:4200");
 
-    // Abrir DevTools en desarrollo
     mainWindow.webContents.openDevTools();
 
-    // Recarga automática en desarrollo (con manejo de errores)
     try {
       require("electron-reload")(__dirname, {
         electron: path.join(
@@ -51,42 +126,34 @@ function createWindow() {
       console.log("Electron-reload no disponible");
     }
   } else {
-    // En producción: cargar archivos estáticos
     mainWindow.loadFile(
       path.join(__dirname, "dist/mantenimiento-tactil/browser/index.html")
     );
   }
 
-  // Mostrar ventana cuando esté lista
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
 
-    // Maximizar en pantallas grandes para mejor experiencia táctil
     if (mainWindow.getBounds().width > 1600) {
       mainWindow.maximize();
     }
   });
 
-  // Configurar comportamiento al cerrar
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
 
-  // ACTUALIZADO: Usar el nuevo método para prevenir navegación externa
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     require("electron").shell.openExternal(url);
     return { action: "deny" };
   });
 
-  // Configurar zoom para interfaz táctil
   mainWindow.webContents.setZoomFactor(1.0);
 }
 
-// Configurar menú de aplicación
 function createMenu() {
   const template = [
     {
-      // ACTUALIZADO: Título correcto
       label: "🔧 Sistema de Gestión de Refacciones",
       submenu: [
         {
@@ -114,6 +181,12 @@ Funciones principales:
           },
         },
         { type: "separator" },
+        {
+          label: "🔄 Verificar Actualizaciones",
+          click: () => {
+            checkForUpdates();
+          },
+        },
         {
           label: "Reiniciar Base de Datos",
           click: () => {
@@ -193,7 +266,6 @@ Funciones principales:
       ],
     },
     {
-      // AGREGADO: Menú específico para navegación
       label: "Navegación",
       submenu: [
         {
@@ -245,10 +317,13 @@ Funciones principales:
   Menu.setApplicationMenu(menu);
 }
 
-// Eventos de la aplicación
 app.whenReady().then(() => {
   createWindow();
   createMenu();
+
+  setTimeout(() => {
+    checkForUpdates();
+  }, 3000);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -263,7 +338,6 @@ app.on("window-all-closed", () => {
   }
 });
 
-// Configuración de seguridad
 app.on("web-contents-created", (event, contents) => {
   contents.setWindowOpenHandler(({ url }) => {
     require("electron").shell.openExternal(url);
@@ -271,10 +345,8 @@ app.on("web-contents-created", (event, contents) => {
   });
 });
 
-// Configurar protocolo personalizado
 app.setAsDefaultProtocolClient("mantenimiento-tactil");
 
-// AGREGADO: Manejo de errores
 process.on("uncaughtException", (error) => {
   console.error("Error crítico:", error);
   dialog.showErrorBox(
@@ -283,6 +355,13 @@ process.on("uncaughtException", (error) => {
   );
 });
 
-// AGREGADO: Optimización para interfaz táctil
 app.commandLine.appendSwitch("touch-events", "enabled");
 app.commandLine.appendSwitch("enable-experimental-web-platform-features");
+
+function checkForUpdates() {
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify();
+  } else {
+    console.log("🔧 Modo desarrollo: actualizaciones deshabilitadas");
+  }
+}
