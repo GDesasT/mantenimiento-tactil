@@ -19,7 +19,7 @@ declare global {
       <!-- Header profesional -->
       <div class="section-header text-center mb-8">
         <h1 class="text-4xl font-bold text-gradient-pro mb-4">
-          Sistema de Gestión de Refacciones v1.0.2
+          Sistema de Gestión de Refacciones
         </h1>
         <p class="text-xl text-gray-600">Selecciona el área de trabajo</p>
       </div>
