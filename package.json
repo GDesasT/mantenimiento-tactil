@@ -1,6 +1,6 @@
 {
   "name": "mantenimiento-tactil",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "DTSoftware",
   "description": "Sistema de Gestion de Refacciones",
   "main": "main.js",
@@ -79,7 +79,7 @@
   },
   "build": {
     "appId": "com.empresa.mantenimiento-tactil",
-    "productName": "Sistema de Gestion de Refacciones",
+    "productName": "Sistema-de-Gestion-de-Refacciones",
     "copyright": "Copyright (c) 2025 DTSoftware",
     "directories": {
       "output": "electron-dist"
@@ -124,7 +124,8 @@
           ]
         }
       ],
-      "icon": "public/icon.ico"
+      "icon": "public/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
