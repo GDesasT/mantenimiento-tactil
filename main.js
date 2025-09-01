@@ -358,6 +358,21 @@ app.on("window-all-closed", () => {
   }
 });
 
+// IPC Handlers
+ipcMain.handle("check-for-updates", async () => {
+  try {
+    console.log("🔍 Verificando actualizaciones via IPC...");
+    return await autoUpdater.checkForUpdatesAndNotify();
+  } catch (error) {
+    console.error("❌ Error verificando actualizaciones:", error);
+    throw error;
+  }
+});
+
+ipcMain.handle("get-app-version", () => {
+  return app.getVersion();
+});
+
 app.on("web-contents-created", (event, contents) => {
   contents.setWindowOpenHandler(({ url }) => {
     require("electron").shell.openExternal(url);
