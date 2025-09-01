@@ -14,7 +14,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
   imports: [CommonModule, FormsModule, TouchButtonComponent],
   template: `
     <div class="app-container">
-      <!-- Header profesional -->
       <div class="professional-header">
         <div class="header-content">
           <div class="header-left">
@@ -39,30 +38,41 @@ import { Part, PartCategory, Machine } from '../../core/models';
           </div>
 
           <div class="header-right">
-            <!-- Admin mode toggle -->
-            <div class="admin-section">
-              <app-touch-button
-                *ngIf="!isAdminMode"
-                variant="secondary"
-                size="md"
-                icon="⚙️"
-                (clicked)="openAdminModal()"
-                class="admin-gear"
-              >
-                Admin
-              </app-touch-button>
+            <app-touch-button
+              *ngIf="isAdminMode"
+              variant="warning"
+              size="sm"
+              icon="🔧"
+              (clicked)="forceUpdatePartsWithImageField()"
+              class="debug-btn"
+              title="Fix Image Field"
+              style="margin-right: 0.5rem;"
+            >
+              Fix Images
+            </app-touch-button>
 
-              <app-touch-button
-                *ngIf="isAdminMode"
-                variant="warning"
-                size="md"
-                icon="🔓"
-                (clicked)="exitAdminMode()"
-                class="admin-active"
-              >
-                Salir Admin
-              </app-touch-button>
-            </div>
+            <app-touch-button
+              *ngIf="!isAdminMode"
+              variant="secondary"
+              size="sm"
+              icon="⚙️"
+              (clicked)="openAdminModal()"
+              class="admin-btn"
+              title="Modo Administrador"
+            >
+            </app-touch-button>
+
+            <app-touch-button
+              *ngIf="isAdminMode"
+              variant="warning"
+              size="sm"
+              icon="🔓"
+              (clicked)="exitAdminMode()"
+              class="admin-btn-active"
+              title="Salir Modo Admin"
+            >
+              Admin
+            </app-touch-button>
 
             <app-touch-button
               variant="success"
@@ -78,7 +88,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
       </div>
 
       <div class="content-area">
-        <!-- Filtros por categoría -->
         <div class="filters-section">
           <div class="professional-card">
             <div class="professional-content">
@@ -131,24 +140,57 @@ import { Part, PartCategory, Machine } from '../../core/models';
           </div>
         </div>
 
-        <!-- Lista de refacciones -->
-        <div *ngIf="filteredParts.length > 0" class="parts-grid">
+        <div *ngIf="paginatedParts.length > 0" class="parts-grid">
           <div
-            *ngFor="let part of filteredParts; let i = index"
+            *ngFor="let part of paginatedParts; let i = index"
             class="part-card professional-card animate-fadeInUp"
             [style.animation-delay]="i * 0.1 + 's'"
             [class]="'part-card-' + part.category"
           >
             <div class="professional-content part-content">
-              <!-- Header de la refacción -->
               <div class="part-header">
-                <div class="part-category-badge">
-                  <span class="category-icon">{{
-                    getCategoryIcon(part.category)
-                  }}</span>
-                  <span class="category-label">{{
-                    getCategoryLabel(part.category)
-                  }}</span>
+                <div class="part-category-section">
+                  <div class="part-image-container">
+                    <img
+                      *ngIf="part.image && part.image.trim()"
+                      [src]="part.image"
+                      [alt]="part.description"
+                      class="part-image"
+                      (error)="onImageError($event)"
+                      (load)="onImageLoad(part)"
+                    />
+                    <div
+                      class="part-image-placeholder"
+                      [attr.data-category]="part.category"
+                      *ngIf="!part.image || !part.image.trim()"
+                    >
+                      <span class="placeholder-icon">{{
+                        getCategoryIcon(part.category)
+                      }}</span>
+                      <span class="placeholder-text">{{
+                        getCategoryLabel(part.category)
+                      }}</span>
+                      <div
+                        *ngIf="isAdminMode"
+                        class="add-image-btn"
+                        (click)="addImageToPart(part)"
+                      >
+                        <span class="add-icon">📷</span>
+                        <span class="add-text"
+                          >{{ part.image ? 'Cambiar' : 'Agregar' }} imagen</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="part-category-badge">
+                    <span class="category-icon">{{
+                      getCategoryIcon(part.category)
+                    }}</span>
+                    <span class="category-label">{{
+                      getCategoryLabel(part.category)
+                    }}</span>
+                  </div>
                 </div>
 
                 <div class="part-info">
@@ -174,38 +216,24 @@ import { Part, PartCategory, Machine } from '../../core/models';
                 </div>
               </div>
 
-              <!-- Las imágenes NO se muestran aquí - solo en el modal -->
-
-              <!-- Acciones -->
-              <div class="part-actions">
-                <app-touch-button
-                  variant="primary"
-                  size="md"
-                  [fullWidth]="true"
-                  icon="👁️"
-                  (clicked)="viewPartDetail(part)"
-                  class="main-action"
-                >
-                  Ver Detalle
-                </app-touch-button>
-
-                <div class="secondary-actions">
+              <div class="part-actions" *ngIf="isAdminMode">
+                <div class="admin-actions">
                   <app-touch-button
-                    *ngIf="isAdminMode"
                     variant="warning"
                     size="sm"
                     icon="✏️"
                     (clicked)="editPart(part)"
+                    [fullWidth]="true"
                   >
                     Editar
                   </app-touch-button>
 
                   <app-touch-button
-                    *ngIf="isAdminMode"
                     variant="danger"
                     size="sm"
                     icon="🗑️"
                     (clicked)="requestDeletePart(part)"
+                    [fullWidth]="true"
                   >
                     Eliminar
                   </app-touch-button>
@@ -215,7 +243,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
           </div>
         </div>
 
-        <!-- Estado vacío -->
         <div
           *ngIf="filteredParts.length === 0 && !isLoading"
           class="empty-state-pro"
@@ -233,144 +260,123 @@ import { Part, PartCategory, Machine } from '../../core/models';
           </app-touch-button>
         </div>
 
-        <!-- Loading state -->
         <div *ngIf="isLoading" class="loading-professional">
           <div class="loading-spinner-pro"></div>
           <span class="loading-text">Cargando refacciones...</span>
         </div>
-      </div>
 
-      <!-- Modal de detalle de refacción -->
-      <div
-        *ngIf="showDetailModal"
-        class="modal-overlay"
-        (click)="closeDetailModal()"
-      >
-        <div class="modal-container" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <div class="modal-title">
-              <span class="modal-icon">👁️</span>
-              <h3>Detalle de Refacción</h3>
-            </div>
-            <button class="modal-close" (click)="closeDetailModal()">✕</button>
+        <div
+          *ngIf="paginatedParts.length > 0 && totalPages > 1"
+          class="page-navigation-sidebar"
+        >
+          <div class="page-info-sidebar">
+            <span class="current-page">{{ currentPage }}</span>
+            <span class="page-separator">/</span>
+            <span class="total-pages">{{ totalPages }}</span>
           </div>
 
-          <div class="modal-content" *ngIf="selectedPart">
-            <!-- Categoria y descripción -->
-            <div class="modal-section">
-              <div
-                class="modal-category-badge"
-                [class]="'badge-' + selectedPart.category"
+          <div class="page-numbers-vertical">
+            <div
+              *ngFor="let page of getVisiblePages()"
+              class="page-number-vertical"
+              [class.active]="page === currentPage"
+              [class.ellipsis]="page === '...'"
+              (click)="page !== '...' && goToPage(page)"
+              [title]="page !== '...' ? 'Ir a página ' + page : ''"
+            >
+              {{ page }}
+            </div>
+          </div>
+
+          <div class="navigation-controls-vertical">
+            <button
+              class="nav-btn nav-btn-first"
+              [disabled]="currentPage === 1"
+              (click)="goToFirstPage()"
+              title="Primera página"
+            >
+              ⏮️
+            </button>
+
+            <button
+              class="nav-btn nav-btn-prev"
+              [disabled]="currentPage === 1"
+              (click)="previousPage()"
+              title="Página anterior"
+            >
+              ⬅️
+            </button>
+
+            <button
+              class="nav-btn nav-btn-next"
+              [disabled]="currentPage === totalPages"
+              (click)="nextPage()"
+              title="Página siguiente"
+            >
+              ➡️
+            </button>
+
+            <button
+              class="nav-btn nav-btn-last"
+              [disabled]="currentPage === totalPages"
+              (click)="goToLastPage()"
+              title="Última página"
+            >
+              ⏭️
+            </button>
+          </div>
+
+          <div class="total-info">
+            <span class="total-count">{{ filteredParts.length }}</span>
+            <span class="total-label">refacciones</span>
+          </div>
+        </div>
+
+        <div
+          *ngIf="paginatedParts.length > 0 && totalPages > 1"
+          class="pagination-mobile"
+        >
+          <div class="pagination-mobile-info">
+            <span class="page-info-mobile">
+              Página {{ currentPage }} de {{ totalPages }} ({{
+                filteredParts.length
+              }}
+              refacciones)
+            </span>
+          </div>
+
+          <div class="pagination-mobile-controls">
+            <button
+              class="mobile-nav-btn"
+              [disabled]="currentPage === 1"
+              (click)="previousPage()"
+            >
+              ⬅️ Anterior
+            </button>
+
+            <div class="mobile-page-numbers">
+              <span
+                *ngFor="let page of getVisiblePages().slice(0, 5)"
+                class="mobile-page-number"
+                [class.active]="page === currentPage"
+                [class.ellipsis]="page === '...'"
+                (click)="page !== '...' && goToPage(page)"
               >
-                <span class="badge-icon">{{
-                  getCategoryIcon(selectedPart.category)
-                }}</span>
-                <span class="badge-label">{{
-                  getCategoryLabel(selectedPart.category)
-                }}</span>
-              </div>
-              <h2 class="modal-description">{{ selectedPart.description }}</h2>
+                {{ page }}
+              </span>
             </div>
 
-            <!-- Información detallada -->
-            <div class="modal-section">
-              <div class="detail-grid">
-                <div class="detail-item">
-                  <div class="detail-icon">📦</div>
-                  <div class="detail-info">
-                    <span class="detail-title">Número SAP</span>
-                    <span class="detail-data sap-highlight">{{
-                      selectedPart.sapNumber
-                    }}</span>
-                  </div>
-                </div>
-
-                <div class="detail-item">
-                  <div class="detail-icon">🔖</div>
-                  <div class="detail-info">
-                    <span class="detail-title">Número de Parte</span>
-                    <span class="detail-data">{{
-                      selectedPart.partNumber
-                    }}</span>
-                  </div>
-                </div>
-
-                <div class="detail-item">
-                  <div class="detail-icon">📍</div>
-                  <div class="detail-info">
-                    <span class="detail-title">Ubicación</span>
-                    <span class="detail-data location-highlight">{{
-                      selectedPart.location
-                    }}</span>
-                  </div>
-                </div>
-
-                <div class="detail-item">
-                  <div class="detail-icon">🔧</div>
-                  <div class="detail-info">
-                    <span class="detail-title">Máquina</span>
-                    <span class="detail-data machine-highlight">{{
-                      machine?.name
-                    }}</span>
-                  </div>
-                </div>
-
-                <div class="detail-item">
-                  <div class="detail-icon">🏭</div>
-                  <div class="detail-info">
-                    <span class="detail-title">Área</span>
-                    <span class="detail-data area-highlight">{{
-                      getAreaTitle()
-                    }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Imagen si existe - SOLO AQUÍ SE MUESTRA -->
-            <div *ngIf="selectedPart.image" class="modal-section">
-              <h4 class="image-section-title">📸 Imagen de la Refacción</h4>
-              <div class="modal-image-container">
-                <img
-                  [src]="selectedPart.image"
-                  [alt]="selectedPart.description"
-                  class="modal-image"
-                  (error)="onImageError($event)"
-                />
-                <div class="image-caption">
-                  <span class="caption-text">{{
-                    selectedPart.description
-                  }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Acciones del modal -->
-          <div class="modal-actions">
-            <app-touch-button
-              *ngIf="isAdminMode"
-              variant="warning"
-              size="lg"
-              icon="✏️"
-              (clicked)="editPartFromModal()"
+            <button
+              class="mobile-nav-btn"
+              [disabled]="currentPage === totalPages"
+              (click)="nextPage()"
             >
-              Editar Refacción
-            </app-touch-button>
-
-            <app-touch-button
-              variant="secondary"
-              size="lg"
-              icon="✕"
-              (clicked)="closeDetailModal()"
-            >
-              Cerrar
-            </app-touch-button>
+              Siguiente ➡️
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Notificación de éxito -->
       <div
         *ngIf="showSuccessNotification"
         class="success-notification animate-slideInRight"
@@ -381,7 +387,16 @@ import { Part, PartCategory, Machine } from '../../core/models';
         </div>
       </div>
 
-      <!-- Modal de administrador -->
+      <div
+        *ngIf="showErrorNotification"
+        class="error-notification animate-slideInRight"
+      >
+        <div class="notification-content">
+          <span class="notification-icon">❌</span>
+          <span class="notification-text">{{ errorMessage }}</span>
+        </div>
+      </div>
+
       <div
         *ngIf="showAdminModal"
         class="modal-overlay"
@@ -450,7 +465,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         </div>
       </div>
 
-      <!-- Modal de eliminación con contraseña -->
       <div
         *ngIf="showPasswordDeleteModal"
         class="modal-overlay"
@@ -557,6 +571,32 @@ import { Part, PartCategory, Machine } from '../../core/models';
         position: relative;
       }
 
+      .admin-btn {
+        opacity: 0.6;
+        transition: all 0.3s ease;
+        margin-right: 12px;
+      }
+
+      .admin-btn:hover {
+        opacity: 1;
+      }
+
+      .admin-btn-active {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
+        color: white !important;
+        margin-right: 12px;
+        animation: subtle-glow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes subtle-glow {
+        from {
+          box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+        to {
+          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+        }
+      }
+
       .professional-header {
         background: var(--gradient-primary);
         color: white;
@@ -636,7 +676,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         margin: 0 auto;
       }
 
-      /* Filtros */
       .filters-section {
         margin-bottom: 2rem;
       }
@@ -648,20 +687,36 @@ import { Part, PartCategory, Machine } from '../../core/models';
         gap: 1rem;
       }
 
-      /* Lista de refacciones */
       .parts-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 2rem;
+        animation: fadeInContent 0.4s ease-out;
+      }
+
+      @keyframes fadeInContent {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .part-card {
-        min-height: 400px;
+        min-height: 480px;
         display: flex;
         flex-direction: column;
         border: 2px solid transparent;
         border-left: 6px solid;
         transition: all 0.3s ease;
+        position: relative;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
       }
 
       .part-card-mecanica {
@@ -677,8 +732,8 @@ import { Part, PartCategory, Machine } from '../../core/models';
       }
 
       .part-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-xl);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
       }
 
       .part-content {
@@ -689,6 +744,79 @@ import { Part, PartCategory, Machine } from '../../core/models';
 
       .part-header {
         margin-bottom: 1.5rem;
+      }
+
+      .part-image-container {
+        width: 220px;
+        height: 165px;
+        margin: 0 auto 1rem auto;
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+        border: 2px solid var(--gray-200);
+        background: var(--gray-50);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .part-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: var(--border-radius-md);
+        transition: transform 0.2s ease;
+      }
+
+      .part-image:hover {
+        transform: scale(1.02);
+      }
+
+      .part-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+        color: var(--gray-600);
+        text-align: center;
+        padding: 0.5rem;
+      }
+
+      .placeholder-icon {
+        font-size: 1.5rem;
+        opacity: 0.7;
+      }
+
+      .placeholder-text {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        line-height: 1.2;
+      }
+
+      .add-image-btn {
+        margin-top: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        background: var(--primary-600);
+        color: white;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.625rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .add-image-btn:hover {
+        background: var(--primary-700);
+        transform: translateY(-1px);
+      }
+
+      .add-icon {
+        margin-right: 0.25rem;
       }
 
       .part-category-badge {
@@ -777,19 +905,18 @@ import { Part, PartCategory, Machine } from '../../core/models';
         margin-top: auto;
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.75rem;
       }
 
-      .secondary-actions {
+      .admin-actions {
         display: flex;
         gap: 0.75rem;
       }
 
-      .secondary-actions app-touch-button {
+      .admin-actions app-touch-button {
         flex: 1;
       }
 
-      /* Modal */
       .modal-overlay {
         position: fixed;
         top: 0;
@@ -1019,7 +1146,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         font-weight: bold;
       }
 
-      /* SECCIÓN DE IMAGEN - SOLO EN MODAL */
       .image-section-title {
         font-size: 1.125rem;
         font-weight: bold;
@@ -1078,7 +1204,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         flex: 1;
       }
 
-      /* Modal de eliminación */
       .delete-warning {
         text-align: center;
       }
@@ -1145,7 +1270,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         margin-top: 1rem;
       }
 
-      /* Notificación de éxito */
       .success-notification {
         position: fixed;
         top: 2rem;
@@ -1157,6 +1281,20 @@ import { Part, PartCategory, Machine } from '../../core/models';
         border-radius: var(--border-radius-lg);
         box-shadow: var(--shadow-xl);
         border: 2px solid #059669;
+        max-width: 400px;
+      }
+
+      .error-notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1100;
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        border: 2px solid #b91c1c;
         max-width: 400px;
       }
 
@@ -1181,7 +1319,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         font-size: 1.125rem;
       }
 
-      /* Animaciones */
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -1232,7 +1369,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         animation: slideInRight 0.5s ease-out;
       }
 
-      /* Admin Modal */
       .admin-modal {
         max-width: 500px;
       }
@@ -1306,7 +1442,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
       }
 
-      /* Responsive */
       @media (max-width: 768px) {
         .header-content {
           flex-direction: column;
@@ -1382,6 +1517,13 @@ import { Part, PartCategory, Machine } from '../../core/models';
           left: 1rem;
           max-width: none;
         }
+
+        .error-notification {
+          top: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
       }
 
       @media (max-width: 480px) {
@@ -1409,6 +1551,321 @@ import { Part, PartCategory, Machine } from '../../core/models';
           font-size: 1.25rem;
         }
       }
+
+      .page-navigation-sidebar {
+        position: fixed;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        padding: 1rem 0.75rem;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        min-width: 60px;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .page-info-sidebar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      .current-page {
+        font-size: 1.25rem;
+        color: var(--primary-600);
+        font-weight: bold;
+      }
+
+      .page-separator {
+        color: var(--gray-400);
+        margin: 0 2px;
+      }
+
+      .total-pages {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+      }
+
+      .page-numbers-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 0.25rem;
+      }
+
+      .page-number-vertical {
+        min-width: 36px;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+        background: var(--gray-100);
+        color: var(--gray-600);
+        touch-action: manipulation;
+      }
+
+      .page-number-vertical:hover:not(.ellipsis):not(.active) {
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border-color: var(--primary-200);
+        transform: scale(1.05);
+      }
+
+      .page-number-vertical.active {
+        background: var(--primary-600);
+        color: white;
+        border-color: var(--primary-600);
+        box-shadow: var(--shadow-md);
+        transform: scale(1.1);
+      }
+
+      .page-number-vertical.ellipsis {
+        cursor: default;
+        background: transparent;
+        color: var(--gray-400);
+        font-size: 0.75rem;
+      }
+
+      .page-number-vertical.ellipsis:hover {
+        background: transparent;
+        transform: none;
+      }
+
+      .navigation-controls-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .nav-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-300);
+        background: white;
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        touch-action: manipulation;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .nav-btn:hover:not(:disabled) {
+        background: var(--primary-50);
+        border-color: var(--primary-300);
+        color: var(--primary-700);
+        transform: scale(1.05);
+      }
+
+      .nav-btn:active:not(:disabled) {
+        transform: scale(0.95);
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: var(--gray-50);
+        color: var(--gray-400);
+      }
+
+      .total-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.75rem;
+        color: var(--gray-500);
+        text-align: center;
+        line-height: 1.2;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--gray-200);
+      }
+
+      .total-count {
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: 0.875rem;
+      }
+
+      .total-label {
+        color: var(--gray-500);
+      }
+
+      .pagination-mobile {
+        display: none;
+        margin-top: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+      }
+
+      .pagination-mobile-info {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .page-info-mobile {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        font-weight: 500;
+      }
+
+      .pagination-mobile-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .mobile-nav-btn {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-300);
+        background: white;
+        color: var(--gray-700);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        touch-action: manipulation;
+        min-width: 90px;
+      }
+
+      .mobile-nav-btn:hover:not(:disabled) {
+        background: var(--primary-50);
+        border-color: var(--primary-300);
+        color: var(--primary-700);
+      }
+
+      .mobile-nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .mobile-page-numbers {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .mobile-page-number {
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        background: var(--gray-100);
+        color: var(--gray-600);
+        touch-action: manipulation;
+      }
+
+      .mobile-page-number:hover:not(.ellipsis):not(.active) {
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border-color: var(--primary-200);
+      }
+
+      .mobile-page-number.active {
+        background: var(--primary-600);
+        color: white;
+        border-color: var(--primary-600);
+      }
+
+      .mobile-page-number.ellipsis {
+        cursor: default;
+        background: transparent;
+        color: var(--gray-400);
+      }
+
+      @media (max-width: 1024px) {
+        .page-navigation-sidebar {
+          right: 10px;
+          padding: 0.75rem 0.5rem;
+          min-width: 50px;
+        }
+
+        .page-number-vertical,
+        .nav-btn {
+          min-width: 32px;
+          min-height: 32px;
+          font-size: 0.8rem;
+        }
+
+        .current-page {
+          font-size: 1.125rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .page-navigation-sidebar {
+          display: none;
+        }
+
+        .pagination-mobile {
+          display: block;
+        }
+
+        .pagination-mobile-controls {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .mobile-page-numbers {
+          order: -1;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .mobile-nav-btn {
+          min-width: 80px;
+          font-size: 0.8rem;
+          padding: 0.5rem 0.75rem;
+        }
+
+        .mobile-page-number {
+          min-width: 28px;
+          height: 28px;
+          font-size: 0.8rem;
+        }
+
+        .page-info-mobile {
+          font-size: 0.8rem;
+        }
+      }
     `,
   ],
 })
@@ -1421,25 +1878,29 @@ export class PartListComponent implements OnInit {
   selectedCategory: 'all' | PartCategory = 'all';
   isLoading = true;
 
-  // Modal states
-  showDetailModal = false;
-  selectedPart: Part | null = null;
+  /** Configuración de paginación */
+  currentPage = 1;
+  itemsPerPage = 12;
+  totalPages = 1;
+  paginatedParts: Part[] = [];
+
   partToDelete: Part | null = null;
   isDeleting = false;
 
-  // Admin mode
+  /** Estado del modo administrador */
   isAdminMode = false;
   showAdminModal = false;
   adminPassword = '';
   private adminTimeout: any;
 
-  // Password delete modal
   showPasswordDeleteModal = false;
   deletePassword = '';
 
-  // Notificación
+  /** Control de notificaciones */
   showSuccessNotification = false;
   successMessage = '';
+  showErrorNotification = false;
+  errorMessage = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -1475,7 +1936,6 @@ export class PartListComponent implements OnInit {
       this.machineService.getMachineById(this.machineId).subscribe({
         next: (machine) => {
           this.machine = machine || null;
-          console.log('🔧 Loaded machine:', this.machine);
         },
         error: (error) => {
           console.error('Error loading machine:', error);
@@ -1494,7 +1954,17 @@ export class PartListComponent implements OnInit {
           this.allParts = parts;
           this.applyFilter();
           this.isLoading = false;
-          console.log('📦 Loaded parts:', parts);
+
+          parts.forEach((part, index) => {
+            if (part.image && part.image.trim()) {
+              console.log(
+                `🖼️ Part ${index + 1} HAS IMAGE: ${part.description}`
+              );
+              console.log(`  - Image URL: "${part.image}"`);
+            } else {
+              console.log(`� Part ${index + 1} NO IMAGE: ${part.description}`);
+            }
+          });
         },
         error: (error) => {
           console.error('Error loading parts:', error);
@@ -1520,6 +1990,125 @@ export class PartListComponent implements OnInit {
         (part) => part.category === this.selectedCategory
       );
     }
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  /** Actualizar paginación y elementos visibles */
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredParts.length / this.itemsPerPage);
+
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = Math.max(1, this.totalPages);
+    }
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+
+    this.paginatedParts = this.filteredParts.slice(startIndex, endIndex);
+
+    this.restartGridAnimation();
+  }
+
+  /** Reiniciar animación del grid para transiciones visuales */
+  private restartGridAnimation() {
+    setTimeout(() => {
+      const partsGrid = document.querySelector('.parts-grid') as HTMLElement;
+      if (partsGrid) {
+        partsGrid.style.animation = 'none';
+        partsGrid.offsetHeight;
+        partsGrid.style.animation = 'fadeInContent 0.4s ease-out';
+      }
+    }, 50);
+  }
+
+  /** Hacer scroll suave hacia el header */
+  private scrollToTop() {
+    setTimeout(() => {
+      const header = document.querySelector('.professional-header');
+      if (header) {
+        header.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      }
+    }, 100);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+      this.scrollToTop();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+      this.scrollToTop();
+    }
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page === 'number' && page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+      this.scrollToTop();
+    }
+  }
+
+  goToFirstPage() {
+    this.currentPage = 1;
+    this.updatePagination();
+    this.scrollToTop();
+  }
+
+  goToLastPage() {
+    this.currentPage = this.totalPages;
+    this.updatePagination();
+    this.scrollToTop();
+  }
+
+  getVisiblePages(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const maxVisiblePages = 5;
+
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const startPage = Math.max(1, this.currentPage - 2);
+      const endPage = Math.min(this.totalPages, this.currentPage + 2);
+
+      if (startPage > 1) {
+        pages.push(1);
+        if (startPage > 2) {
+          pages.push('...');
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+
+      if (endPage < this.totalPages) {
+        if (endPage < this.totalPages - 1) {
+          pages.push('...');
+        }
+        pages.push(this.totalPages);
+      }
+    }
+
+    return pages;
   }
 
   getPartsByCategory(category: PartCategory): Part[] {
@@ -1597,53 +2186,57 @@ export class PartListComponent implements OnInit {
     )}`;
   }
 
-  onImageError(event: any) {
-    console.warn('Error loading image:', event);
-    event.target.style.display = 'none';
+  goBack() {
+    this.router.navigate(['/machine-list', this.selectedArea]);
   }
 
-  // Modal de detalle
-  viewPartDetail(part: Part) {
-    console.log('👁️ View part detail:', part.description);
-    this.selectedPart = part;
-    this.showDetailModal = true;
+  /** Métodos de administración */
+  openAdminModal() {
+    this.showAdminModal = true;
+    this.adminPassword = '';
   }
 
-  closeDetailModal() {
-    this.showDetailModal = false;
-    this.selectedPart = null;
+  closeAdminModal() {
+    this.showAdminModal = false;
+    this.adminPassword = '';
   }
 
-  editPartFromModal() {
-    if (this.selectedPart) {
-      this.closeDetailModal();
-      this.editPart(this.selectedPart);
+  exitAdminMode() {
+    this.isAdminMode = false;
+    if (this.adminTimeout) {
+      clearTimeout(this.adminTimeout);
     }
   }
 
-  // Notificación de éxito
-  showSuccess(message: string) {
-    this.successMessage = message;
-    this.showSuccessNotification = true;
+  checkAdminPassword() {
+    if (this.adminPassword === 'Mantenimiento1.') {
+      this.isAdminMode = true;
+      this.showAdminModal = false;
+      this.adminPassword = '';
 
-    setTimeout(() => {
-      this.showSuccessNotification = false;
-    }, 4000);
+      this.adminTimeout = setTimeout(() => {
+        this.exitAdminMode();
+      }, 5 * 60 * 1000);
+    } else {
+      this.showError('Contraseña incorrecta');
+      this.adminPassword = '';
+    }
   }
 
-  goBack() {
-    this.router.navigate([
-      '/machines',
-      this.selectedArea,
-      this.machineId,
-      'parts',
-    ]);
+  onInputInteraction(event: any) {
+    if (event.type === 'focus' || event.type === 'click') {
+      return;
+    }
+
+    if (event.type === 'keydown') {
+      return;
+    }
   }
 
+  /** Gestión de refacciones */
   addPart() {
-    console.log('➕ Add new part to machine:', this.machineId);
     const category =
-      this.selectedCategory === 'all' ? 'mecanica' : this.selectedCategory;
+      this.selectedCategory !== 'all' ? this.selectedCategory : 'mecanica';
     this.router.navigate([
       '/machines',
       this.selectedArea,
@@ -1655,68 +2248,17 @@ export class PartListComponent implements OnInit {
   }
 
   editPart(part: Part) {
-    console.log('✏️ Edit part:', part.description);
     this.router.navigate([
       '/machines',
       this.selectedArea,
       this.machineId,
       'parts',
-      this.selectedCategory,
+      part.category,
       part.id,
       'edit',
     ]);
   }
 
-  // Admin mode methods
-  openAdminModal() {
-    this.showAdminModal = true;
-    this.adminPassword = '';
-
-    // Focus the input after modal opens
-    setTimeout(() => {
-      const input = document.querySelector('.admin-input') as HTMLInputElement;
-      if (input) {
-        input.focus();
-      }
-    }, 100);
-  }
-
-  closeAdminModal() {
-    this.showAdminModal = false;
-    this.adminPassword = '';
-  }
-
-  // Prevent modal close on input interaction
-  onInputInteraction(event: Event) {
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-  }
-
-  checkAdminPassword() {
-    if (this.adminPassword === 'Mantenimiento1.') {
-      this.isAdminMode = true;
-      this.closeAdminModal();
-      this.showSuccess('Modo administrador activado');
-
-      // Auto logout after 5 minutes
-      this.adminTimeout = setTimeout(() => {
-        this.exitAdminMode();
-      }, 5 * 60 * 1000);
-    } else {
-      this.showSuccess('Contraseña incorrecta');
-      this.adminPassword = '';
-    }
-  }
-
-  exitAdminMode() {
-    this.isAdminMode = false;
-    if (this.adminTimeout) {
-      clearTimeout(this.adminTimeout);
-    }
-    this.showSuccess('Modo administrador desactivado');
-  }
-
-  // Password delete methods
   requestDeletePart(part: Part) {
     this.partToDelete = part;
     this.showPasswordDeleteModal = true;
@@ -1729,30 +2271,162 @@ export class PartListComponent implements OnInit {
     this.deletePassword = '';
   }
 
-  confirmPasswordDelete() {
-    if (this.deletePassword !== 'Mantenimiento1.') {
-      this.showSuccess('Contraseña incorrecta');
+  confirmDeletePart() {
+    if (this.deletePassword === 'Mantenimiento1.' && this.partToDelete) {
+      this.isDeleting = true;
+      this.partService.deletePart(this.partToDelete.id!).subscribe({
+        next: () => {
+          this.showSuccess('Refacción eliminada exitosamente');
+          this.loadParts();
+          this.closePasswordDeleteModal();
+          this.isDeleting = false;
+        },
+        error: (error) => {
+          console.error('Error deleting part:', error);
+          this.showError('Error al eliminar la refacción');
+          this.isDeleting = false;
+        },
+      });
+    } else {
+      this.showError('Contraseña incorrecta');
       this.deletePassword = '';
-      return;
+    }
+  }
+
+  confirmPasswordDelete() {
+    this.confirmDeletePart();
+  }
+
+  onImageError(event: any) {
+    const imgElement = event.target;
+    const imageUrl = imgElement.src;
+
+    if (!imageUrl || imageUrl === '' || imageUrl.includes('404')) {
+      imgElement.style.display = 'none';
+
+      const container = imgElement.closest('.part-image-container');
+      if (container) {
+        const placeholder = container.querySelector('.part-image-placeholder');
+        if (placeholder) {
+          placeholder.style.display = 'flex';
+
+          if (
+            this.isAdminMode &&
+            !placeholder.querySelector('.add-image-btn')
+          ) {
+            const addImageBtn = document.createElement('div');
+            addImageBtn.className = 'add-image-btn';
+            addImageBtn.innerHTML =
+              '<span class="add-icon">📷</span><span class="add-text">Cambiar imagen</span>';
+            addImageBtn.addEventListener('click', () => {
+              const partCard = container.closest('.part-card');
+              if (partCard) {
+                const partIndex = Array.from(
+                  partCard.parentNode!.children
+                ).indexOf(partCard);
+                if (this.filteredParts[partIndex]) {
+                  this.addImageToPart(this.filteredParts[partIndex]);
+                }
+              }
+            });
+            placeholder.appendChild(addImageBtn);
+          }
+        }
+      }
+    }
+  }
+
+  onImageLoad(part: Part) {}
+
+  addImageToPart(part: Part) {
+    const imageUrl = prompt(
+      `Ingresa la URL completa de la imagen para "${part.description}":\n\nEjemplo: https://ejemplo.com/imagen.jpg\n\nAsegúrate de que la URL termine en .jpg, .png, .gif o .webp`
+    );
+
+    if (imageUrl && imageUrl.trim()) {
+      const updatedPart = {
+        ...part,
+        image: imageUrl.trim(),
+        updatedAt: new Date(),
+      };
+
+      this.partService.updatePart(part.id!, updatedPart).subscribe({
+        next: () => {
+          const partIndex = this.allParts.findIndex((p) => p.id === part.id);
+          if (partIndex !== -1) {
+            this.allParts[partIndex] = {
+              ...this.allParts[partIndex],
+              image: imageUrl.trim(),
+            };
+            this.applyFilter();
+          }
+
+          this.showSuccess('Imagen agregada exitosamente');
+
+          setTimeout(() => {
+            this.loadParts();
+          }, 500);
+        },
+        error: (error) => {
+          console.error('❌ Error updating part image:', error);
+          this.showError('Error al agregar la imagen. Intenta nuevamente.');
+        },
+      });
+    }
+  }
+
+  /** Actualizar refacciones con campo imagen (herramienta de mantenimiento) */
+  async forceUpdatePartsWithImageField() {
+    try {
+      const allParts = await this.databaseService.parts.toArray();
+
+      for (const part of allParts) {
+        if (!part.hasOwnProperty('image') || part.image === undefined) {
+          await this.databaseService.parts.update(part.id!, { image: '' });
+        }
+      }
+
+      this.loadParts();
+    } catch (error) {
+      console.error('❌ Error updating parts:', error);
+    }
+  }
+
+  /** Validar formato de URL de imagen */
+  isValidImageUrl(url: string): boolean {
+    if (!url || !url.trim()) {
+      return false;
     }
 
-    if (!this.partToDelete) return;
+    try {
+      new URL(url);
+    } catch {
+      return false;
+    }
 
-    this.isDeleting = true;
-    const partName = this.partToDelete.description;
+    const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg)(\?|$|#)/i;
+    const hasImageExtension = imageExtensions.test(url);
 
-    this.partService.deletePart(this.partToDelete.id!).subscribe({
-      next: () => {
-        console.log('🗑️ Part deleted:', partName);
-        this.closePasswordDeleteModal();
-        this.showSuccess(`Refacción "${partName}" eliminada exitosamente`);
-        this.loadParts();
-      },
-      error: (error) => {
-        console.error('Error deleting part:', error);
-        this.isDeleting = false;
-        this.showSuccess('Error al eliminar la refacción. Intenta nuevamente.');
-      },
-    });
+    const imageKeywords = /(image|img|photo|picture|pic)/i;
+    const hasImageKeyword = imageKeywords.test(url);
+
+    return hasImageExtension || hasImageKeyword;
+  }
+
+  /** Métodos de notificación */
+  showSuccess(message: string) {
+    this.successMessage = message;
+    this.showSuccessNotification = true;
+    setTimeout(() => {
+      this.showSuccessNotification = false;
+    }, 3000);
+  }
+
+  showError(message: string) {
+    this.errorMessage = message;
+    this.showErrorNotification = true;
+    setTimeout(() => {
+      this.showErrorNotification = false;
+    }, 3000);
   }
 }

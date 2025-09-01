@@ -34,7 +34,10 @@ import { Machine, PartCategory } from '../../core/models';
             </app-touch-button>
 
             <div class="header-text">
-              <h2 class="header-title">➕ Agregar Refacción</h2>
+              <h2 class="header-title">
+                <span *ngIf="!isEditMode">➕ Agregar Refacción</span>
+                <span *ngIf="isEditMode">✏️ Editar Refacción</span>
+              </h2>
               <p class="header-subtitle">
                 🔧 {{ machine?.name || 'Cargando máquina...' }}
                 <span *ngIf="isPreselected()">
@@ -782,10 +785,13 @@ import { Machine, PartCategory } from '../../core/models';
 export class AddPartComponent implements OnInit {
   partForm: FormGroup;
   machineId!: number;
+  partId?: number; // Para edición
   machine: Machine | null = null;
   isSubmitting = false;
   selectedArea: string = 'costura';
   selectedCategory: string = '';
+  isEditMode = false; // Indica si estamos editando
+  originalPart: any = null; // Datos originales de la refacción
 
   // Notificaciones
   showNotification = false;
@@ -816,6 +822,10 @@ export class AddPartComponent implements OnInit {
       this.machineId = +params['machineId'];
       this.selectedArea = params['area'] || 'costura';
       this.selectedCategory = params['category'] || '';
+      this.partId = params['partId'] ? +params['partId'] : undefined;
+
+      // Determinar si estamos en modo edición
+      this.isEditMode = !!this.partId;
 
       // Preseleccionar categoría si viene en la URL
       if (this.selectedCategory && this.selectedCategory !== 'all') {
@@ -823,6 +833,11 @@ export class AddPartComponent implements OnInit {
       }
 
       this.loadMachine();
+
+      // Si estamos editando, cargar los datos de la refacción
+      if (this.isEditMode && this.partId) {
+        this.loadPartForEdit(this.partId);
+      }
     });
 
     // Inicializar base de datos
@@ -852,7 +867,13 @@ export class AddPartComponent implements OnInit {
 
     sapControl?.valueChanges.subscribe(async (sapNumber: string) => {
       if (sapNumber && sapNumber.length >= 3) {
-        const isUnique = await this.partService.isSapNumberUnique(sapNumber);
+        // En modo edición, excluir el ID actual de la validación
+        const excludeId =
+          this.isEditMode && this.partId ? this.partId : undefined;
+        const isUnique = await this.partService.isSapNumberUnique(
+          sapNumber,
+          excludeId
+        );
 
         if (!isUnique) {
           sapControl.setErrors({ ...sapControl.errors, sapExists: true });
@@ -985,17 +1006,27 @@ export class AddPartComponent implements OnInit {
           image: this.partForm.value.image?.trim() || '',
         };
 
-        await this.partService.createPart(partData).toPromise();
-
-        console.log('✅ Part created successfully');
-        this.showNotificationMessage(
-          `Refacción "${partData.description}" agregada exitosamente`,
-          'success'
-        );
+        if (this.isEditMode && this.partId) {
+          // Actualizar refacción existente
+          await this.partService.updatePart(this.partId, partData).toPromise();
+          console.log('✅ Part updated successfully');
+          this.showNotificationMessage(
+            `Refacción "${partData.description}" actualizada exitosamente`,
+            'success'
+          );
+        } else {
+          // Crear nueva refacción
+          await this.partService.createPart(partData).toPromise();
+          console.log('✅ Part created successfully');
+          this.showNotificationMessage(
+            `Refacción "${partData.description}" agregada exitosamente`,
+            'success'
+          );
+        }
 
         // Esperar un momento para que se vea la notificación
         setTimeout(() => {
-          // Navegar a la lista de la categoría creada
+          // Navegar a la lista de la categoría
           this.router.navigate([
             '/machines',
             this.selectedArea,
@@ -1005,13 +1036,43 @@ export class AddPartComponent implements OnInit {
           ]);
         }, 1500);
       } catch (error) {
-        console.error('Error creating part:', error);
+        console.error('Error saving part:', error);
+        const action = this.isEditMode ? 'actualizar' : 'agregar';
         this.showNotificationMessage(
-          'Error al agregar la refacción. Intenta nuevamente.',
+          `Error al ${action} la refacción. Intenta nuevamente.`,
           'error'
         );
         this.isSubmitting = false;
       }
     }
+  }
+
+  loadPartForEdit(partId: number) {
+    this.partService.getPartById(partId).subscribe({
+      next: (part) => {
+        if (part) {
+          this.originalPart = part;
+
+          // Cargar los datos en el formulario
+          this.partForm.patchValue({
+            sapNumber: part.sapNumber,
+            partNumber: part.partNumber,
+            description: part.description,
+            category: part.category,
+            location: part.location,
+            image: part.image || '',
+          });
+
+          // Actualizar la categoría seleccionada
+          this.selectedCategory = part.category;
+
+          console.log('✅ Refacción cargada para editar:', part);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading part for edit:', error);
+        this.showNotificationMessage('Error al cargar la refacción', 'error');
+      },
+    });
   }
 }

@@ -22,8 +22,8 @@ interface ImportResult {
   success: number;
   errors: string[];
   duplicates: number;
-  omittedRows: string[]; // Filas omitidas por falta de datos
-  duplicatedSaps: string[]; // SAPs que estaban duplicados
+  omittedRows: string[];
+  duplicatedSaps: string[];
 }
 
 @Component({
@@ -96,6 +96,12 @@ interface ImportResult {
                         la refacción
                       </li>
                       <li>
+                        <strong>IMAGEN:</strong> Columna con URL completa de la
+                        imagen (opcional) - Ejemplos:
+                        https://ejemplo.com/imagen.jpg,
+                        https://images.unsplash.com/photo-xxx
+                      </li>
+                      <li>
                         <strong>UBICACION:</strong> Columna con ubicación física
                         (opcional)
                       </li>
@@ -147,6 +153,141 @@ interface ImportResult {
                       </li>
                     </ul>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Instrucciones específicas para imágenes -->
+        <div class="images-section">
+          <div
+            class="professional-card animate-fadeInUp"
+            style="animation-delay: 0.05s"
+          >
+            <div class="professional-content">
+              <h3 class="section-title">
+                🖼️ Guía para Agregar Imágenes de Refacciones
+              </h3>
+
+              <div class="images-grid">
+                <div class="image-info-card">
+                  <div class="info-header">
+                    <div class="info-icon">📝</div>
+                    <h4 class="info-title">Cómo Incluir URLs de Imagen</h4>
+                  </div>
+                  <ul class="info-list">
+                    <li>
+                      <strong>Columna IMAGEN:</strong> Agrega una columna
+                      llamada "IMAGEN" en tus hojas de Excel
+                    </li>
+                    <li>
+                      <strong>URL Completa:</strong> Incluye la URL completa de
+                      la imagen
+                    </li>
+                    <li>
+                      <strong>Formatos Soportados:</strong> .jpg, .jpeg, .png,
+                      .gif, .webp
+                    </li>
+                    <li>
+                      <strong>Opcional:</strong> Las refacciones sin imagen
+                      mostrarán un placeholder
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="image-info-card">
+                  <div class="info-header">
+                    <div class="info-icon">💡</div>
+                    <h4 class="info-title">Ejemplos de URLs Válidas</h4>
+                  </div>
+                  <div class="examples-container">
+                    <div class="example-item">
+                      <div class="example-label">🌐 URL Directa:</div>
+                      <code class="example-code"
+                        >https://ejemplo.com/refaccion.jpg</code
+                      >
+                    </div>
+                    <div class="example-item">
+                      <div class="example-label">📷 Unsplash:</div>
+                      <code class="example-code"
+                        >https://images.unsplash.com/photo-xxx</code
+                      >
+                    </div>
+                    <div class="example-item">
+                      <div class="example-label">🔧 Sitio del Fabricante:</div>
+                      <code class="example-code"
+                        >https://fabricante.com/productos/imagen.png</code
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="image-info-card">
+                  <div class="info-header">
+                    <div class="info-icon">⚠️</div>
+                    <h4 class="info-title">Consejos Importantes</h4>
+                  </div>
+                  <ul class="info-list">
+                    <li>
+                      <strong>URLs Públicas:</strong> Usa solo URLs públicamente
+                      accesibles
+                    </li>
+                    <li>
+                      <strong>Tamaño Recomendado:</strong> Imágenes de 300x200
+                      píxeles o superiores
+                    </li>
+                    <li>
+                      <strong>Calidad:</strong> Imágenes claras que muestren
+                      bien la refacción
+                    </li>
+                    <li>
+                      <strong>Prueba:</strong> Verifica que la URL funcione
+                      antes de importar
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="image-example-section">
+                <h4 class="example-title">
+                  📋 Ejemplo de Hoja Excel con Imágenes:
+                </h4>
+                <div class="excel-example">
+                  <table class="example-table">
+                    <thead>
+                      <tr>
+                        <th>SAP</th>
+                        <th>#PARTE</th>
+                        <th>DESCRIPCION</th>
+                        <th>IMAGEN</th>
+                        <th>UBICACION</th>
+                        <th>MAQUINA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>12345</td>
+                        <td>BR-001</td>
+                        <td>Aguja para Brother</td>
+                        <td>https://ejemplo.com/aguja.jpg</td>
+                        <td>A-01-B</td>
+                        <td>BROTHER-001</td>
+                      </tr>
+                      <tr>
+                        <td>12346</td>
+                        <td>BR-002</td>
+                        <td>Prensatelas Universal</td>
+                        <td></td>
+                        <td>A-02-C</td>
+                        <td>BROTHER-001</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p class="example-note">
+                    💡 <strong>Nota:</strong> La segunda fila no tiene imagen,
+                    así que mostrará un placeholder automáticamente.
+                  </p>
                 </div>
               </div>
             </div>
@@ -774,7 +915,6 @@ interface ImportResult {
         margin-bottom: 1.5rem;
       }
 
-      /* Instrucciones */
       .instructions-section {
         margin-bottom: 2rem;
       }
@@ -827,7 +967,177 @@ interface ImportResult {
         left: 0;
       }
 
-      /* Controles */
+      .images-section {
+        margin-bottom: 2rem;
+      }
+
+      .images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .image-info-card {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #fef7ff, #f8fafc);
+        border-radius: var(--border-radius-lg);
+        border: 2px solid #e1d5e7;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .image-info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+      }
+
+      .image-info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        border-color: #8b5cf6;
+      }
+
+      .info-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .info-icon {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+        background: rgba(139, 92, 246, 0.1);
+        border-radius: var(--border-radius-sm);
+      }
+
+      .info-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin: 0;
+      }
+
+      .info-list {
+        margin: 0;
+        padding-left: 1rem;
+        list-style: none;
+      }
+
+      .info-list li {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-bottom: 0.75rem;
+        position: relative;
+        padding-left: 1rem;
+        line-height: 1.5;
+      }
+
+      .info-list li::before {
+        content: '📝';
+        position: absolute;
+        left: 0;
+        font-size: 0.75rem;
+      }
+
+      .examples-container {
+        space-y: 0.75rem;
+      }
+
+      .example-item {
+        margin-bottom: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+      }
+
+      .example-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.25rem;
+      }
+
+      .example-code {
+        display: block;
+        font-size: 0.75rem;
+        color: #059669;
+        background: #f0fdf4;
+        padding: 0.5rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid #bbf7d0;
+        font-family: 'Courier New', monospace;
+        word-break: break-all;
+      }
+
+      .image-example-section {
+        background: #fafafa;
+        padding: 1.5rem;
+        border-radius: var(--border-radius-lg);
+        border: 2px solid #e5e7eb;
+      }
+
+      .example-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+      }
+
+      .excel-example {
+        background: white;
+        border-radius: var(--border-radius-md);
+        padding: 1rem;
+        border: 1px solid #d1d5db;
+      }
+
+      .example-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+      }
+
+      .example-table th,
+      .example-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border: 1px solid #e5e7eb;
+      }
+
+      .example-table th {
+        background: #f9fafb;
+        font-weight: 600;
+        color: var(--gray-700);
+      }
+
+      .example-table td {
+        color: var(--gray-600);
+      }
+
+      .example-table td:nth-child(4) {
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem;
+        color: #059669;
+      }
+
+      .example-note {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        padding: 0.75rem;
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        border-radius: var(--border-radius-sm);
+      }
+
       .controls-section {
         margin-bottom: 2rem;
       }
@@ -893,7 +1203,6 @@ interface ImportResult {
         color: #dc2626;
       }
 
-      /* Importación */
       .import-section {
         margin-bottom: 2rem;
       }
@@ -1072,7 +1381,6 @@ interface ImportResult {
         letter-spacing: 0.05em;
       }
 
-      /* Resultados */
       .results-section {
         margin-top: 2rem;
       }
@@ -1190,7 +1498,6 @@ interface ImportResult {
         justify-content: center;
       }
 
-      /* Modales */
       .modal-overlay {
         position: fixed;
         top: 0;
@@ -1466,7 +1773,6 @@ interface ImportResult {
         flex: 1;
       }
 
-      /* Notificaciones */
       .notification {
         position: fixed;
         top: 2rem;
@@ -1518,7 +1824,6 @@ interface ImportResult {
         display: none;
       }
 
-      /* Animaciones */
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -1576,7 +1881,6 @@ interface ImportResult {
         animation: fadeInUp 0.6s ease-out;
       }
 
-      /* Responsive */
       @media (max-width: 1024px) {
         .controls-grid {
           grid-template-columns: 1fr;
@@ -1701,15 +2005,12 @@ export class ExcelImportComponent implements OnInit {
   processingType: 'machines' | 'parts' | null = null;
   importResults: ImportResult | null = null;
 
-  // Estadísticas del sistema
   machineCount = 0;
   partCount = 0;
 
-  // Controles
   selectedAreaForParts: 'corte' | 'costura' = 'costura';
   isDeleting = false;
 
-  // Modales
   showDeleteModal = false;
   showResultsModal = false;
   canConfirmDelete = false;
@@ -1717,7 +2018,6 @@ export class ExcelImportComponent implements OnInit {
   passwordError = '';
   readonly ADMIN_PASSWORD = 'Mantenimiento1.';
 
-  // Notificaciones
   showNotification = false;
   notificationMessage = '';
   notificationType: 'success' | 'error' | 'warning' = 'success';
@@ -1800,7 +2100,6 @@ export class ExcelImportComponent implements OnInit {
     this.goToSearch();
   }
 
-  // Modal de confirmación de eliminación
   showDeleteConfirmation() {
     this.showDeleteModal = true;
     this.deletePassword = '';
@@ -1839,7 +2138,6 @@ export class ExcelImportComponent implements OnInit {
     try {
       console.log('🗑️ Iniciando eliminación completa...');
 
-      // Eliminar todas las refacciones primero
       const allParts = await this.partService.loadParts().toPromise();
       if (allParts && allParts.length > 0) {
         for (const part of allParts) {
@@ -1850,7 +2148,6 @@ export class ExcelImportComponent implements OnInit {
         console.log(`🗑️ Eliminadas ${allParts.length} refacciones`);
       }
 
-      // Eliminar todas las máquinas
       const allMachines = await this.machineService.loadMachines().toPromise();
       if (allMachines && allMachines.length > 0) {
         for (const machine of allMachines) {
@@ -1861,7 +2158,6 @@ export class ExcelImportComponent implements OnInit {
         console.log(`🗑️ Eliminadas ${allMachines.length} máquinas`);
       }
 
-      // Actualizar estadísticas
       await this.loadSystemStats();
 
       this.showNotificationMessage(
@@ -1869,7 +2165,6 @@ export class ExcelImportComponent implements OnInit {
         'success'
       );
 
-      // Limpiar resultados y archivos
       this.resetImport();
       this.closeDeleteModal();
     } catch (error) {
@@ -1883,7 +2178,6 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
-  // Modal de resultados
   closeResultsModal() {
     this.showResultsModal = false;
   }
@@ -1915,7 +2209,6 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
-  // Manejo de drag & drop
   onDragOver(event: DragEvent, type: 'machines' | 'parts') {
     event.preventDefault();
     if (type === 'machines') {
@@ -2013,7 +2306,6 @@ export class ExcelImportComponent implements OnInit {
       const result = await this.processMachinesData(data);
       this.importResults = result;
 
-      // Actualizar estadísticas
       await this.loadSystemStats();
 
       console.log('✅ Machines import completed:', result);
@@ -2053,12 +2345,10 @@ export class ExcelImportComponent implements OnInit {
       const result = await this.processPartsFromAllSheets(this.partsFile);
       this.importResults = result;
 
-      // Actualizar estadísticas
       await this.loadSystemStats();
 
       console.log('✅ Parts import completed:', result);
 
-      // Crear mensaje detallado de resultados
       let message = `✅ Importación completada: ${result.success} refacciones importadas exitosamente`;
 
       if (result.omittedRows.length > 0) {
@@ -2286,6 +2576,17 @@ export class ExcelImportComponent implements OnInit {
               'UBIC',
               'ubic',
             ]);
+            const imageIndex = this.findColumnIndex(headers, [
+              'IMAGEN',
+              'Imagen',
+              'imagen',
+              'IMAGE',
+              'Image',
+              'image',
+              'URL',
+              'url',
+              'Url',
+            ]);
             const machineIndex = this.findColumnIndex(headers, [
               'MAQUINA',
               'MÁQUINA',
@@ -2302,6 +2603,7 @@ export class ExcelImportComponent implements OnInit {
               SAP: sapIndex,
               PARTE: partIndex,
               DESCRIPCION: descIndex,
+              IMAGEN: imageIndex,
               UBICACION: ubicIndex,
               MAQUINA: machineIndex,
             });
@@ -2321,6 +2623,7 @@ export class ExcelImportComponent implements OnInit {
                 const sap = row[sapIndex];
                 const partNumber = row[partIndex];
                 const description = row[descIndex];
+                const image = imageIndex >= 0 ? row[imageIndex] : '';
                 const ubicacion = ubicIndex >= 0 ? row[ubicIndex] : '';
                 const machineName = machineIndex >= 0 ? row[machineIndex] : '';
 
@@ -2385,7 +2688,7 @@ export class ExcelImportComponent implements OnInit {
                     ? ubicacion.toString().trim()
                     : 'Sin ubicación',
                   machineId: machineId,
-                  image: '',
+                  image: image ? image.toString().trim() : '',
                 };
 
                 console.log(
@@ -2416,16 +2719,14 @@ export class ExcelImportComponent implements OnInit {
   }
 
   private async getOrCreateMachineForPart(
-    machineName: string, // Ahora recibe directamente el nombre de la máquina
+    machineName: string,
     category: string,
     existingMachines: { [key: string]: number },
     defaultArea: 'corte' | 'costura'
   ): Promise<number> {
-    // Si se especificó una máquina específica, usarla
     if (machineName && machineName.trim() !== '') {
       const upperMachineName = machineName.trim().toUpperCase();
 
-      // Si la máquina ya existe, usarla
       if (existingMachines[upperMachineName]) {
         console.log(
           `🎯 Usando máquina existente: ${machineName} (ID: ${existingMachines[upperMachineName]})`
@@ -2433,7 +2734,6 @@ export class ExcelImportComponent implements OnInit {
         return existingMachines[upperMachineName];
       }
 
-      // Si no existe, crearla
       console.log(`🏭 Creando nueva máquina: ${machineName}...`);
       try {
         const newMachine = await this.machineService
@@ -2454,7 +2754,6 @@ export class ExcelImportComponent implements OnInit {
       }
     }
 
-    // Si no se especificó máquina o no se pudo crear, usar o crear GENERAL
     if (!existingMachines['GENERAL']) {
       console.log('🏭 Creando máquina GENERAL...');
       try {
@@ -2498,7 +2797,6 @@ export class ExcelImportComponent implements OnInit {
   ): string {
     const desc = description.toLowerCase();
 
-    // Detección por palabras clave en la descripción
     if (
       desc.includes('sensor') ||
       desc.includes('cable') ||
@@ -2523,7 +2821,6 @@ export class ExcelImportComponent implements OnInit {
       return 'consumible';
     }
 
-    // Por defecto, todo lo demás es mecánico
     return 'mecanica';
   }
 
@@ -2537,7 +2834,6 @@ export class ExcelImportComponent implements OnInit {
   }
 
   private extractMachineNames(description: string): string[] {
-    // Simplemente retorna un array vacío para que no extraiga máquinas de la descripción
     return [];
   }
 

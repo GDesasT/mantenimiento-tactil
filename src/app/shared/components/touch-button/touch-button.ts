@@ -181,6 +181,13 @@ import { CommonModule } from '@angular/common';
       }
 
       /* Tamaños profesionales */
+      .btn-xs {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        border-radius: 0.25rem;
+        min-height: 2rem;
+      }
+
       .btn-sm {
         padding: 0.5rem 1rem;
         font-size: 0.875rem;
@@ -245,8 +252,58 @@ import { CommonModule } from '@angular/common';
           min-height: 3rem;
         }
 
+        .btn-md {
+          padding: 0.625rem 1.25rem;
+          font-size: 0.8125rem;
+          min-height: 2.75rem;
+        }
+
+        .btn-sm {
+          padding: 0.4375rem 0.875rem;
+          font-size: 0.8125rem;
+          min-height: 2.25rem;
+        }
+
+        .btn-xs {
+          padding: 0.3125rem 0.625rem;
+          font-size: 0.6875rem;
+          min-height: 1.875rem;
+        }
+
         .button-icon {
           margin-right: 0.375rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .btn-lg,
+        .btn-xl {
+          padding: 0.75rem 1.25rem;
+          font-size: 0.8125rem;
+          min-height: 2.75rem;
+        }
+
+        .btn-md {
+          padding: 0.5625rem 1.125rem;
+          font-size: 0.75rem;
+          min-height: 2.5rem;
+        }
+
+        .btn-sm {
+          padding: 0.375rem 0.75rem;
+          font-size: 0.75rem;
+          min-height: 2rem;
+        }
+
+        .btn-xs {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.625rem;
+          min-height: 1.625rem;
+        }
+
+        .button-icon {
+          margin-right: 0.25rem;
+          font-size: 0.875em;
         }
       }
     `,
@@ -255,7 +312,7 @@ import { CommonModule } from '@angular/common';
 export class TouchButtonComponent {
   @Input() variant: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' =
     'primary';
-  @Input() size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
+  @Input() size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'md';
   @Input() disabled = false;
   @Input() loading = false;
   @Input() type: 'button' | 'submit' = 'button';

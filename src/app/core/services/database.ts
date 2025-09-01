@@ -18,6 +18,25 @@ export class DatabaseService extends Dexie {
         '++id, sapNumber, partNumber, machineId, category, location, description, createdAt',
     });
 
+    // Version 2: Agregar campo image a parts
+    this.version(2)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+      })
+      .upgrade((trans) => {
+        // Migración: agregar campo image a refacciones existentes
+        return trans
+          .table('parts')
+          .toCollection()
+          .modify((part) => {
+            if (!part.hasOwnProperty('image')) {
+              part.image = '';
+            }
+          });
+      });
+
     // Hooks para timestamps automáticos
     this.machines.hook('creating', (primKey, obj, trans) => {
       obj.createdAt = new Date();
