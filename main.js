@@ -321,10 +321,6 @@ app.whenReady().then(() => {
   createWindow();
   createMenu();
 
-  setTimeout(() => {
-    checkForUpdates();
-  }, 3000);
-
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();

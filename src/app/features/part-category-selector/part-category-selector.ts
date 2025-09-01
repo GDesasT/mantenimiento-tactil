@@ -49,31 +49,6 @@ import { Machine, PartCategory } from '../../core/models';
       </div>
 
       <div class="content-area">
-        <!-- Control Admin pequeño -->
-        <div class="admin-toggle-corner">
-          <app-touch-button
-            *ngIf="!isAdminMode"
-            variant="secondary"
-            size="xs"
-            icon="⚙️"
-            (clicked)="toggleAdminMode()"
-            class="admin-corner-btn"
-            title="Modo Admin"
-          >
-          </app-touch-button>
-
-          <app-touch-button
-            *ngIf="isAdminMode"
-            variant="warning"
-            size="xs"
-            icon="🔓"
-            (clicked)="exitAdminMode()"
-            class="admin-corner-btn active"
-            title="Salir Admin"
-          >
-          </app-touch-button>
-        </div>
-
         <!-- Información compacta de la máquina -->
         <div class="machine-info-compact">
           <div class="compact-card">
@@ -823,7 +798,6 @@ export class PartCategorySelectorComponent implements OnInit {
   stats: { [key in PartCategory]: number } | null = null;
   isLoading = true;
   selectedArea: 'corte' | 'costura' = 'costura';
-  isAdminMode = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -929,15 +903,5 @@ export class PartCategorySelectorComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/machines', this.machine?.area]);
-  }
-
-  toggleAdminMode() {
-    this.isAdminMode = true;
-    console.log('🔧 Admin mode activated');
-  }
-
-  exitAdminMode() {
-    this.isAdminMode = false;
-    console.log('🔓 Admin mode deactivated');
   }
 }
