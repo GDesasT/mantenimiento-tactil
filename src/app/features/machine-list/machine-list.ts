@@ -35,30 +35,6 @@ import { Machine, PartCategory } from '../../core/models';
           </div>
 
           <div class="header-right">
-            <!-- Control Admin discreto -->
-            <app-touch-button
-              *ngIf="!isAdminMode"
-              variant="secondary"
-              size="sm"
-              icon="⚙️"
-              (clicked)="toggleAdminMode()"
-              class="admin-btn"
-              title="Modo Administrador"
-            >
-            </app-touch-button>
-
-            <app-touch-button
-              *ngIf="isAdminMode"
-              variant="warning"
-              size="sm"
-              icon="🔓"
-              (clicked)="exitAdminMode()"
-              class="admin-btn-active"
-              title="Salir Modo Admin"
-            >
-              Admin
-            </app-touch-button>
-
             <app-touch-button
               variant="success"
               size="lg"
@@ -128,28 +104,6 @@ import { Machine, PartCategory } from '../../core/models';
             <div class="machine-actions">
               <div class="main-action-info">
                 <span class="tap-hint">👆 Toca para ver refacciones</span>
-              </div>
-
-              <div class="secondary-actions" (click)="$event.stopPropagation()">
-                <app-touch-button
-                  *ngIf="isAdminMode"
-                  variant="warning"
-                  size="sm"
-                  icon="✏️"
-                  (clicked)="editMachine(machine)"
-                >
-                  Editar
-                </app-touch-button>
-
-                <app-touch-button
-                  *ngIf="isAdminMode"
-                  variant="danger"
-                  size="sm"
-                  icon="🗑️"
-                  (clicked)="deleteMachine(machine)"
-                >
-                  Eliminar
-                </app-touch-button>
               </div>
             </div>
           </div>
@@ -276,64 +230,6 @@ import { Machine, PartCategory } from '../../core/models';
               [disabled]="isDeleting"
             >
               Cancelar
-            </app-touch-button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modal de modo admin -->
-      <div
-        *ngIf="showAdminModal"
-        class="modal-overlay"
-        (click)="closeAdminModal()"
-      >
-        <div
-          class="modal-container admin-modal"
-          (click)="$event.stopPropagation()"
-        >
-          <div class="modal-header">
-            <div class="modal-title">
-              <span class="modal-icon">🔐</span>
-              <h3>Acceso de Administrador</h3>
-            </div>
-            <button class="modal-close" (click)="closeAdminModal()">✕</button>
-          </div>
-
-          <div class="modal-content">
-            <div class="admin-login">
-              <p class="admin-description">
-                Ingresa la contraseña de administrador para acceder a las
-                funciones avanzadas.
-              </p>
-
-              <div class="password-section">
-                <label class="password-label">Contraseña:</label>
-                <input
-                  type="password"
-                  [(ngModel)]="adminPassword"
-                  placeholder="Contraseña de administrador"
-                  class="admin-input"
-                  (keyup.enter)="confirmAdminAccess()"
-                  (input)="clearAdminError()"
-                  (click)="clearAdminError()"
-                  (focus)="clearAdminError()"
-                  autocomplete="off"
-                />
-                <div *ngIf="adminError" class="admin-error">
-                  {{ adminError }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-actions">
-            <app-touch-button
-              variant="success"
-              size="lg"
-              (clicked)="confirmAdminAccess()"
-              [fullWidth]="true"
-            >
-              Activar Modo Admin
             </app-touch-button>
           </div>
         </div>
@@ -1294,12 +1190,6 @@ export class MachineListComponent implements OnInit, OnDestroy {
   notificationMessage = '';
   notificationType: 'success' | 'error' | 'warning' = 'success';
 
-  isAdminMode = false;
-  showAdminModal = false;
-  adminPassword = '';
-  adminError = '';
-  readonly ADMIN_PASSWORD = 'Mantenimiento1.';
-
   showDeleteModal = false;
   machineToDelete: Machine | null = null;
   isDeleting = false;
@@ -1397,7 +1287,7 @@ export class MachineListComponent implements OnInit, OnDestroy {
 
   onPasswordChange() {
     this.passwordError = '';
-    this.canConfirmDelete = this.deletePassword === this.ADMIN_PASSWORD;
+    this.canConfirmDelete = this.deletePassword === 'Mantenimiento1.';
   }
 
   async confirmDeleteMachine() {
@@ -1423,47 +1313,6 @@ export class MachineListComponent implements OnInit, OnDestroy {
     } finally {
       this.isDeleting = false;
     }
-  }
-
-  toggleAdminMode() {
-    if (this.isAdminMode) {
-      this.exitAdminMode();
-    } else {
-      this.showAdminModal = true;
-      this.adminPassword = '';
-      this.adminError = '';
-    }
-  }
-
-  exitAdminMode() {
-    this.isAdminMode = false;
-    this.showNotificationMessage('Modo administrador desactivado', 'warning');
-  }
-
-  closeAdminModal() {
-    this.showAdminModal = false;
-    this.adminPassword = '';
-    this.adminError = '';
-  }
-
-  clearAdminError() {
-    this.adminError = '';
-  }
-
-  confirmAdminAccess() {
-    if (!this.adminPassword) {
-      this.adminError = 'Por favor ingresa la contraseña';
-      return;
-    }
-
-    if (this.adminPassword !== this.ADMIN_PASSWORD) {
-      this.adminError = 'Contraseña incorrecta';
-      return;
-    }
-
-    this.isAdminMode = true;
-    this.closeAdminModal();
-    this.showNotificationMessage('Modo administrador activado', 'success');
   }
 
   showNotificationMessage(

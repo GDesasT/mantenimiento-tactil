@@ -143,87 +143,76 @@ import { Part, PartCategory, Machine } from '../../core/models';
         <div *ngIf="paginatedParts.length > 0" class="parts-grid">
           <div
             *ngFor="let part of paginatedParts; let i = index"
-            class="part-card professional-card animate-fadeInUp"
-            [style.animation-delay]="i * 0.1 + 's'"
-            [class]="'part-card-' + part.category"
+            class="part-card"
           >
-            <div class="professional-content part-content">
-              <div class="part-header">
-                <div class="part-category-section">
-                  <div class="part-image-container">
-                    <img
-                      *ngIf="part.image && part.image.trim()"
-                      [src]="part.image"
-                      [alt]="part.description"
-                      class="part-image"
-                      (error)="onImageError($event)"
-                      (load)="onImageLoad(part)"
-                    />
-                    <div
-                      class="part-image-placeholder"
-                      [attr.data-category]="part.category"
-                      *ngIf="!part.image || !part.image.trim()"
-                    >
-                      <span class="placeholder-icon">{{
-                        getCategoryIcon(part.category)
-                      }}</span>
-                      <span class="placeholder-text">{{
-                        getCategoryLabel(part.category)
-                      }}</span>
-                      <div
-                        *ngIf="isAdminMode"
-                        class="add-image-btn"
-                        (click)="addImageToPart(part)"
-                      >
-                        <span class="add-icon">📷</span>
-                        <span class="add-text"
-                          >{{ part.image ? 'Cambiar' : 'Agregar' }} imagen</span
-                        >
-                      </div>
-                    </div>
-                  </div>
+            <div class="part-header">
+              <div class="part-sap">{{ part.sapNumber }}</div>
+              <div class="part-category">
+                {{ getCategoryIcon(part.category) }}
+                {{ getCategoryName(part.category) }}
+              </div>
+            </div>
 
-                  <div class="part-category-badge">
-                    <span class="category-icon">{{
-                      getCategoryIcon(part.category)
-                    }}</span>
-                    <span class="category-label">{{
-                      getCategoryLabel(part.category)
-                    }}</span>
-                  </div>
+            <div class="part-image-container">
+              <img
+                *ngIf="part.image && part.image.trim()"
+                [src]="part.image"
+                [alt]="part.description"
+                (error)="onImageError($event)"
+                (load)="onImageLoad(part)"
+                class="part-image"
+              />
+              <div
+                *ngIf="!part.image || !part.image.trim()"
+                class="part-image-placeholder"
+                [attr.data-category]="part.category"
+              >
+                <span class="placeholder-icon">{{
+                  getCategoryIcon(part.category)
+                }}</span>
+                <span class="placeholder-text">{{
+                  getCategoryName(part.category)
+                }}</span>
+              </div>
+            </div>
+
+            <div class="part-content">
+              <h3 class="part-title">{{ part.description }}</h3>
+
+              <div class="part-details">
+                <div class="detail-row">
+                  <span class="detail-label">📍 Ubicación:</span>
+                  <span class="detail-value">{{
+                    part.location || 'No especificada'
+                  }}</span>
                 </div>
 
-                <div class="part-info">
-                  <h3 class="part-description">{{ part.description }}</h3>
-                  <div class="part-numbers">
-                    <div class="part-detail">
-                      <span class="detail-label">SAP:</span>
-                      <span class="detail-value sap-value">{{
-                        part.sapNumber
-                      }}</span>
-                    </div>
-                    <div class="part-detail">
-                      <span class="detail-label">Parte:</span>
-                      <span class="detail-value">{{ part.partNumber }}</span>
-                    </div>
-                    <div class="part-detail">
-                      <span class="detail-label">Ubicación:</span>
-                      <span class="detail-value location-value">{{
-                        part.location
-                      }}</span>
-                    </div>
-                  </div>
+                <div class="detail-row">
+                  <span class="detail-label">🔧 Parte:</span>
+                  <span class="detail-value">{{ part.partNumber }}</span>
+                </div>
+
+                <div class="detail-row">
+                  <span class="detail-label">🏭 Máquina:</span>
+                  <span class="detail-value">{{ machine?.name || 'N/A' }}</span>
                 </div>
               </div>
 
-              <div class="part-actions" *ngIf="isAdminMode">
-                <div class="admin-actions">
+              <!-- Botones de admin si está en modo admin -->
+              <div *ngIf="isAdminMode" class="admin-controls">
+                <div class="add-image-btn" (click)="addImageToPart(part)">
+                  <span class="add-icon">📷</span>
+                  <span class="add-text"
+                    >{{ part.image ? 'Cambiar' : 'Agregar' }} imagen</span
+                  >
+                </div>
+
+                <div class="action-buttons">
                   <app-touch-button
                     variant="warning"
                     size="sm"
                     icon="✏️"
                     (clicked)="editPart(part)"
-                    [fullWidth]="true"
                   >
                     Editar
                   </app-touch-button>
@@ -233,7 +222,6 @@ import { Part, PartCategory, Machine } from '../../core/models';
                     size="sm"
                     icon="🗑️"
                     (clicked)="requestDeletePart(part)"
-                    [fullWidth]="true"
                   >
                     Eliminar
                   </app-touch-button>
@@ -567,41 +555,20 @@ import { Part, PartCategory, Machine } from '../../core/models';
     `
       .app-container {
         min-height: 100vh;
-        background: var(--gray-50);
-        position: relative;
-      }
-
-      .admin-btn {
-        opacity: 0.6;
-        transition: all 0.3s ease;
-        margin-right: 12px;
-      }
-
-      .admin-btn:hover {
-        opacity: 1;
-      }
-
-      .admin-btn-active {
-        background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
-        color: white !important;
-        margin-right: 12px;
-        animation: subtle-glow 2s ease-in-out infinite alternate;
-      }
-
-      @keyframes subtle-glow {
-        from {
-          box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-        }
-        to {
-          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
-        }
+        background: #f8fafc;
+        padding: 2rem 0 0 0;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
 
       .professional-header {
-        background: var(--gradient-primary);
-        color: white;
-        padding: 1.5rem 2rem;
-        border-bottom: 3px solid var(--primary-700);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.5rem;
+        position: relative;
+        z-index: 10;
+        margin-bottom: 1rem;
       }
 
       .header-content {
@@ -610,6 +577,30 @@ import { Part, PartCategory, Machine } from '../../core/models';
         align-items: center;
         max-width: 1400px;
         margin: 0 auto;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .header-text {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+      }
+
+      .header-subtitle {
+        font-size: 0.9rem;
+        color: #718096;
+        margin: 0;
       }
 
       .header-left {
@@ -690,86 +681,51 @@ import { Part, PartCategory, Machine } from '../../core/models';
       .parts-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 2rem;
-        animation: fadeInContent 0.4s ease-out;
-      }
-
-      @keyframes fadeInContent {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        gap: 1.5rem;
+        margin-bottom: 2rem;
       }
 
       .part-card {
-        min-height: 480px;
-        display: flex;
-        flex-direction: column;
-        border: 2px solid transparent;
-        border-left: 6px solid;
-        transition: all 0.3s ease;
-        position: relative;
-        user-select: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-      }
-
-      .part-card-mecanica {
-        border-left-color: var(--primary-600);
-      }
-
-      .part-card-electronica {
-        border-left-color: #f59e0b;
-      }
-
-      .part-card-consumible {
-        border-left-color: #10b981;
-      }
-
-      .part-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-      }
-
-      .part-content {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        overflow: hidden;
       }
 
       .part-header {
-        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #edf2f7;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .part-sap {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: 1.1rem;
+      }
+
+      .part-category {
+        font-size: 0.8rem;
+        color: #718096;
+        font-weight: 600;
       }
 
       .part-image-container {
-        width: 220px;
-        height: 165px;
-        margin: 0 auto 1rem auto;
-        border-radius: var(--border-radius-md);
-        overflow: hidden;
-        border: 2px solid var(--gray-200);
-        background: var(--gray-50);
+        height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: var(--shadow-sm);
+        background: #f7fafc;
+        overflow: hidden;
       }
 
       .part-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: var(--border-radius-md);
-        transition: transform 0.2s ease;
-      }
-
-      .part-image:hover {
-        transform: scale(1.02);
       }
 
       .part-image-placeholder {
@@ -780,14 +736,14 @@ import { Part, PartCategory, Machine } from '../../core/models';
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
-        color: var(--gray-600);
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+        color: #718096;
         text-align: center;
         padding: 0.5rem;
       }
 
       .placeholder-icon {
-        font-size: 1.5rem;
+        font-size: 2rem;
         opacity: 0.7;
       }
 
@@ -799,24 +755,111 @@ import { Part, PartCategory, Machine } from '../../core/models';
         line-height: 1.2;
       }
 
+      .part-content {
+        padding: 1rem;
+      }
+
+      .part-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0 0 1rem 0;
+        line-height: 1.4;
+      }
+
+      .part-details {
+        margin-bottom: 1rem;
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+        font-size: 0.9rem;
+      }
+
+      .detail-label {
+        color: #718096;
+        font-weight: 500;
+      }
+
+      .detail-value {
+        color: #2d3748;
+        font-weight: 600;
+      }
+
+      .admin-controls {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
       .add-image-btn {
-        margin-top: 0.25rem;
-        padding: 0.25rem 0.5rem;
-        background: var(--primary-600);
-        color: white;
-        border-radius: var(--border-radius-sm);
-        font-size: 0.625rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: #e2e8f0;
+        border-radius: 0.5rem;
         cursor: pointer;
-        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+        transition: background 0.2s ease;
       }
 
       .add-image-btn:hover {
-        background: var(--primary-700);
-        transform: translateY(-1px);
+        background: #cbd5e0;
       }
 
       .add-icon {
-        margin-right: 0.25rem;
+        font-size: 1rem;
+      }
+
+      .add-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .admin-controls {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .add-image-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: #e2e8f0;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+        transition: background 0.2s ease;
+      }
+
+      .add-image-btn:hover {
+        background: #cbd5e0;
+      }
+
+      .add-icon {
+        font-size: 1rem;
+      }
+
+      .add-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
       }
 
       .part-category-badge {
@@ -1611,42 +1654,36 @@ import { Part, PartCategory, Machine } from '../../core/models';
       }
 
       .page-number-vertical {
-        min-width: 36px;
-        min-height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f7fafc;
+        color: #4a5568;
         font-size: 0.875rem;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.2s ease;
-        border: 2px solid transparent;
-        background: var(--gray-100);
-        color: var(--gray-600);
-        touch-action: manipulation;
+        user-select: none;
       }
 
       .page-number-vertical:hover:not(.ellipsis):not(.active) {
-        background: var(--primary-100);
-        color: var(--primary-700);
-        border-color: var(--primary-200);
+        background: #e2e8f0;
         transform: scale(1.05);
       }
 
       .page-number-vertical.active {
-        background: var(--primary-600);
+        background: #4299e1;
         color: white;
-        border-color: var(--primary-600);
-        box-shadow: var(--shadow-md);
-        transform: scale(1.1);
+        box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
       }
 
       .page-number-vertical.ellipsis {
         cursor: default;
         background: transparent;
-        color: var(--gray-400);
-        font-size: 0.75rem;
+        color: #a0aec0;
       }
 
       .page-number-vertical.ellipsis:hover {
@@ -1661,25 +1698,25 @@ import { Part, PartCategory, Machine } from '../../core/models';
       }
 
       .nav-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--gray-300);
-        background: white;
-        color: var(--gray-600);
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        touch-action: manipulation;
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #4a5568;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+        touch-action: manipulation;
       }
 
       .nav-btn:hover:not(:disabled) {
-        background: var(--primary-50);
-        border-color: var(--primary-300);
-        color: var(--primary-700);
+        background: #e2e8f0;
+        border-color: #cbd5e0;
         transform: scale(1.05);
       }
 
@@ -1690,8 +1727,13 @@ import { Part, PartCategory, Machine } from '../../core/models';
       .nav-btn:disabled {
         opacity: 0.4;
         cursor: not-allowed;
-        background: var(--gray-50);
-        color: var(--gray-400);
+        color: #a0aec0;
+      }
+
+      .nav-btn:disabled:hover {
+        background: white;
+        border-color: #e2e8f0;
+        transform: none;
       }
 
       .total-info {
@@ -2135,6 +2177,15 @@ export class PartListComponent implements OnInit {
       consumible: 'Consumible',
     };
     return labels[category];
+  }
+
+  getCategoryName(category: PartCategory): string {
+    const names = {
+      mecanica: 'Mecánica',
+      electronica: 'Electrónica',
+      consumible: 'Consumible',
+    };
+    return names[category] || category;
   }
 
   getAreaTitle(): string {

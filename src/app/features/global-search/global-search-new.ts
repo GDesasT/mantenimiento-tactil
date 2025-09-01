@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
-import { VirtualKeyboardComponent } from '../../shared/components/virtual-keyboard/virtual-keyboard';
 import { PartService } from '../../core/services/part';
 import { MachineService } from '../../core/services/machine';
 import { DatabaseService } from '../../core/services/database';
@@ -18,12 +17,7 @@ interface SearchFilters {
 @Component({
   selector: 'app-global-search',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    TouchButtonComponent,
-    VirtualKeyboardComponent,
-  ],
+  imports: [CommonModule, FormsModule, TouchButtonComponent],
   template: `
     <div class="app-container">
       <div class="professional-header">
@@ -67,10 +61,18 @@ interface SearchFilters {
                 type="text"
                 [(ngModel)]="searchQuery"
                 (input)="onSearchInput()"
-                (focus)="showKeyboard()"
                 placeholder="🔎 Buscar por SAP, descripción, ubicación o máquina..."
                 class="search-input"
               />
+              <app-touch-button
+                variant="secondary"
+                size="sm"
+                icon="⌨️"
+                (clicked)="toggleKeyboard()"
+                class="keyboard-btn"
+                title="Teclado virtual"
+              >
+              </app-touch-button>
             </div>
 
             <!-- Filtros rápidos -->
@@ -162,14 +164,9 @@ interface SearchFilters {
                 <div
                   *ngIf="!part.image || !part.image.trim()"
                   class="part-image-placeholder"
-                  [attr.data-category]="part.category"
                 >
-                  <span class="placeholder-icon">{{
-                    getCategoryIcon(part.category)
-                  }}</span>
-                  <span class="placeholder-text">{{
-                    getCategoryName(part.category)
-                  }}</span>
+                  <span class="placeholder-icon">📦</span>
+                  <span class="placeholder-text">Sin imagen</span>
                 </div>
               </div>
 
@@ -196,104 +193,54 @@ interface SearchFilters {
                     }}</span>
                   </div>
                 </div>
+
+                <div class="part-actions">
+                  <app-touch-button
+                    variant="primary"
+                    size="sm"
+                    icon="👁️"
+                    (clicked)="viewPartDetails(part)"
+                    class="action-btn"
+                  >
+                    Ver detalles
+                  </app-touch-button>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Sidebar de navegación -->
-          <div
-            *ngIf="paginatedParts.length > 0 && totalPages > 1"
-            class="page-navigation-sidebar"
-          >
-            <div class="page-info-sidebar">
-              <span class="current-page">{{ currentPage }}</span>
-              <span class="page-separator">/</span>
-              <span class="total-pages">{{ totalPages }}</span>
+          <!-- Paginación -->
+          <div class="pagination-container" *ngIf="totalPages > 1">
+            <div class="pagination-info">
+              <span>Página {{ currentPage }} de {{ totalPages }}</span>
+              <span>({{ filteredParts.length }} resultados)</span>
             </div>
 
-            <div class="page-numbers-vertical">
-              <div
-                *ngFor="let page of getVisiblePages().slice(0, 7)"
-                class="page-number-vertical"
-                [class.active]="page === currentPage"
-                (click)="goToPage(page)"
-                [title]="'Ir a página ' + page"
-              >
-                {{ page }}
-              </div>
-            </div>
-
-            <div class="navigation-controls-vertical">
-              <button
-                class="nav-btn nav-btn-first"
+            <div class="pagination-controls">
+              <app-touch-button
+                variant="secondary"
+                size="md"
+                icon="⏮️"
+                (clicked)="goToPage(1)"
                 [disabled]="currentPage === 1"
-                (click)="goToFirstPage()"
-                title="Primera página"
               >
-                ⏮️
-              </button>
+                Primera
+              </app-touch-button>
 
-              <button
-                class="nav-btn nav-btn-prev"
+              <app-touch-button
+                variant="secondary"
+                size="md"
+                icon="⬅️"
+                (clicked)="previousPage()"
                 [disabled]="currentPage === 1"
-                (click)="previousPage()"
-                title="Página anterior"
               >
-                ⬅️
-              </button>
+                Anterior
+              </app-touch-button>
 
-              <button
-                class="nav-btn nav-btn-next"
-                [disabled]="currentPage === totalPages"
-                (click)="nextPage()"
-                title="Página siguiente"
-              >
-                ➡️
-              </button>
-
-              <button
-                class="nav-btn nav-btn-last"
-                [disabled]="currentPage === totalPages"
-                (click)="goToLastPage()"
-                title="Última página"
-              >
-                ⏭️
-              </button>
-            </div>
-
-            <div class="total-info">
-              <span class="total-count">{{ filteredParts.length }}</span>
-              <span class="total-label">refacciones</span>
-            </div>
-          </div>
-
-          <!-- Paginación móvil -->
-          <div
-            *ngIf="paginatedParts.length > 0 && totalPages > 1"
-            class="pagination-mobile"
-          >
-            <div class="pagination-mobile-info">
-              <span class="page-info-mobile">
-                Página {{ currentPage }} de {{ totalPages }} ({{
-                  filteredParts.length
-                }}
-                refacciones)
-              </span>
-            </div>
-
-            <div class="pagination-mobile-controls">
-              <button
-                class="mobile-nav-btn"
-                [disabled]="currentPage === 1"
-                (click)="previousPage()"
-              >
-                ⬅️ Anterior
-              </button>
-
-              <div class="mobile-page-numbers">
+              <div class="page-numbers">
                 <span
-                  *ngFor="let page of getVisiblePages().slice(0, 5)"
-                  class="mobile-page-number"
+                  *ngFor="let page of getVisiblePages()"
+                  class="page-number"
                   [class.active]="page === currentPage"
                   (click)="goToPage(page)"
                 >
@@ -301,13 +248,25 @@ interface SearchFilters {
                 </span>
               </div>
 
-              <button
-                class="mobile-nav-btn"
+              <app-touch-button
+                variant="secondary"
+                size="md"
+                icon="➡️"
+                (clicked)="nextPage()"
                 [disabled]="currentPage === totalPages"
-                (click)="nextPage()"
               >
-                Siguiente ➡️
-              </button>
+                Siguiente
+              </app-touch-button>
+
+              <app-touch-button
+                variant="secondary"
+                size="md"
+                icon="⏭️"
+                (clicked)="goToPage(totalPages)"
+                [disabled]="currentPage === totalPages"
+              >
+                Última
+              </app-touch-button>
             </div>
           </div>
         </div>
@@ -339,29 +298,67 @@ interface SearchFilters {
       </div>
 
       <!-- Teclado virtual -->
-      <app-virtual-keyboard
-        [visible]="keyboardVisible"
-        [showEnter]="false"
-        (keyPressed)="onKeyPressed($event)"
-        (backspacePressed)="onBackspacePressed()"
-        (clearPressed)="onClearPressed()"
-        (closed)="hideKeyboard()"
-      ></app-virtual-keyboard>
+      <div class="virtual-keyboard" *ngIf="keyboardVisible">
+        <div class="keyboard-container">
+          <div class="keyboard-header">
+            <h4>Teclado Virtual</h4>
+            <app-touch-button
+              variant="secondary"
+              size="sm"
+              icon="✕"
+              (clicked)="hideKeyboard()"
+            >
+            </app-touch-button>
+          </div>
 
-      <!-- Overlay para cerrar teclado -->
-      <div
-        *ngIf="keyboardVisible"
-        class="keyboard-overlay"
-        (click)="hideKeyboard()"
-      ></div>
+          <div class="keyboard-grid">
+            <div class="keyboard-row">
+              <button
+                *ngFor="let key of keyboardLayout.row1"
+                class="key"
+                (click)="typeKey(key)"
+              >
+                {{ key }}
+              </button>
+            </div>
+            <div class="keyboard-row">
+              <button
+                *ngFor="let key of keyboardLayout.row2"
+                class="key"
+                (click)="typeKey(key)"
+              >
+                {{ key }}
+              </button>
+            </div>
+            <div class="keyboard-row">
+              <button
+                *ngFor="let key of keyboardLayout.row3"
+                class="key"
+                (click)="typeKey(key)"
+              >
+                {{ key }}
+              </button>
+            </div>
+            <div class="keyboard-row">
+              <button class="key key-space" (click)="typeKey(' ')">
+                Espacio
+              </button>
+              <button class="key key-backspace" (click)="backspace()">⌫</button>
+              <button class="key key-clear" (click)="clearSearch()">
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [
     `
       .app-container {
         min-height: 100vh;
-        background: #f8fafc;
-        padding: 2rem 0 0 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 0;
         margin: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
@@ -371,9 +368,9 @@ interface SearchFilters {
         backdrop-filter: blur(10px);
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         padding: 1rem 1.5rem;
-        position: relative;
-        z-index: 10;
-        margin-bottom: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
       }
 
       .header-content {
@@ -455,6 +452,10 @@ interface SearchFilters {
         box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
       }
 
+      .keyboard-btn {
+        flex-shrink: 0;
+      }
+
       .quick-filters,
       .area-filters {
         display: flex;
@@ -482,6 +483,12 @@ interface SearchFilters {
         border: 1px solid #e2e8f0;
         border-radius: 1rem;
         overflow: hidden;
+        transition: all 0.2s ease;
+      }
+
+      .part-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       }
 
       .part-card.out-of-stock {
@@ -526,30 +533,15 @@ interface SearchFilters {
       }
 
       .part-image-placeholder {
-        width: 100%;
-        height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        background: linear-gradient(135deg, #f7fafc, #edf2f7);
-        color: #718096;
-        text-align: center;
-        padding: 0.5rem;
+        color: #a0aec0;
       }
 
       .placeholder-icon {
-        font-size: 2rem;
-        opacity: 0.7;
-      }
-
-      .placeholder-text {
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-        line-height: 1.2;
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
       }
 
       .part-content {
@@ -589,245 +581,61 @@ interface SearchFilters {
         color: #f56565;
       }
 
-      .pagination-mobile {
-        margin-top: 2rem;
-        padding: 1rem;
-        background: white;
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e2e8f0;
+      .part-actions {
+        display: flex;
+        justify-content: center;
       }
 
-      .pagination-mobile-info {
+      .action-btn {
+        flex: 1;
+      }
+
+      .pagination-container {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 1.5rem;
+      }
+
+      .pagination-info {
         text-align: center;
         margin-bottom: 1rem;
-      }
-
-      .page-info-mobile {
-        font-size: 0.875rem;
         color: #718096;
-        font-weight: 500;
       }
 
-      .pagination-mobile-controls {
+      .pagination-controls {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .mobile-nav-btn {
-        padding: 0.75rem 1rem;
-        border-radius: 0.75rem;
-        border: 1px solid #e2e8f0;
-        background: white;
-        color: #4a5568;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        touch-action: manipulation;
-        min-width: 90px;
-      }
-
-      .mobile-nav-btn:hover:not(:disabled) {
-        background: #edf2f7;
-        border-color: #cbd5e0;
-        color: #2d3748;
-      }
-
-      .mobile-nav-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .mobile-page-numbers {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-      }
-
-      .mobile-page-number {
-        min-width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
         justify-content: center;
-        border-radius: 50%;
-        background: #f7fafc;
-        color: #4a5568;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-weight: 600;
-        font-size: 0.875rem;
-      }
-
-      .mobile-page-number:hover {
-        background: #e2e8f0;
-      }
-
-      .mobile-page-number.active {
-        background: #4299e1;
-        color: white;
-      }
-
-      /* Sidebar de navegación */
-      .page-navigation-sidebar {
-        position: fixed;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        background: white;
-        border-radius: 1rem;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        padding: 1rem;
-        z-index: 50;
-        display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 1rem;
-        min-width: 80px;
-        border: 1px solid #e2e8f0;
+        gap: 0.5rem;
+        flex-wrap: wrap;
       }
 
-      .page-info-sidebar {
+      .page-numbers {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #4a5568;
-        text-align: center;
-        line-height: 1.2;
-      }
-
-      .current-page {
-        font-size: 1.25rem;
-        color: #4299e1;
-        font-weight: 700;
-      }
-
-      .page-separator {
-        color: #a0aec0;
-        margin: 0.125rem 0;
-      }
-
-      .total-pages {
-        color: #718096;
-      }
-
-      .page-numbers-vertical {
-        display: flex;
-        flex-direction: column;
         gap: 0.25rem;
-        max-height: 300px;
-        overflow-y: hidden;
+        margin: 0 1rem;
       }
 
-      .page-number-vertical {
+      .page-number {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: #f7fafc;
         color: #4a5568;
-        font-size: 0.875rem;
-        font-weight: 600;
         cursor: pointer;
         transition: all 0.2s ease;
-        user-select: none;
+        font-weight: 600;
       }
 
-      .page-number-vertical:hover {
+      .page-number:hover {
         background: #e2e8f0;
-        transform: scale(1.05);
       }
 
-      .page-number-vertical.active {
+      .page-number.active {
         background: #4299e1;
         color: white;
-        box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
-      }
-
-      .navigation-controls-vertical {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .nav-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border: 1px solid #e2e8f0;
-        background: white;
-        color: #4a5568;
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        user-select: none;
-      }
-
-      .nav-btn:hover:not(:disabled) {
-        background: #edf2f7;
-        border-color: #cbd5e0;
-        transform: translateY(-1px);
-      }
-
-      .nav-btn:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      .total-info {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.75rem;
-        color: #718096;
-        text-align: center;
-        border-top: 1px solid #e2e8f0;
-        padding-top: 0.75rem;
-        margin-top: 0.5rem;
-        width: 100%;
-      }
-
-      .total-count {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #4299e1;
-        line-height: 1;
-      }
-
-      .total-label {
-        color: #a0aec0;
-        font-size: 0.75rem;
-      }
-
-      .keyboard-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.2);
-        z-index: 999;
-        animation: fadeIn 0.3s ease-out;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
       }
 
       .empty-state,
@@ -867,6 +675,91 @@ interface SearchFilters {
         margin-bottom: 1.5rem;
       }
 
+      /* Teclado virtual */
+      .virtual-keyboard {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+        z-index: 1000;
+        box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .keyboard-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+
+      .keyboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .keyboard-header h4 {
+        margin: 0;
+        color: #2d3748;
+      }
+
+      .keyboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .keyboard-row {
+        display: flex;
+        justify-content: center;
+        gap: 0.25rem;
+      }
+
+      .key {
+        min-width: 40px;
+        height: 50px;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background: #f7fafc;
+        color: #2d3748;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .key:hover {
+        background: #e2e8f0;
+        transform: translateY(-1px);
+      }
+
+      .key:active {
+        transform: translateY(0);
+        background: #cbd5e0;
+      }
+
+      .key-space {
+        min-width: 200px;
+      }
+
+      .key-backspace,
+      .key-clear {
+        min-width: 80px;
+        background: #fed7d7;
+        color: #c53030;
+      }
+
+      .key-backspace:hover,
+      .key-clear:hover {
+        background: #feb2b2;
+      }
+
       /* Responsive */
       @media (max-width: 768px) {
         .header-content {
@@ -879,32 +772,18 @@ interface SearchFilters {
           gap: 1rem;
         }
 
-        .quick-filters,
-        .area-filters {
-          justify-content: center;
-        }
-
-        .pagination-mobile-controls {
+        .pagination-controls {
           flex-direction: column;
           gap: 1rem;
         }
 
-        .mobile-page-numbers {
-          order: 2;
+        .page-numbers {
+          margin: 0;
         }
 
-        .page-navigation-sidebar {
-          display: none;
-        }
-
-        .pagination-mobile {
-          display: block;
-        }
-      }
-
-      @media (min-width: 769px) {
-        .pagination-mobile {
-          display: none;
+        .quick-filters,
+        .area-filters {
+          justify-content: center;
         }
       }
     `,
@@ -931,6 +810,29 @@ export class GlobalSearchComponent implements OnInit {
   totalPages = 1;
 
   keyboardVisible = false;
+  keyboardLayout = {
+    row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
+    row3: [
+      'Z',
+      'X',
+      'C',
+      'V',
+      'B',
+      'N',
+      'M',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '0',
+    ],
+  };
 
   constructor(
     private router: Router,
@@ -1023,52 +925,21 @@ export class GlobalSearchComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.updatePaginatedParts();
-      this.scrollToTop();
     }
   }
 
   previousPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePaginatedParts();
-      this.scrollToTop();
-    }
+    this.goToPage(this.currentPage - 1);
   }
 
   nextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePaginatedParts();
-      this.scrollToTop();
-    }
-  }
-
-  goToFirstPage() {
-    this.currentPage = 1;
-    this.updatePaginatedParts();
-    this.scrollToTop();
-  }
-
-  goToLastPage() {
-    this.currentPage = this.totalPages;
-    this.updatePaginatedParts();
-    this.scrollToTop();
-  }
-
-  private scrollToTop() {
-    setTimeout(() => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    }, 100);
+    this.goToPage(this.currentPage + 1);
   }
 
   getVisiblePages(): number[] {
     const pages: number[] = [];
-    const maxPages = 7; // Máximo 7 páginas para evitar scroll
-    const start = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    const end = Math.min(this.totalPages, start + maxPages - 1);
+    const start = Math.max(1, this.currentPage - 2);
+    const end = Math.min(this.totalPages, this.currentPage + 2);
 
     for (let i = start; i <= end; i++) {
       pages.push(i);
@@ -1119,7 +990,7 @@ export class GlobalSearchComponent implements OnInit {
     // Imagen cargada correctamente
   }
 
-  navigateToPartMachine(part: Part) {
+  viewPartDetails(part: Part) {
     const machine = this.machines.find((m) => m.id === part.machineId);
     if (machine) {
       this.router.navigate(['/machines', machine.area], {
@@ -1132,25 +1003,21 @@ export class GlobalSearchComponent implements OnInit {
     this.keyboardVisible = !this.keyboardVisible;
   }
 
-  showKeyboard() {
-    this.keyboardVisible = true;
-  }
-
   hideKeyboard() {
     this.keyboardVisible = false;
   }
 
-  onKeyPressed(key: string) {
+  typeKey(key: string) {
     this.searchQuery += key;
     this.onSearchInput();
   }
 
-  onBackspacePressed() {
+  backspace() {
     this.searchQuery = this.searchQuery.slice(0, -1);
     this.onSearchInput();
   }
 
-  onClearPressed() {
+  clearSearch() {
     this.searchQuery = '';
     this.onSearchInput();
   }
