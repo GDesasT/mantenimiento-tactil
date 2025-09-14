@@ -1,0 +1,57 @@
+<div class="admin-container">
+	<h2 class="title">Peticiones de Refacciones</h2>
+
+	<div *ngIf="loading" class="loading">Cargando...</div>
+
+	<div *ngIf="!loading && petitions.length === 0" class="empty">
+		No hay peticiones por ahora.
+	</div>
+
+	<div class="list" *ngIf="!loading && petitions.length > 0">
+		<div class="card" *ngFor="let p of petitions">
+			<div class="card-main">
+				<div class="row">
+					<span class="label">Empleado</span>
+					<span class="value">{{ p.employeeName }} ({{ p.employeeNumber }})</span>
+				</div>
+				<div class="row">
+					<span class="label">Refacción</span>
+					<span class="value">
+						{{ partsMap.get(p.partId)?.description || 'Desconocida' }}
+						— SAP: {{ partsMap.get(p.partId)?.sapNumber || 'N/A' }}
+					</span>
+				</div>
+				<div class="row">
+					<span class="label">Estado</span>
+					<span class="badge" [ngClass]="{
+						'badge-pending': p.status === 'pending',
+						'badge-approved': p.status === 'approved',
+						'badge-rejected': p.status === 'rejected'
+					}">{{ p.status }}</span>
+				</div>
+			</div>
+					<div class="card-actions" *ngIf="p.status === 'pending'">
+				<app-touch-button
+					variant="success"
+					size="sm"
+					icon="✅"
+					(clicked)="approve(p)"
+					>Aprobar</app-touch-button
+				>
+				<app-touch-button
+					variant="danger"
+					size="sm"
+					icon="✖️"
+					(clicked)="reject(p)"
+					>Rechazar</app-touch-button
+				>
+			</div>
+		</div>
+	</div>
+
+	<div class="footer">
+		<app-touch-button variant="secondary" size="md" icon="🔄" (clicked)="refresh()"
+			>Actualizar</app-touch-button
+		>
+	</div>
+</div>
