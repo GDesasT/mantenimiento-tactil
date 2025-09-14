@@ -201,22 +201,22 @@ import { firstValueFrom } from 'rxjs';
                 </div>
               </div>
               <div class="petition-part">
-                  <app-touch-button
-                    variant="success"
-                    size="sm"
-                    icon="🛒"
-                    (clicked)="openPetitionModal(part)"
-                  >
-                    Pedir Refaccion
-                  </app-touch-button>
-                                <app-touch-button
-                    variant="warning"
-                    size="sm"
-                    icon="🛒"
-                    (clicked)="editPart(part)"
-                  >
-                    Editar Informacion
-                  </app-touch-button>
+                <app-touch-button
+                  variant="success"
+                  size="sm"
+                  icon="🛒"
+                  (clicked)="openPetitionModal(part)"
+                >
+                  Pedir Refaccion
+                </app-touch-button>
+                <app-touch-button
+                  variant="warning"
+                  size="sm"
+                  icon="🛒"
+                  (clicked)="editPart(part)"
+                >
+                  Editar Informacion
+                </app-touch-button>
               </div>
 
               <!-- Botones de admin si está en modo admin -->
@@ -583,18 +583,27 @@ import { firstValueFrom } from 'rxjs';
               <span class="modal-icon">🛒</span>
               <h3>Pedir refacción</h3>
             </div>
-            <button class="modal-close" (click)="closePetitionModal()">✕</button>
+            <button class="modal-close" (click)="closePetitionModal()">
+              ✕
+            </button>
           </div>
 
           <div class="modal-content" *ngIf="selectedPartForPetition as p">
             <div class="modal-section">
-              <div class="modal-category-badge" [ngClass]="{
-                'badge-mecanica': p.category === 'mecanica',
-                'badge-electronica': p.category === 'electronica',
-                'badge-consumible': p.category === 'consumible'
-              }">
-                <span class="badge-icon">{{ getCategoryIcon(p.category) }}</span>
-                <span class="badge-label">{{ getCategoryName(p.category) }}</span>
+              <div
+                class="modal-category-badge"
+                [ngClass]="{
+                  'badge-mecanica': p.category === 'mecanica',
+                  'badge-electronica': p.category === 'electronica',
+                  'badge-consumible': p.category === 'consumible'
+                }"
+              >
+                <span class="badge-icon">{{
+                  getCategoryIcon(p.category)
+                }}</span>
+                <span class="badge-label">{{
+                  getCategoryName(p.category)
+                }}</span>
               </div>
 
               <p class="modal-description">
@@ -606,7 +615,9 @@ import { firstValueFrom } from 'rxjs';
                   <div class="detail-icon">#</div>
                   <div class="detail-info">
                     <div class="detail-title">SAP</div>
-                    <div class="detail-data sap-highlight">{{ p.sapNumber }}</div>
+                    <div class="detail-data sap-highlight">
+                      {{ p.sapNumber }}
+                    </div>
                   </div>
                 </div>
                 <div class="detail-item">
@@ -621,30 +632,69 @@ import { firstValueFrom } from 'rxjs';
 
             <div class="modal-section">
               <label class="input-label">Número de empleado</label>
-              <input
-                type="text"
-                class="admin-input"
-                [(ngModel)]="employeeNumberInput"
-                (input)="onEmployeeNumberChange()"
-                placeholder="Ingresa tu número"
-                autocomplete="off"
-              />
-              <div *ngIf="employeeExists" style="margin-top: 0.5rem; color: #059669; font-weight: 600;">
-                Empleado: {{ employeeNameInput }} (reconocido)
-              </div>
-            </div>
 
-            <div class="modal-section">
-              <label class="input-label">Nombre</label>
-              <input
-                type="text"
-                class="admin-input"
-                [(ngModel)]="employeeNameInput"
-                [disabled]="employeeExists"
-                placeholder="Ingresa tu nombre"
-                autocomplete="off"
-              />
-              <small style="color:#6b7280;">Si ya estás registrado, este campo se autocompleta.</small>
+              <!-- Display del número -->
+              <div class="employee-number-display">
+                {{ employeeNumberInput || '0000' }}
+              </div>
+
+              <!-- Teclado numérico -->
+              <div class="numpad">
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('1')">
+                    1
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('2')">
+                    2
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('3')">
+                    3
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('4')">
+                    4
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('5')">
+                    5
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('6')">
+                    6
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('7')">
+                    7
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('8')">
+                    8
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('9')">
+                    9
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button
+                    class="numpad-key numpad-clear"
+                    (click)="onNumpadClear()"
+                  >
+                    🗑️
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('0')">
+                    0
+                  </button>
+                  <button
+                    class="numpad-key numpad-backspace"
+                    (click)="onNumpadBackspace()"
+                  >
+                    ⌫
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="employeeExists" class="employee-recognized">
+                ✅ Empleado: {{ employeeNameInput }} (reconocido)
+              </div>
             </div>
           </div>
 
@@ -676,12 +726,12 @@ import { firstValueFrom } from 'rxjs';
   `,
   styles: [
     `
-    .petition-part {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      justify-content: center;
-    }
+      .petition-part {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: center;
+      }
       .app-container {
         min-height: 100vh;
         background: #f8fafc;
@@ -2037,6 +2087,126 @@ import { firstValueFrom } from 'rxjs';
           font-size: 0.8rem;
         }
       }
+
+      /* Estilos para el teclado numérico */
+      .employee-number-display {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.2em;
+        color: #111827;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+      }
+
+      .numpad {
+        display: grid;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 1rem;
+      }
+
+      .numpad-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+      }
+
+      .numpad-key {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.2rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background: #f3f4f6;
+          border-color: #d1d5db;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        &:active {
+          background: #e5e7eb;
+          transform: translateY(0);
+          box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      .numpad-clear {
+        background: #fee2e2 !important;
+        border-color: #fecaca !important;
+        color: #dc2626 !important;
+
+        &:hover {
+          background: #fecaca !important;
+          border-color: #f87171 !important;
+        }
+      }
+
+      .numpad-backspace {
+        background: #fef3c7 !important;
+        border-color: #fde68a !important;
+        color: #d97706 !important;
+
+        &:hover {
+          background: #fde68a !important;
+          border-color: #fbbf24 !important;
+        }
+      }
+
+      .employee-recognized {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #d1fae5;
+        border: 1px solid #10b981;
+        border-radius: 0.5rem;
+        color: #065f46;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      /* Responsive para móviles */
+      @media (max-width: 480px) {
+        .numpad-key {
+          padding: 1rem;
+          font-size: 1.25rem;
+          min-height: 3.5rem;
+        }
+
+        .employee-number-display {
+          font-size: 1.5rem;
+          min-height: 3rem;
+          padding: 0.75rem;
+        }
+      }
     `,
   ],
 })
@@ -2081,6 +2251,9 @@ export class PartListComponent implements OnInit {
   employeeExists = false;
   isSubmittingPetition = false;
 
+  // Teclado numérico para número de empleado
+  showNumericKeyboard = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -2112,6 +2285,25 @@ export class PartListComponent implements OnInit {
     }
   }
 
+  // ----- Métodos para teclado numérico -----
+  onNumberPressed(num: string) {
+    if (this.employeeNumberInput.length < 4) {
+      // Límite de 4 dígitos
+      this.employeeNumberInput += num;
+      this.onEmployeeNumberChange();
+    }
+  }
+
+  onNumpadBackspace() {
+    this.employeeNumberInput = this.employeeNumberInput.slice(0, -1);
+    this.onEmployeeNumberChange();
+  }
+
+  onNumpadClear() {
+    this.employeeNumberInput = '';
+    this.onEmployeeNumberChange();
+  }
+
   // ----- Peticiones de refacción -----
   openPetitionModal(part: Part) {
     this.selectedPartForPetition = part;
@@ -2134,7 +2326,7 @@ export class PartListComponent implements OnInit {
       if (!this.employeeExists) this.employeeNameInput = '';
       return;
     }
-  this.employeeService.getByEmployeeNumber(num).subscribe((emp: any) => {
+    this.employeeService.getByEmployeeNumber(num).subscribe((emp: any) => {
       if (emp) {
         this.employeeExists = true;
         this.employeeNameInput = emp.name;
