@@ -375,33 +375,118 @@ interface SearchFilters {
       </div>
 
       <!-- Modal: Pedir Refacción (Empleado) -->
-      <div *ngIf="showPetitionModal" class="modal-overlay" (click)="closePetitionModal()">
+      <div
+        *ngIf="showPetitionModal"
+        class="modal-overlay"
+        (click)="closePetitionModal()"
+      >
         <div class="modal-container" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <div class="modal-title"><span>🛒</span><h3>Pedir refacción</h3></div>
-            <button class="modal-close" (click)="closePetitionModal()">✕</button>
+            <div class="modal-title">
+              <span>🛒</span>
+              <h3>Pedir refacción</h3>
+            </div>
+            <button class="modal-close" (click)="closePetitionModal()">
+              ✕
+            </button>
           </div>
           <div class="modal-content" *ngIf="selectedPartForPetition as p">
             <p class="modal-description">{{ p.description }}</p>
-            <div class="detail-row"><span class="detail-label">SAP:</span> <span class="detail-value">{{ p.sapNumber }}</span></div>
-            <div class="detail-row"><span class="detail-label">Parte:</span> <span class="detail-value">{{ p.partNumber }}</span></div>
+            <div class="detail-row">
+              <span class="detail-label">SAP:</span>
+              <span class="detail-value">{{ p.sapNumber }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Parte:</span>
+              <span class="detail-value">{{ p.partNumber }}</span>
+            </div>
 
             <div class="input-group">
               <label class="input-label">Número de empleado</label>
-              <input type="text" class="admin-input" [(ngModel)]="employeeNumberInput" (input)="onEmployeeNumberChange()" placeholder="Ingresa tu número" />
-              <div *ngIf="employeeExists" class="hint-ok">Empleado: {{ employeeNameInput }} (reconocido)</div>
-            </div>
 
-            <div class="input-group">
-              <label class="input-label">Nombre</label>
-              <input type="text" class="admin-input" [(ngModel)]="employeeNameInput" [disabled]="employeeExists" placeholder="Ingresa tu nombre" />
+              <!-- Display del número -->
+              <div class="employee-number-display">
+                {{ employeeNumberInput || '0000' }}
+              </div>
+
+              <!-- Teclado numérico -->
+              <div class="numpad">
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('1')">
+                    1
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('2')">
+                    2
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('3')">
+                    3
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('4')">
+                    4
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('5')">
+                    5
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('6')">
+                    6
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('7')">
+                    7
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('8')">
+                    8
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('9')">
+                    9
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button
+                    class="numpad-key numpad-clear"
+                    (click)="onNumpadClear()"
+                  >
+                    🗑️
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('0')">
+                    0
+                  </button>
+                  <button
+                    class="numpad-key numpad-backspace"
+                    (click)="onNumpadBackspace()"
+                  >
+                    ⌫
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="employeeExists" class="employee-recognized">
+                ✅ Empleado: {{ employeeNameInput }} (reconocido)
+              </div>
             </div>
           </div>
           <div class="modal-actions">
-            <app-touch-button variant="primary" size="lg" icon="✅" (clicked)="submitPetition()" [loading]="isSubmittingPetition" [disabled]="!employeeNumberInput.trim() || isSubmittingPetition">
+            <app-touch-button
+              variant="primary"
+              size="lg"
+              icon="✅"
+              (clicked)="submitPetition()"
+              [loading]="isSubmittingPetition"
+              [disabled]="!employeeNumberInput.trim() || isSubmittingPetition"
+            >
               {{ isSubmittingPetition ? 'Enviando...' : 'Confirmar petición' }}
             </app-touch-button>
-            <app-touch-button variant="secondary" size="lg" icon="✕" (clicked)="closePetitionModal()" [disabled]="isSubmittingPetition">Cancelar</app-touch-button>
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              icon="✕"
+              (clicked)="closePetitionModal()"
+              [disabled]="isSubmittingPetition"
+              >Cancelar</app-touch-button
+            >
           </div>
         </div>
       </div>
@@ -960,24 +1045,211 @@ interface SearchFilters {
       }
 
       /* Notificaciones simples */
-      .success-notification, .error-notification {
-        position: fixed; top: 1rem; right: 1rem; padding: .75rem 1rem; border-radius: .5rem; color: #fff; z-index: 1000;
+      .success-notification,
+      .error-notification {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        color: #fff;
+        z-index: 1000;
       }
-      .success-notification { background: #10b981; }
-      .error-notification { background: #ef4444; }
+      .success-notification {
+        background: #10b981;
+      }
+      .error-notification {
+        background: #ef4444;
+      }
 
       /* Modal básico */
-      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-      .modal-container { background: #fff; border-radius: .75rem; width: 100%; max-width: 520px; overflow: hidden; }
-      .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb; }
-      .modal-title { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: #111827; }
-      .modal-close { border: none; background: #f3f4f6; border-radius: 999px; width: 36px; height: 36px; cursor: pointer; }
-      .modal-content { padding: 1rem 1.25rem; }
-      .modal-actions { display: flex; gap: .5rem; padding: 1rem 1.25rem; }
-      .input-group { margin: .75rem 0; }
-      .input-label { display: block; margin-bottom: .25rem; font-weight: 600; color: #374151; }
-      .admin-input { width: 100%; padding: .75rem; border: 2px solid #e5e7eb; border-radius: .5rem; }
-      .hint-ok { margin-top: .25rem; color: #059669; font-weight: 600; }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+      }
+      .modal-container {
+        background: #fff;
+        border-radius: 0.75rem;
+        width: 100%;
+        max-width: 520px;
+        overflow: hidden;
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #111827;
+      }
+      .modal-close {
+        border: none;
+        background: #f3f4f6;
+        border-radius: 999px;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+      }
+      .modal-content {
+        padding: 1rem 1.25rem;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+      }
+      .input-group {
+        margin: 0.75rem 0;
+      }
+      .input-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+        color: #374151;
+      }
+      .admin-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+      }
+      .hint-ok {
+        margin-top: 0.25rem;
+        color: #059669;
+        font-weight: 600;
+      }
+
+      /* Estilos para el teclado numérico */
+      .employee-number-display {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.2em;
+        color: #111827;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+      }
+
+      .numpad {
+        display: grid;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 1rem;
+      }
+
+      .numpad-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+      }
+
+      .numpad-key {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.2rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background: #f3f4f6;
+          border-color: #d1d5db;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        &:active {
+          background: #e5e7eb;
+          transform: translateY(0);
+          box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      .numpad-clear {
+        background: #fee2e2 !important;
+        border-color: #fecaca !important;
+        color: #dc2626 !important;
+
+        &:hover {
+          background: #fecaca !important;
+          border-color: #f87171 !important;
+        }
+      }
+
+      .numpad-backspace {
+        background: #fef3c7 !important;
+        border-color: #fde68a !important;
+        color: #d97706 !important;
+
+        &:hover {
+          background: #fde68a !important;
+          border-color: #fbbf24 !important;
+        }
+      }
+
+      .employee-recognized {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #d1fae5;
+        border: 1px solid #10b981;
+        border-radius: 0.5rem;
+        color: #065f46;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      /* Responsive para móviles */
+      @media (max-width: 480px) {
+        .numpad-key {
+          padding: 1rem;
+          font-size: 1.25rem;
+          min-height: 3.5rem;
+        }
+
+        .employee-number-display {
+          font-size: 1.5rem;
+          min-height: 3rem;
+          padding: 0.75rem;
+        }
+      }
     `,
   ],
 })
@@ -1015,6 +1287,9 @@ export class GlobalSearchComponent implements OnInit {
   showErrorNotification = false;
   errorMessage = '';
 
+  // Teclado numérico para número de empleado
+  showNumericKeyboard = false;
+
   constructor(
     private router: Router,
     private partService: PartService,
@@ -1041,6 +1316,25 @@ export class GlobalSearchComponent implements OnInit {
     if (this.isSubmittingPetition) return;
     this.showPetitionModal = false;
     this.selectedPartForPetition = null;
+  }
+
+  // ----- Métodos para teclado numérico -----
+  onNumberPressed(num: string) {
+    if (this.employeeNumberInput.length < 4) {
+      // Límite de 4 dígitos
+      this.employeeNumberInput += num;
+      this.onEmployeeNumberChange();
+    }
+  }
+
+  onNumpadBackspace() {
+    this.employeeNumberInput = this.employeeNumberInput.slice(0, -1);
+    this.onEmployeeNumberChange();
+  }
+
+  onNumpadClear() {
+    this.employeeNumberInput = '';
+    this.onEmployeeNumberChange();
   }
 
   onEmployeeNumberChange() {
@@ -1080,18 +1374,12 @@ export class GlobalSearchComponent implements OnInit {
       if (existing) {
         name = existing.name;
       } else {
-        const inputName = this.employeeNameInput.trim();
-        if (!inputName) {
-          this.isSubmittingPetition = false;
-          this.errorMessage = 'Ingresa tu nombre para registrarte';
-          this.showErrorNotification = true;
-          setTimeout(() => (this.showErrorNotification = false), 3000);
-          return;
-        }
-        const created = await firstValueFrom(
-          this.employeeService.create({ employeeNumber: num, name: inputName })
+        // Si el empleado no existe, usar el número como nombre temporal
+        name = `Empleado ${num}`;
+        // Crear el empleado con nombre temporal
+        await firstValueFrom(
+          this.employeeService.create({ employeeNumber: num, name: name })
         );
-        name = created.name;
       }
 
       await firstValueFrom(

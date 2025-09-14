@@ -572,57 +572,25 @@ import { firstValueFrom } from 'rxjs';
         <div class="modal-container" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <div class="modal-title">
-              <span class="modal-icon">🛒</span>
+              <span>🛒</span>
               <h3>Pedir refacción</h3>
             </div>
             <button class="modal-close" (click)="closePetitionModal()">
               ✕
             </button>
           </div>
-
           <div class="modal-content" *ngIf="selectedPartForPetition as p">
-            <div class="modal-section">
-              <div
-                class="modal-category-badge"
-                [ngClass]="{
-                  'badge-mecanica': p.category === 'mecanica',
-                  'badge-electronica': p.category === 'electronica',
-                  'badge-consumible': p.category === 'consumible'
-                }"
-              >
-                <span class="badge-icon">{{
-                  getCategoryIcon(p.category)
-                }}</span>
-                <span class="badge-label">{{
-                  getCategoryName(p.category)
-                }}</span>
-              </div>
-
-              <p class="modal-description">
-                {{ p.description }}
-              </p>
-
-              <div class="detail-grid" style="margin-top: 1rem;">
-                <div class="detail-item">
-                  <div class="detail-icon">#</div>
-                  <div class="detail-info">
-                    <div class="detail-title">SAP</div>
-                    <div class="detail-data sap-highlight">
-                      {{ p.sapNumber }}
-                    </div>
-                  </div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-icon">🏷️</div>
-                  <div class="detail-info">
-                    <div class="detail-title">Parte</div>
-                    <div class="detail-data">{{ p.partNumber }}</div>
-                  </div>
-                </div>
-              </div>
+            <p class="modal-description">{{ p.description }}</p>
+            <div class="detail-row">
+              <span class="detail-label">SAP:</span>
+              <span class="detail-value">{{ p.sapNumber }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Parte:</span>
+              <span class="detail-value">{{ p.partNumber }}</span>
             </div>
 
-            <div class="modal-section">
+            <div class="input-group">
               <label class="input-label">Número de empleado</label>
 
               <!-- Display del número -->
@@ -689,7 +657,6 @@ import { firstValueFrom } from 'rxjs';
               </div>
             </div>
           </div>
-
           <div class="modal-actions">
             <app-touch-button
               variant="primary"
@@ -701,16 +668,14 @@ import { firstValueFrom } from 'rxjs';
             >
               {{ isSubmittingPetition ? 'Enviando...' : 'Confirmar petición' }}
             </app-touch-button>
-
             <app-touch-button
               variant="secondary"
               size="lg"
               icon="✕"
               (clicked)="closePetitionModal()"
               [disabled]="isSubmittingPetition"
+              >Cancelar</app-touch-button
             >
-              Cancelar
-            </app-touch-button>
           </div>
         </div>
       </div>
@@ -1133,29 +1098,21 @@ import { firstValueFrom } from 'rxjs';
 
       .modal-overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 1000;
         padding: 1rem;
-        backdrop-filter: blur(4px);
-        animation: fadeIn 0.3s ease;
       }
 
       .modal-container {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        max-width: 600px;
+        background: #fff;
+        border-radius: 0.75rem;
         width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: var(--shadow-2xl);
-        animation: scaleIn 0.3s ease;
+        max-width: 520px;
+        overflow: hidden;
       }
 
       .delete-modal {
@@ -1164,10 +1121,10 @@ import { firstValueFrom } from 'rxjs';
 
       .modal-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 2rem 2rem 1rem;
-        border-bottom: 2px solid var(--gray-100);
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
       }
 
       .danger-header {
@@ -1178,120 +1135,79 @@ import { firstValueFrom } from 'rxjs';
       .modal-title {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #111827;
       }
 
       .modal-title h3 {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--gray-900);
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #111827;
         margin: 0;
-      }
-
-      .modal-icon {
-        font-size: 2rem;
-        padding: 0.5rem;
-        background: var(--primary-100);
-        border-radius: var(--border-radius-md);
-      }
-
-      .danger-icon {
-        background: #fef2f2;
       }
 
       .modal-close {
-        width: 2.5rem;
-        height: 2.5rem;
         border: none;
-        background: var(--gray-100);
-        border-radius: 50%;
-        color: var(--gray-600);
-        font-size: 1.25rem;
-        font-weight: bold;
+        background: #f3f4f6;
+        border-radius: 999px;
+        width: 36px;
+        height: 36px;
         cursor: pointer;
-        transition: all 0.2s ease;
       }
 
       .modal-close:hover {
-        background: var(--gray-200);
-        color: var(--gray-800);
+        background: #e5e7eb;
       }
 
       .modal-content {
-        padding: 2rem;
+        padding: 1rem 1.25rem;
       }
 
-      .modal-section {
-        margin-bottom: 2rem;
-      }
-
-      .modal-section:last-child {
-        margin-bottom: 0;
-      }
-
-      .modal-category-badge {
+      .modal-actions {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        padding: 1rem 2rem;
-        border-radius: var(--border-radius-lg);
-        margin-bottom: 1.5rem;
-      }
-
-      .badge-mecanica {
-        background: linear-gradient(
-          135deg,
-          var(--primary-100),
-          var(--primary-200)
-        );
-        border: 2px solid var(--primary-300);
-      }
-
-      .badge-electronica {
-        background: linear-gradient(135deg, #fef3c7, #fde68a);
-        border: 2px solid #f59e0b;
-      }
-
-      .badge-consumible {
-        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-        border: 2px solid #10b981;
-      }
-
-      .badge-icon {
-        font-size: 2.5rem;
-      }
-
-      .badge-label {
-        font-size: 1rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--gray-700);
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
       }
 
       .modal-description {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--gray-900);
-        text-align: center;
-        line-height: 1.4;
-        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 1rem;
       }
 
-      .detail-grid {
-        display: grid;
-        gap: 1.5rem;
-      }
-
-      .detail-item {
+      .detail-row {
         display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--gray-50);
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--gray-200);
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .detail-label {
+        font-weight: 600;
+        color: #6b7280;
+      }
+
+      .detail-value {
+        color: #111827;
+      }
+
+      .input-group {
+        margin: 0.75rem 0;
+      }
+
+      .input-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .admin-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
       }
 
       .detail-icon {
@@ -2348,18 +2264,12 @@ export class PartListComponent implements OnInit {
       if (existing) {
         name = existing.name;
       } else {
-        const inputName = this.employeeNameInput.trim();
-        if (!inputName) {
-          this.isSubmittingPetition = false;
-          this.errorMessage = 'Ingresa tu nombre para registrarte';
-          this.showErrorNotification = true;
-          setTimeout(() => (this.showErrorNotification = false), 3000);
-          return;
-        }
-        const created = await firstValueFrom(
-          this.employeeService.create({ employeeNumber: num, name: inputName })
+        // Si el empleado no existe, usar el número como nombre temporal
+        name = `Empleado ${num}`;
+        // Crear el empleado con nombre temporal
+        await firstValueFrom(
+          this.employeeService.create({ employeeNumber: num, name: name })
         );
-        name = created.name;
       }
 
       await firstValueFrom(
