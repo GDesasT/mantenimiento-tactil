@@ -209,14 +209,6 @@ import { firstValueFrom } from 'rxjs';
                 >
                   Pedir Refaccion
                 </app-touch-button>
-                <app-touch-button
-                  variant="warning"
-                  size="sm"
-                  icon="🛒"
-                  (clicked)="editPart(part)"
-                >
-                  Editar Informacion
-                </app-touch-button>
               </div>
 
               <!-- Botones de admin si está en modo admin -->
