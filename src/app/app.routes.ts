@@ -75,6 +75,14 @@ export const routes: Routes = [
       ),
     title: 'Importar desde Excel',
   },
+  {
+    path: 'peticiones-admin',
+    loadComponent: () =>
+      import('./features/peticiones-admin/peticiones-admin').then(
+        (m) => m.PeticionesAdmin
+      ),
+    title: 'Peticiones de Refacciones',
+  },
   // Redirección al home para rutas no encontradas
   { path: '**', redirectTo: '' },
 ];

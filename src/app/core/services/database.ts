@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import Dexie, { Table } from 'dexie';
-import { Machine, Part } from '../models/index';
+import { Machine, Part, Employee, Petition } from '../models/index';
 
 @Injectable({
   providedIn: 'root',
@@ -8,6 +8,8 @@ import { Machine, Part } from '../models/index';
 export class DatabaseService extends Dexie {
   machines!: Table<Machine>;
   parts!: Table<Part>;
+  employees!: Table<Employee>;
+  petitions!: Table<Petition>;
 
   constructor() {
     super('MaintenanceDB');
@@ -37,6 +39,33 @@ export class DatabaseService extends Dexie {
           });
       });
 
+    // Version 3: Tabla employees
+    this.version(3)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+      })
+      .upgrade((trans) => {
+        // No-op: creación de nueva tabla
+        return Promise.resolve();
+      });
+
+    // Version 4: Tabla petitions
+    this.version(4)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+        petitions:
+          '++id, partId, machineId, employeeNumber, employeeName, status, createdAt',
+      })
+      .upgrade((trans) => {
+        return Promise.resolve();
+      });
+
     // Hooks para timestamps automáticos
     this.machines.hook('creating', (primKey, obj, trans) => {
       obj.createdAt = new Date();
@@ -55,6 +84,25 @@ export class DatabaseService extends Dexie {
     this.parts.hook('updating', (modifications, primKey, obj, trans) => {
       (modifications as any).updatedAt = new Date();
     });
+
+    // employees hooks
+    this.employees?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.employees?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
+
+    // petitions hooks
+    this.petitions?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+      if (!obj.status) obj.status = 'pending';
+    });
+    this.petitions?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
   }
 
   async initializeDatabase(): Promise<void> {
@@ -68,9 +116,11 @@ export class DatabaseService extends Dexie {
   }
 
   async clearAllData(): Promise<void> {
-    await this.transaction('rw', this.machines, this.parts, async () => {
+    await this.transaction('rw', this.machines, this.parts, this.employees, this.petitions, async () => {
       await this.machines.clear();
       await this.parts.clear();
+      await this.employees.clear();
+      await this.petitions.clear();
     });
     console.log('🗑️ All data cleared');
   }

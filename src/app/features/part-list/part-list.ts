@@ -7,6 +7,9 @@ import { PartService } from '../../core/services/part';
 import { MachineService } from '../../core/services/machine';
 import { DatabaseService } from '../../core/services/database';
 import { Part, PartCategory, Machine } from '../../core/models';
+import { EmployeeService } from '../../core/services/employee';
+import { PetitionService } from '../../core/services/petition';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-part-list',
@@ -196,6 +199,16 @@ import { Part, PartCategory, Machine } from '../../core/models';
                   <span class="detail-label">🏭 Máquina:</span>
                   <span class="detail-value">{{ machine?.name || 'N/A' }}</span>
                 </div>
+              </div>
+              <div class="petition-part">
+                <app-touch-button
+                  variant="success"
+                  size="sm"
+                  icon="🛒"
+                  (clicked)="openPetitionModal(part)"
+                >
+                  Pedir Refaccion
+                </app-touch-button>
               </div>
 
               <!-- Botones de admin si está en modo admin -->
@@ -549,10 +562,133 @@ import { Part, PartCategory, Machine } from '../../core/models';
           </div>
         </div>
       </div>
+
+      <!-- Modal: Pedir Refacción (Empleado) -->
+      <div
+        *ngIf="showPetitionModal"
+        class="modal-overlay"
+        (click)="closePetitionModal()"
+      >
+        <div class="modal-container" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div class="modal-title">
+              <span>🛒</span>
+              <h3>Pedir refacción</h3>
+            </div>
+            <button class="modal-close" (click)="closePetitionModal()">
+              ✕
+            </button>
+          </div>
+          <div class="modal-content" *ngIf="selectedPartForPetition as p">
+            <p class="modal-description">{{ p.description }}</p>
+            <div class="detail-row">
+              <span class="detail-label">SAP:</span>
+              <span class="detail-value">{{ p.sapNumber }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Parte:</span>
+              <span class="detail-value">{{ p.partNumber }}</span>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Número de empleado</label>
+
+              <!-- Display del número -->
+              <div class="employee-number-display">
+                {{ employeeNumberInput || '0000' }}
+              </div>
+
+              <!-- Teclado numérico -->
+              <div class="numpad">
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('1')">
+                    1
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('2')">
+                    2
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('3')">
+                    3
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('4')">
+                    4
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('5')">
+                    5
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('6')">
+                    6
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button class="numpad-key" (click)="onNumberPressed('7')">
+                    7
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('8')">
+                    8
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('9')">
+                    9
+                  </button>
+                </div>
+                <div class="numpad-row">
+                  <button
+                    class="numpad-key numpad-clear"
+                    (click)="onNumpadClear()"
+                  >
+                    🗑️
+                  </button>
+                  <button class="numpad-key" (click)="onNumberPressed('0')">
+                    0
+                  </button>
+                  <button
+                    class="numpad-key numpad-backspace"
+                    (click)="onNumpadBackspace()"
+                  >
+                    ⌫
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="employeeExists" class="employee-recognized">
+                ✅ Empleado: {{ employeeNameInput }} (reconocido)
+              </div>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <app-touch-button
+              variant="primary"
+              size="lg"
+              icon="✅"
+              (clicked)="submitPetition()"
+              [loading]="isSubmittingPetition"
+              [disabled]="!employeeNumberInput.trim() || isSubmittingPetition"
+            >
+              {{ isSubmittingPetition ? 'Enviando...' : 'Confirmar petición' }}
+            </app-touch-button>
+            <app-touch-button
+              variant="secondary"
+              size="lg"
+              icon="✕"
+              (clicked)="closePetitionModal()"
+              [disabled]="isSubmittingPetition"
+              >Cancelar</app-touch-button
+            >
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [
     `
+      .petition-part {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: center;
+      }
       .app-container {
         min-height: 100vh;
         background: #f8fafc;
@@ -962,29 +1098,21 @@ import { Part, PartCategory, Machine } from '../../core/models';
 
       .modal-overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 1000;
         padding: 1rem;
-        backdrop-filter: blur(4px);
-        animation: fadeIn 0.3s ease;
       }
 
       .modal-container {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        max-width: 600px;
+        background: #fff;
+        border-radius: 0.75rem;
         width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: var(--shadow-2xl);
-        animation: scaleIn 0.3s ease;
+        max-width: 520px;
+        overflow: hidden;
       }
 
       .delete-modal {
@@ -993,10 +1121,10 @@ import { Part, PartCategory, Machine } from '../../core/models';
 
       .modal-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 2rem 2rem 1rem;
-        border-bottom: 2px solid var(--gray-100);
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
       }
 
       .danger-header {
@@ -1007,120 +1135,79 @@ import { Part, PartCategory, Machine } from '../../core/models';
       .modal-title {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #111827;
       }
 
       .modal-title h3 {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--gray-900);
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #111827;
         margin: 0;
-      }
-
-      .modal-icon {
-        font-size: 2rem;
-        padding: 0.5rem;
-        background: var(--primary-100);
-        border-radius: var(--border-radius-md);
-      }
-
-      .danger-icon {
-        background: #fef2f2;
       }
 
       .modal-close {
-        width: 2.5rem;
-        height: 2.5rem;
         border: none;
-        background: var(--gray-100);
-        border-radius: 50%;
-        color: var(--gray-600);
-        font-size: 1.25rem;
-        font-weight: bold;
+        background: #f3f4f6;
+        border-radius: 999px;
+        width: 36px;
+        height: 36px;
         cursor: pointer;
-        transition: all 0.2s ease;
       }
 
       .modal-close:hover {
-        background: var(--gray-200);
-        color: var(--gray-800);
+        background: #e5e7eb;
       }
 
       .modal-content {
-        padding: 2rem;
+        padding: 1rem 1.25rem;
       }
 
-      .modal-section {
-        margin-bottom: 2rem;
-      }
-
-      .modal-section:last-child {
-        margin-bottom: 0;
-      }
-
-      .modal-category-badge {
+      .modal-actions {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        padding: 1rem 2rem;
-        border-radius: var(--border-radius-lg);
-        margin-bottom: 1.5rem;
-      }
-
-      .badge-mecanica {
-        background: linear-gradient(
-          135deg,
-          var(--primary-100),
-          var(--primary-200)
-        );
-        border: 2px solid var(--primary-300);
-      }
-
-      .badge-electronica {
-        background: linear-gradient(135deg, #fef3c7, #fde68a);
-        border: 2px solid #f59e0b;
-      }
-
-      .badge-consumible {
-        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-        border: 2px solid #10b981;
-      }
-
-      .badge-icon {
-        font-size: 2.5rem;
-      }
-
-      .badge-label {
-        font-size: 1rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--gray-700);
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
       }
 
       .modal-description {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--gray-900);
-        text-align: center;
-        line-height: 1.4;
-        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 1rem;
       }
 
-      .detail-grid {
-        display: grid;
-        gap: 1.5rem;
-      }
-
-      .detail-item {
+      .detail-row {
         display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--gray-50);
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--gray-200);
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .detail-label {
+        font-weight: 600;
+        color: #6b7280;
+      }
+
+      .detail-value {
+        color: #111827;
+      }
+
+      .input-group {
+        margin: 0.75rem 0;
+      }
+
+      .input-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .admin-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
       }
 
       .detail-icon {
@@ -1908,6 +1995,126 @@ import { Part, PartCategory, Machine } from '../../core/models';
           font-size: 0.8rem;
         }
       }
+
+      /* Estilos para el teclado numérico */
+      .employee-number-display {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.2em;
+        color: #111827;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+      }
+
+      .numpad {
+        display: grid;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 1rem;
+      }
+
+      .numpad-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+      }
+
+      .numpad-key {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.2rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background: #f3f4f6;
+          border-color: #d1d5db;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        &:active {
+          background: #e5e7eb;
+          transform: translateY(0);
+          box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      .numpad-clear {
+        background: #fee2e2 !important;
+        border-color: #fecaca !important;
+        color: #dc2626 !important;
+
+        &:hover {
+          background: #fecaca !important;
+          border-color: #f87171 !important;
+        }
+      }
+
+      .numpad-backspace {
+        background: #fef3c7 !important;
+        border-color: #fde68a !important;
+        color: #d97706 !important;
+
+        &:hover {
+          background: #fde68a !important;
+          border-color: #fbbf24 !important;
+        }
+      }
+
+      .employee-recognized {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #d1fae5;
+        border: 1px solid #10b981;
+        border-radius: 0.5rem;
+        color: #065f46;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      /* Responsive para móviles */
+      @media (max-width: 480px) {
+        .numpad-key {
+          padding: 1rem;
+          font-size: 1.25rem;
+          min-height: 3.5rem;
+        }
+
+        .employee-number-display {
+          font-size: 1.5rem;
+          min-height: 3rem;
+          padding: 0.75rem;
+        }
+      }
     `,
   ],
 })
@@ -1944,12 +2151,25 @@ export class PartListComponent implements OnInit {
   showErrorNotification = false;
   errorMessage = '';
 
+  // Estado de petición (empleado)
+  showPetitionModal = false;
+  selectedPartForPetition: Part | null = null;
+  employeeNumberInput = '';
+  employeeNameInput = '';
+  employeeExists = false;
+  isSubmittingPetition = false;
+
+  // Teclado numérico para número de empleado
+  showNumericKeyboard = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private partService: PartService,
     private machineService: MachineService,
-    private databaseService: DatabaseService
+    private databaseService: DatabaseService,
+    private employeeService: EmployeeService,
+    private petitionService: PetitionService
   ) {}
 
   async ngOnInit() {
@@ -1970,6 +2190,108 @@ export class PartListComponent implements OnInit {
       await this.databaseService.initializeDatabase();
     } catch (error) {
       console.error('Error initializing database:', error);
+    }
+  }
+
+  // ----- Métodos para teclado numérico -----
+  onNumberPressed(num: string) {
+    if (this.employeeNumberInput.length < 4) {
+      // Límite de 4 dígitos
+      this.employeeNumberInput += num;
+      this.onEmployeeNumberChange();
+    }
+  }
+
+  onNumpadBackspace() {
+    this.employeeNumberInput = this.employeeNumberInput.slice(0, -1);
+    this.onEmployeeNumberChange();
+  }
+
+  onNumpadClear() {
+    this.employeeNumberInput = '';
+    this.onEmployeeNumberChange();
+  }
+
+  // ----- Peticiones de refacción -----
+  openPetitionModal(part: Part) {
+    this.selectedPartForPetition = part;
+    this.employeeNumberInput = '';
+    this.employeeNameInput = '';
+    this.employeeExists = false;
+    this.showPetitionModal = true;
+  }
+
+  closePetitionModal() {
+    if (this.isSubmittingPetition) return;
+    this.showPetitionModal = false;
+    this.selectedPartForPetition = null;
+  }
+
+  onEmployeeNumberChange() {
+    const num = this.employeeNumberInput.trim();
+    if (!num) {
+      this.employeeExists = false;
+      if (!this.employeeExists) this.employeeNameInput = '';
+      return;
+    }
+    this.employeeService.getByEmployeeNumber(num).subscribe((emp: any) => {
+      if (emp) {
+        this.employeeExists = true;
+        this.employeeNameInput = emp.name;
+      } else {
+        this.employeeExists = false;
+        this.employeeNameInput = '';
+      }
+    });
+  }
+
+  async submitPetition() {
+    if (!this.selectedPartForPetition || !this.machine) return;
+    const num = this.employeeNumberInput.trim();
+    if (!num) {
+      this.errorMessage = 'Ingresa el número de empleado';
+      this.showErrorNotification = true;
+      setTimeout(() => (this.showErrorNotification = false), 3000);
+      return;
+    }
+
+    this.isSubmittingPetition = true;
+    try {
+      const existing = await firstValueFrom(
+        this.employeeService.getByEmployeeNumber(num)
+      );
+      let name = '';
+      if (existing) {
+        name = existing.name;
+      } else {
+        // Si el empleado no existe, usar el número como nombre temporal
+        name = `Empleado ${num}`;
+        // Crear el empleado con nombre temporal
+        await firstValueFrom(
+          this.employeeService.create({ employeeNumber: num, name: name })
+        );
+      }
+
+      await firstValueFrom(
+        this.petitionService.create({
+          partId: this.selectedPartForPetition.id!,
+          machineId: this.machine.id!,
+          employeeNumber: num,
+          employeeName: name,
+        })
+      );
+
+      this.successMessage = 'Petición enviada correctamente';
+      this.showSuccessNotification = true;
+      setTimeout(() => (this.showSuccessNotification = false), 3000);
+      this.closePetitionModal();
+    } catch (e) {
+      console.error(e);
+      this.errorMessage = 'No se pudo enviar la petición';
+      this.showErrorNotification = true;
+      setTimeout(() => (this.showErrorNotification = false), 3000);
+    } finally {
+      this.isSubmittingPetition = false;
     }
   }
 
