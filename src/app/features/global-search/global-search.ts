@@ -8,6 +8,9 @@ import { PartService } from '../../core/services/part';
 import { MachineService } from '../../core/services/machine';
 import { DatabaseService } from '../../core/services/database';
 import { Part, Machine, PartCategory } from '../../core/models';
+import { EmployeeService } from '../../core/services/employee';
+import { PetitionService } from '../../core/services/petition';
+import { firstValueFrom } from 'rxjs';
 
 interface SearchFilters {
   searchText: string;
@@ -195,6 +198,14 @@ interface SearchFilters {
                       getMachineName(part.machineId)
                     }}</span>
                   </div>
+                  <app-touch-button
+                    variant="success"
+                    size="sm"
+                    icon="🛒"
+                    (clicked)="openPetitionModal(part)"
+                  >
+                    Pedir Refacción
+                  </app-touch-button>
                 </div>
               </div>
             </div>
@@ -354,6 +365,46 @@ interface SearchFilters {
         class="keyboard-overlay"
         (click)="hideKeyboard()"
       ></div>
+
+      <!-- Notificaciones -->
+      <div *ngIf="showSuccessNotification" class="success-notification">
+        ✅ {{ successMessage }}
+      </div>
+      <div *ngIf="showErrorNotification" class="error-notification">
+        ❌ {{ errorMessage }}
+      </div>
+
+      <!-- Modal: Pedir Refacción (Empleado) -->
+      <div *ngIf="showPetitionModal" class="modal-overlay" (click)="closePetitionModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div class="modal-title"><span>🛒</span><h3>Pedir refacción</h3></div>
+            <button class="modal-close" (click)="closePetitionModal()">✕</button>
+          </div>
+          <div class="modal-content" *ngIf="selectedPartForPetition as p">
+            <p class="modal-description">{{ p.description }}</p>
+            <div class="detail-row"><span class="detail-label">SAP:</span> <span class="detail-value">{{ p.sapNumber }}</span></div>
+            <div class="detail-row"><span class="detail-label">Parte:</span> <span class="detail-value">{{ p.partNumber }}</span></div>
+
+            <div class="input-group">
+              <label class="input-label">Número de empleado</label>
+              <input type="text" class="admin-input" [(ngModel)]="employeeNumberInput" (input)="onEmployeeNumberChange()" placeholder="Ingresa tu número" />
+              <div *ngIf="employeeExists" class="hint-ok">Empleado: {{ employeeNameInput }} (reconocido)</div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Nombre</label>
+              <input type="text" class="admin-input" [(ngModel)]="employeeNameInput" [disabled]="employeeExists" placeholder="Ingresa tu nombre" />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <app-touch-button variant="primary" size="lg" icon="✅" (clicked)="submitPetition()" [loading]="isSubmittingPetition" [disabled]="!employeeNumberInput.trim() || isSubmittingPetition">
+              {{ isSubmittingPetition ? 'Enviando...' : 'Confirmar petición' }}
+            </app-touch-button>
+            <app-touch-button variant="secondary" size="lg" icon="✕" (clicked)="closePetitionModal()" [disabled]="isSubmittingPetition">Cancelar</app-touch-button>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [
@@ -907,6 +958,26 @@ interface SearchFilters {
           display: none;
         }
       }
+
+      /* Notificaciones simples */
+      .success-notification, .error-notification {
+        position: fixed; top: 1rem; right: 1rem; padding: .75rem 1rem; border-radius: .5rem; color: #fff; z-index: 1000;
+      }
+      .success-notification { background: #10b981; }
+      .error-notification { background: #ef4444; }
+
+      /* Modal básico */
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+      .modal-container { background: #fff; border-radius: .75rem; width: 100%; max-width: 520px; overflow: hidden; }
+      .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb; }
+      .modal-title { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: #111827; }
+      .modal-close { border: none; background: #f3f4f6; border-radius: 999px; width: 36px; height: 36px; cursor: pointer; }
+      .modal-content { padding: 1rem 1.25rem; }
+      .modal-actions { display: flex; gap: .5rem; padding: 1rem 1.25rem; }
+      .input-group { margin: .75rem 0; }
+      .input-label { display: block; margin-bottom: .25rem; font-weight: 600; color: #374151; }
+      .admin-input { width: 100%; padding: .75rem; border: 2px solid #e5e7eb; border-radius: .5rem; }
+      .hint-ok { margin-top: .25rem; color: #059669; font-weight: 600; }
     `,
   ],
 })
@@ -932,15 +1003,118 @@ export class GlobalSearchComponent implements OnInit {
 
   keyboardVisible = false;
 
+  // Estado del modal de petición
+  showPetitionModal = false;
+  selectedPartForPetition: Part | null = null;
+  employeeNumberInput = '';
+  employeeNameInput = '';
+  employeeExists = false;
+  isSubmittingPetition = false;
+  showSuccessNotification = false;
+  successMessage = '';
+  showErrorNotification = false;
+  errorMessage = '';
+
   constructor(
     private router: Router,
     private partService: PartService,
     private machineService: MachineService,
-    private databaseService: DatabaseService
+    private databaseService: DatabaseService,
+    private employeeService: EmployeeService,
+    private petitionService: PetitionService
   ) {}
 
   async ngOnInit() {
     await this.loadData();
+  }
+
+  // ----- Petición de refacción -----
+  openPetitionModal(part: Part) {
+    this.selectedPartForPetition = part;
+    this.employeeNumberInput = '';
+    this.employeeNameInput = '';
+    this.employeeExists = false;
+    this.showPetitionModal = true;
+  }
+
+  closePetitionModal() {
+    if (this.isSubmittingPetition) return;
+    this.showPetitionModal = false;
+    this.selectedPartForPetition = null;
+  }
+
+  onEmployeeNumberChange() {
+    const num = this.employeeNumberInput.trim();
+    if (!num) {
+      this.employeeExists = false;
+      this.employeeNameInput = '';
+      return;
+    }
+    this.employeeService.getByEmployeeNumber(num).subscribe((emp: any) => {
+      if (emp) {
+        this.employeeExists = true;
+        this.employeeNameInput = emp.name;
+      } else {
+        this.employeeExists = false;
+        this.employeeNameInput = '';
+      }
+    });
+  }
+
+  async submitPetition() {
+    if (!this.selectedPartForPetition) return;
+    const num = this.employeeNumberInput.trim();
+    if (!num) {
+      this.errorMessage = 'Ingresa el número de empleado';
+      this.showErrorNotification = true;
+      setTimeout(() => (this.showErrorNotification = false), 3000);
+      return;
+    }
+
+    this.isSubmittingPetition = true;
+    try {
+      const existing = await firstValueFrom(
+        this.employeeService.getByEmployeeNumber(num)
+      );
+      let name = '';
+      if (existing) {
+        name = existing.name;
+      } else {
+        const inputName = this.employeeNameInput.trim();
+        if (!inputName) {
+          this.isSubmittingPetition = false;
+          this.errorMessage = 'Ingresa tu nombre para registrarte';
+          this.showErrorNotification = true;
+          setTimeout(() => (this.showErrorNotification = false), 3000);
+          return;
+        }
+        const created = await firstValueFrom(
+          this.employeeService.create({ employeeNumber: num, name: inputName })
+        );
+        name = created.name;
+      }
+
+      await firstValueFrom(
+        this.petitionService.create({
+          partId: this.selectedPartForPetition.id!,
+          machineId: this.selectedPartForPetition.machineId,
+          employeeNumber: num,
+          employeeName: name,
+        })
+      );
+
+      this.successMessage = 'Petición enviada correctamente';
+      this.showSuccessNotification = true;
+      setTimeout(() => (this.showSuccessNotification = false), 3000);
+      this.closePetitionModal();
+    } catch (e) {
+      console.error(e);
+      this.errorMessage = 'No se pudo enviar la petición';
+      this.showErrorNotification = true;
+      setTimeout(() => (this.showErrorNotification = false), 3000);
+    } finally {
+      this.isSubmittingPetition = false;
+    }
   }
 
   async loadData() {
