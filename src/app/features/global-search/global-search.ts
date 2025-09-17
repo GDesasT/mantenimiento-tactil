@@ -198,14 +198,14 @@ interface SearchFilters {
                       getMachineName(part.machineId)
                     }}</span>
                   </div>
-                  <app-touch-button
+                  <!-- <app-touch-button
                     variant="success"
                     size="sm"
                     icon="🛒"
                     (clicked)="openPetitionModal(part)"
                   >
                     Pedir Refacción
-                  </app-touch-button>
+                  </app-touch-button> -->
                 </div>
               </div>
             </div>

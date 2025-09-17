@@ -196,14 +196,14 @@ interface SearchFilters {
                       getMachineName(part.machineId)
                     }}</span>
                   </div>
-                  <app-touch-button
+                  <!-- <app-touch-button
                     variant="success"
                     size="sm"
                     icon="🛒"
                     (clicked)="openPetitionModal(part)"
                   >
                     Pedir Refaccion
-                  </app-touch-button>
+                  </app-touch-button> -->
                 </div>
 
                 <div class="part-actions">
@@ -377,7 +377,7 @@ interface SearchFilters {
     <div *ngIf="showPetitionModal" class="modal-overlay" (click)="closePetitionModal()">
       <div class="modal-container" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <div class="modal-title"><span>🛒</span><h3>Pedir refacción</h3></div>
+          <!-- <div class="modal-title"><span>🛒</span><h3>Pedir refacción</h3></div> -->
           <button class="modal-close" (click)="closePetitionModal()">✕</button>
         </div>
         <div class="modal-content" *ngIf="selectedPartForPetition as p">

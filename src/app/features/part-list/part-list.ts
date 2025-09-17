@@ -201,14 +201,14 @@ import { firstValueFrom } from 'rxjs';
                 </div>
               </div>
               <div class="petition-part">
-                <app-touch-button
+                <!-- <app-touch-button
                   variant="success"
                   size="sm"
                   icon="🛒"
                   (clicked)="openPetitionModal(part)"
                 >
                   Pedir Refaccion
-                </app-touch-button>
+                </app-touch-button> -->
               </div>
 
               <!-- Botones de admin si está en modo admin -->
@@ -575,9 +575,9 @@ import { firstValueFrom } from 'rxjs';
               <span>🛒</span>
               <h3>Pedir refacción</h3>
             </div>
-            <button class="modal-close" (click)="closePetitionModal()">
+            <!-- <button class="modal-close" (click)="closePetitionModal()"> -->
               ✕
-            </button>
+            <!-- </button> -->
           </div>
           <div class="modal-content" *ngIf="selectedPartForPetition as p">
             <p class="modal-description">{{ p.description }}</p>

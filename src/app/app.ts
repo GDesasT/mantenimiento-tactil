@@ -58,7 +58,7 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
               >
                 Importar Excel
               </app-touch-button>
-              <app-touch-button
+              <!-- <app-touch-button
                 [variant]="
                   isCurrentRoute('/excel-import') ? 'primary' : 'secondary'
                 "
@@ -68,7 +68,7 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
                 class="nav-touch-button"
               >
                 Peticiones
-              </app-touch-button>
+              </app-touch-button> -->
             </div>
 
             <!-- Indicador de hora y fecha -->
