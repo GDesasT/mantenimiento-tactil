@@ -7,6 +7,7 @@ import { MachineService } from '../../core/services/machine';
 import { PartService } from '../../core/services/part';
 import { DatabaseService } from '../../core/services/database';
 import { Machine, PartCategory } from '../../core/models';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-machine-list',
@@ -1228,7 +1229,7 @@ import { Machine, PartCategory } from '../../core/models';
   ],
 })
 export class MachineListComponent implements OnInit, OnDestroy {
-  selectedArea: 'corte' | 'costura' = 'costura';
+  selectedArea: 'corte' | 'costura' | 'consumible' = 'costura';
   machines: Machine[] = [];
   machineStats: { [key: number]: { [key in PartCategory]: number } } = {};
   isLoading = true;
@@ -1263,7 +1264,7 @@ export class MachineListComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.selectedArea =
-      (this.route.snapshot.params['area'] as 'corte' | 'costura') || 'costura';
+      (this.route.snapshot.params['area'] as 'corte' | 'costura' | 'consumible') || 'costura';
     await this.loadMachines();
   }
 
@@ -1274,14 +1275,13 @@ export class MachineListComponent implements OnInit, OnDestroy {
   async loadMachines() {
     this.isLoading = true;
     try {
-      this.machines =
-        (await this.machineService
-          .getMachinesByArea(this.selectedArea)
-          .toPromise()) || [];
-
+      const machinesResponse = await firstValueFrom(
+        this.machineService.getMachinesByArea(this.selectedArea as 'corte' | 'costura')
+      );
+      this.machines = machinesResponse || [];
 
       for (const machine of this.machines) {
-        if (machine.id) {
+        if (machine.id != null) {
           const stats = await this.partService.getPartStats(machine.id);
           if (stats) {
             this.machineStats[machine.id] = stats;
@@ -1299,20 +1299,22 @@ export class MachineListComponent implements OnInit, OnDestroy {
   getAreaTitle(): string {
     return this.selectedArea === 'costura'
       ? '🧵 ÁREA DE COSTURA'
-      : '✂️ ÁREA DE CORTE';
+      : this.selectedArea === 'consumible' ? '💡 ÁREA DE CONSUMIBLES' : '✂️ ÁREA DE CORTE';
   }
 
   getAreaLabel(): string {
     return this.selectedArea === 'costura'
       ? 'Costura Industrial'
-      : 'Corte Industrial';
+      : this.selectedArea === 'consumible' ? 'Consumibles Industriales' : 'Corte Industrial';
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'costura' ? '🧵' : '✂️';
+    return this.selectedArea === 'costura' ? '🧵' : this.selectedArea === 'consumible' ? '💡' : '✂️';
   }
 
   goBack() {
+    // Reset scroll position before navigating
+    window.scrollTo(0, 0);
     this.router.navigate(['/']);
   }
 
@@ -1348,16 +1350,14 @@ export class MachineListComponent implements OnInit, OnDestroy {
     this.passwordError = '';
     this.canConfirmDelete = this.deletePassword === this.ADMIN_PASSWORD;
   }
-
   async confirmDeleteMachine() {
     if (!this.machineToDelete || !this.canConfirmDelete) return;
 
     this.isDeleting = true;
-
     try {
-      await this.machineService
-        .deleteMachine(this.machineToDelete.id!)
-        .toPromise();
+      await firstValueFrom(
+        this.machineService.deleteMachine(this.machineToDelete.id!)
+      );
 
       this.showNotificationMessage(
         `Máquina "${this.machineToDelete.name}" eliminada correctamente`,

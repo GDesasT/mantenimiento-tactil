@@ -435,6 +435,8 @@ export class AppComponent implements OnDestroy {
   }
 
   navigateTo(route: string): void {
+    // Reset scroll position before navigating
+    window.scrollTo(0, 0);
     this.router.navigate([route]);
   }
 

@@ -311,6 +311,15 @@ Funciones principales:
           },
         },
         {
+          label: "💡 Ir a Área de Consumibles",
+          click: () => {
+            mainWindow.webContents.executeJavaScript(`
+              window.location.hash = '/machines/consumible';
+            `);
+          },
+        },
+        { type: "separator" },
+        {
           label: "🧵 Ir a Área de Costura",
           click: () => {
             mainWindow.webContents.executeJavaScript(`
@@ -344,6 +353,12 @@ Funciones principales:
 app.whenReady().then(() => {
   createWindow();
   createMenu();
+
+  // IPC Handler para verificar actualizaciones
+  ipcMain.handle('check-for-updates', () => {
+    checkForUpdates();
+    return { success: true };
+  });
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

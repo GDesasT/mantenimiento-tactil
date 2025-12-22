@@ -25,7 +25,7 @@ declare global {
       </div>
 
       <!-- Áreas principales usando tu sistema -->
-      <div class="professional-grid grid-2 max-w-6xl mx-auto mb-12">
+      <div class="professional-grid grid-3 max-w-8xl mx-auto mb-12">
         <!-- Área de Corte -->
         <div class="area-card corte-area" (click)="selectArea('corte')">
           <div class="area-content">
@@ -69,7 +69,30 @@ declare global {
             </app-touch-button>
           </div>
         </div>
+                      <!-- Área de Consumibles -->
+        <div class="area-card consumible-area" (click)="selectArea('consumible')">
+          <div class="area-content">
+            <div class="area-icon">
+              <span class="icon-emoji">💡</span>
+            </div>
+
+            <h2 class="area-title">ÁREA DE CONSUMIBLES</h2>
+            <p class="area-subtitle">Consumibles industrial</p>
+
+            <app-touch-button
+              variant="warning"
+              size="xl"
+              [fullWidth]="true"
+              (clicked)="selectArea('consumible')"
+              class="area-action-btn"
+            >
+              INGRESAR A CONSUMIBLES
+            </app-touch-button>
+          </div>
+        </div>
       </div>
+      </div>
+
 
       <!-- Herramientas adicionales usando tu sistema -->
       <div class="max-w-4xl mx-auto">
@@ -193,7 +216,7 @@ declare global {
           </div>
         </div>
       </div>
-    </div>
+
   `,
   styles: [
     `
@@ -277,6 +300,24 @@ declare global {
           #065f46 0%,
           #047857 50%,
           #10b981 100%
+        );
+      }
+            .consumible-area {
+        background: linear-gradient(
+          135deg,
+          #783004FF 0%,
+          #B96210FF 50%,
+          #FFD700FF 100%
+        );
+        color: white;
+      }
+
+      .consumible-area:hover {
+        background: linear-gradient(
+          135deg,
+          #784404FF 0%,
+          #B96210FF 50%,
+          #FFD700FF 100%
         );
       }
 
@@ -395,7 +436,7 @@ declare global {
 export class HomeComponent {
   constructor(private router: Router) {}
 
-  selectArea(area: 'corte' | 'costura') {
+  selectArea(area: 'corte' | 'costura' | 'consumible') {
     console.log(`📍 Navigating to ${area} machines`);
     this.router.navigate(['/machines', area]);
   }

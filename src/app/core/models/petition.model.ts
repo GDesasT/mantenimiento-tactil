@@ -5,8 +5,8 @@ export interface Petition {
   partId: number; // Refacción solicitada
   machineId: number; // Máquina relacionada
   employeeNumber: string; // Número de empleado que solicita
-  employeeName: string; // Redundancia para facilitar lectura
-  note?: string; // Opcional: comentario
+  employeeName: string; 
+  note?: string; 
   status: PetitionStatus;
   createdAt: Date;
   updatedAt: Date;

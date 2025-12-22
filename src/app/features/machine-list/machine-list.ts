@@ -1181,7 +1181,7 @@ import { Machine, PartCategory } from '../../core/models';
   ],
 })
 export class MachineListComponent implements OnInit, OnDestroy {
-  selectedArea: 'corte' | 'costura' = 'costura';
+  selectedArea: 'corte' | 'costura' | 'consumible' = 'costura';
   machines: Machine[] = [];
   machineStats: { [key: number]: { [key in PartCategory]: number } } = {};
   isLoading = true;
@@ -1207,7 +1207,7 @@ export class MachineListComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.selectedArea =
-      (this.route.snapshot.params['area'] as 'corte' | 'costura') || 'costura';
+      (this.route.snapshot.params['area'] as 'corte' | 'costura' | 'consumible') || 'costura';
     await this.loadMachines();
   }
 
@@ -1240,20 +1240,22 @@ export class MachineListComponent implements OnInit, OnDestroy {
   getAreaTitle(): string {
     return this.selectedArea === 'costura'
       ? '🧵 ÁREA DE COSTURA'
-      : '✂️ ÁREA DE CORTE';
+      : this.selectedArea === 'consumible' ? '💡 ÁREA DE CONSUMIBLES' : '✂️ ÁREA DE CORTE';
   }
 
   getAreaLabel(): string {
     return this.selectedArea === 'costura'
       ? 'Costura Industrial'
-      : 'Corte Industrial';
+      : this.selectedArea === 'consumible' ? 'Consumibles Industriales' : 'Corte Industrial';
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'costura' ? '🧵' : '✂️';
+    return this.selectedArea === 'costura' ? '🧵' : this.selectedArea === 'consumible' ? '💡' : '✂️';
   }
 
   goBack() {
+    // Reset scroll position before navigating
+    window.scrollTo(0, 0);
     this.router.navigate(['/']);
   }
 

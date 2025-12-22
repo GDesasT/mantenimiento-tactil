@@ -316,6 +316,7 @@ interface ImportResult {
                   >
                     <option value="costura">🧵 Área de Costura</option>
                     <option value="corte">✂️ Área de Corte</option>
+                    <option value="consumible">💡 Área de Consumibles</option>
                   </select>
                   <p class="control-hint">
                     Las máquinas detectadas en las refacciones se crearán en
@@ -2088,6 +2089,8 @@ export class ExcelImportComponent implements OnInit {
   }
 
   goBack() {
+    // Reset scroll position before navigating
+    window.scrollTo(0, 0);
     this.router.navigate(['/']);
   }
 

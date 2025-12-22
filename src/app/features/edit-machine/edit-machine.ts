@@ -510,11 +510,11 @@ export class EditMachineComponent implements OnInit {
   }
 
   getAreaTitle(): string {
-    return this.selectedArea === 'corte' ? 'ÁREA DE CORTE' : 'ÁREA DE COSTURA';
+    return this.selectedArea === 'corte' ? 'ÁREA DE CORTE' : this.selectedArea === 'costura' ? 'ÁREA DE COSTURA' : 'ÁREA DE CONSUMIBLES';
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'corte' ? '✂️' : '🧵';
+    return this.selectedArea === 'corte' ? '✂️' : this.selectedArea === 'costura' ? '🧵' :  this.selectedArea === 'consumibles' ? '💡' : '';
   }
 
   goBack() {

@@ -256,7 +256,7 @@ import { DatabaseService } from '../../core/services/database';
 })
 export class AddMachineComponent implements OnInit {
   machineForm: FormGroup;
-  selectedArea: 'corte' | 'costura' = 'costura';
+  selectedArea: 'consumible' | 'corte' | 'costura' = 'costura';
   isSubmitting = false;
 
   // Variables para notificaciones
@@ -319,11 +319,11 @@ export class AddMachineComponent implements OnInit {
   }
 
   getAreaTitle(): string {
-    return this.selectedArea === 'corte' ? 'ÁREA DE CORTE' : 'ÁREA DE COSTURA';
+    return this.selectedArea === 'corte' ? 'ÁREA DE CORTE' : this.selectedArea === 'costura' ? 'ÁREA DE COSTURA' : 'ÁREA DE CONSUMIBLES';
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'corte' ? '✂️' : '🧵';
+    return this.selectedArea === 'corte' ? '✂️' : this.selectedArea === 'costura' ? '🧵' : '💡';
   }
 
   goBack() {

@@ -1199,6 +1199,8 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   goBack() {
+    // Reset scroll position before navigating
+    window.scrollTo(0, 0);
     this.router.navigate(['/']);
   }
 }

@@ -143,9 +143,9 @@ import { firstValueFrom } from 'rxjs';
           </div>
         </div>
 
-        <div *ngIf="paginatedParts.length > 0" class="parts-grid">
+        <div *ngIf="filteredParts.length > 0" class="parts-grid">
           <div
-            *ngFor="let part of paginatedParts; let i = index"
+            *ngFor="let part of filteredParts; let i = index"
             class="part-card"
           >
             <div class="part-header">
@@ -266,116 +266,15 @@ import { firstValueFrom } from 'rxjs';
           <span class="loading-text">Cargando refacciones...</span>
         </div>
 
-        <div
-          *ngIf="paginatedParts.length > 0 && totalPages > 1"
-          class="page-navigation-sidebar"
+        <!-- Botón para subir arriba -->
+        <button
+          *ngIf="filteredParts.length > 0"
+          class="scroll-to-top-btn"
+          (click)="scrollToTop()"
+          title="Ir arriba"
         >
-          <div class="page-info-sidebar">
-            <span class="current-page">{{ currentPage }}</span>
-            <span class="page-separator">/</span>
-            <span class="total-pages">{{ totalPages }}</span>
-          </div>
-
-          <div class="page-numbers-vertical">
-            <div
-              *ngFor="let page of getVisiblePages()"
-              class="page-number-vertical"
-              [class.active]="page === currentPage"
-              [class.ellipsis]="page === '...'"
-              (click)="page !== '...' && goToPage(page)"
-              [title]="page !== '...' ? 'Ir a página ' + page : ''"
-            >
-              {{ page }}
-            </div>
-          </div>
-
-          <div class="navigation-controls-vertical">
-            <button
-              class="nav-btn nav-btn-first"
-              [disabled]="currentPage === 1"
-              (click)="goToFirstPage()"
-              title="Primera página"
-            >
-              ⏮️
-            </button>
-
-            <button
-              class="nav-btn nav-btn-prev"
-              [disabled]="currentPage === 1"
-              (click)="previousPage()"
-              title="Página anterior"
-            >
-              ⬅️
-            </button>
-
-            <button
-              class="nav-btn nav-btn-next"
-              [disabled]="currentPage === totalPages"
-              (click)="nextPage()"
-              title="Página siguiente"
-            >
-              ➡️
-            </button>
-
-            <button
-              class="nav-btn nav-btn-last"
-              [disabled]="currentPage === totalPages"
-              (click)="goToLastPage()"
-              title="Última página"
-            >
-              ⏭️
-            </button>
-          </div>
-
-          <div class="total-info">
-            <span class="total-count">{{ filteredParts.length }}</span>
-            <span class="total-label">refacciones</span>
-          </div>
-        </div>
-
-        <div
-          *ngIf="paginatedParts.length > 0 && totalPages > 1"
-          class="pagination-mobile"
-        >
-          <div class="pagination-mobile-info">
-            <span class="page-info-mobile">
-              Página {{ currentPage }} de {{ totalPages }} ({{
-                filteredParts.length
-              }}
-              refacciones)
-            </span>
-          </div>
-
-          <div class="pagination-mobile-controls">
-            <button
-              class="mobile-nav-btn"
-              [disabled]="currentPage === 1"
-              (click)="previousPage()"
-            >
-              ⬅️ Anterior
-            </button>
-
-            <div class="mobile-page-numbers">
-              <span
-                *ngFor="let page of getVisiblePages().slice(0, 5)"
-                class="mobile-page-number"
-                [class.active]="page === currentPage"
-                [class.ellipsis]="page === '...'"
-                (click)="page !== '...' && goToPage(page)"
-              >
-                {{ page }}
-              </span>
-            </div>
-
-            <button
-              class="mobile-nav-btn"
-              [disabled]="currentPage === totalPages"
-              (click)="nextPage()"
-            >
-              Siguiente ➡️
-            </button>
-          </div>
-        </div>
+          ⬆️
+        </button>
       </div>
 
       <div
@@ -816,8 +715,8 @@ import { firstValueFrom } from 'rxjs';
 
       .parts-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 1rem;
         margin-bottom: 2rem;
       }
 
@@ -832,7 +731,7 @@ import { firstValueFrom } from 'rxjs';
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
+        padding: 0.75rem;
         background: #edf2f7;
         border-bottom: 1px solid #e2e8f0;
       }
@@ -840,17 +739,17 @@ import { firstValueFrom } from 'rxjs';
       .part-sap {
         font-weight: 700;
         color: #2d3748;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
       }
 
       .part-category {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         color: #718096;
         font-weight: 600;
       }
 
       .part-image-container {
-        height: 200px;
+        height: 150px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -861,6 +760,12 @@ import { firstValueFrom } from 'rxjs';
       .part-image {
         width: 100%;
         height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+      }
+
+      .part-card:hover .part-image {
+        transform: scale(1.15);
         object-fit: cover;
       }
 
@@ -892,26 +797,26 @@ import { firstValueFrom } from 'rxjs';
       }
 
       .part-content {
-        padding: 1rem;
+        padding: 0.75rem;
       }
 
       .part-title {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         font-weight: 600;
         color: #2d3748;
-        margin: 0 0 1rem 0;
-        line-height: 1.4;
+        margin: 0 0 0.75rem 0;
+        line-height: 1.3;
       }
 
       .part-details {
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
       }
 
       .detail-row {
         display: flex;
         justify-content: space-between;
-        padding: 0.25rem 0;
-        font-size: 0.9rem;
+        padding: 0.2rem 0;
+        font-size: 0.8rem;
       }
 
       .detail-label {
@@ -1599,12 +1504,12 @@ import { firstValueFrom } from 'rxjs';
         }
 
         .parts-grid {
-          grid-template-columns: 1fr;
-          gap: 1.5rem;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 0.75rem;
         }
 
         .part-card {
-          min-height: 350px;
+          min-height: auto;
         }
 
         .filters-grid {
@@ -1939,6 +1844,38 @@ import { firstValueFrom } from 'rxjs';
         color: var(--gray-400);
       }
 
+      .scroll-to-top-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        transition: all 0.3s ease;
+        z-index: 99;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.9;
+      }
+
+      .scroll-to-top-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+        opacity: 1;
+      }
+
+      .scroll-to-top-btn:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      }
+
       @media (max-width: 1024px) {
         .page-navigation-sidebar {
           right: 10px;
@@ -1975,6 +1912,14 @@ import { firstValueFrom } from 'rxjs';
         .mobile-page-numbers {
           order: -1;
           justify-content: center;
+        }
+
+        .scroll-to-top-btn {
+          bottom: 1rem;
+          right: 1rem;
+          width: 45px;
+          height: 45px;
+          font-size: 1.25rem;
         }
       }
 
@@ -2388,7 +2333,7 @@ export class PartListComponent implements OnInit {
   }
 
   /** Hacer scroll suave hacia el header */
-  private scrollToTop() {
+  scrollToTop() {
     setTimeout(() => {
       const header = document.querySelector('.professional-header');
       if (header) {

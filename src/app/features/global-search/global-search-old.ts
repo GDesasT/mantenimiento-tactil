@@ -1541,11 +1541,11 @@ export class GlobalSearchComponent implements OnInit {
   getMachineArea(machineId: number): string {
     const machine = this.availableMachines.find((m) => m.id === machineId);
     if (!machine) return 'Área desconocida';
-    return machine.area === 'corte' ? 'ÁREA DE CORTE' : 'ÁREA DE COSTURA';
+    return machine.area === 'corte' ? 'ÁREA DE CORTE' : machine.area === 'costura' ? 'ÁREA DE COSTURA' : 'ÁREA DE CONSUMIBLES';
   }
 
   getMachineLabel(machine: Machine): string {
-    const areaIcon = machine.area === 'corte' ? '✂️' : '🧵';
+    const areaIcon = machine.area === 'corte' ? '✂️' : machine.area === 'costura' ? '🧵' : machine.area === 'consumible' ? '💡' : '';
     return `${areaIcon} ${machine.name}`;
   }
 
@@ -1741,6 +1741,8 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   goBack() {
+    // Reset scroll position before navigating
+    window.scrollTo(0, 0);
     this.router.navigate(['/']);
   }
 }

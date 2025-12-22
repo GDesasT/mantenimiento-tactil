@@ -24,7 +24,7 @@ export class MachineService {
   }
 
   // Obtener máquinas por área
-  getMachinesByArea(area: 'corte' | 'costura'): Observable<Machine[]> {
+  getMachinesByArea(area: 'corte' | 'costura' | 'consumible'): Observable<Machine[]> {
     return from(this.db.machines.where('area').equals(area).toArray()).pipe(
       map((machines) => machines.sort((a, b) => a.name.localeCompare(b.name))),
       tap((machines) => console.log(`🔧 Machines in ${area}:`, machines))
@@ -85,7 +85,7 @@ export class MachineService {
   // Validar nombre único
   async isNameUnique(
     name: string,
-    area: 'corte' | 'costura',
+    area: 'corte' | 'costura' | 'consumible',
     excludeId?: number
   ): Promise<boolean> {
     const existing = await this.db.machines
