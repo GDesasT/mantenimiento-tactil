@@ -68,6 +68,14 @@ export const routes: Routes = [
     title: 'Búsqueda Global',
   },
   {
+    path: 'tools',
+    loadComponent: () =>
+      import('./features/herramientas/herramientas').then(
+        (m) => m.HerramientasComponent
+      ),
+    title: 'Herramientas',
+  },
+  {
     path: 'excel-import',
     loadComponent: () =>
       import('./features/excel-import/excel-import').then(
