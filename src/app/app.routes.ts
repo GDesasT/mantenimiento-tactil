@@ -76,6 +76,22 @@ export const routes: Routes = [
     title: 'Herramientas',
   },
   {
+    path: 'fasteners',
+    loadComponent: () =>
+      import('./features/tornillos/tornillos').then(
+        (m) => m.TornillosComponent
+      ),
+    title: 'Tornillos',
+  },
+  {
+    path: 'chemicals',
+    loadComponent: () =>
+      import('./features/quimicos/quimicos').then(
+        (m) => m.QuimicosComponent
+      ),
+    title: 'Químicos',
+  },
+  {
     path: 'excel-import',
     loadComponent: () =>
       import('./features/excel-import/excel-import').then(

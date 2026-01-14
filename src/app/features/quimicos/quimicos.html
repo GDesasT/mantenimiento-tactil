@@ -1,0 +1,133 @@
+<div class="app-container">
+  <!-- Header profesional -->
+  <div class="professional-header">
+    <div class="header-content">
+      <div class="header-left">
+        <app-touch-button
+          variant="secondary"
+          size="md"
+          icon="←"
+          (clicked)="goBack()"
+          class="back-btn"
+        >
+          Atrás
+        </app-touch-button>
+
+        <div class="header-text">
+          <h2 class="header-title">🧪 Químicos Disponibles</h2>
+          <p class="header-subtitle">Inventario de químicos industriales</p>
+        </div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total</span>
+          <span class="stat-value">{{ chemicals.length }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-section">
+    <div class="search-container">
+      <input
+        #searchInput
+        type="text"
+        class="search-input"
+        placeholder="🔍 Buscar químicos..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearch($event)"
+        (focus)="onSearchFocus()"
+      />
+      <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de químicos -->
+  <div class="tools-section">
+    <div *ngIf="filteredChemicals.length > 0" class="tools-grid">
+      <div
+        *ngFor="let chemical of filteredChemicals"
+        class="tool-card"
+        (click)="selectChemical(chemical)"
+      >
+        <!-- Imagen del químico -->
+        <div class="tool-image-container">
+          <img
+            *ngIf="chemical.image"
+            [src]="chemical.image"
+            [alt]="chemical.name"
+            class="tool-image"
+          />
+          <div *ngIf="!chemical.image" class="tool-image-placeholder">
+            <span class="placeholder-icon">🧪</span>
+          </div>
+        </div>
+
+        <!-- Información del químico -->
+        <div class="tool-info">
+          <h3 class="tool-name">{{ chemical.name }}</h3>
+          <p class="tool-location">
+            📍 {{ chemical.location || 'Ubicación no especificada' }}
+          </p>
+          <p class="tool-date">
+            Agregado: {{ chemical.createdAt | date : 'short' }}
+          </p>
+        </div>
+
+
+      </div>
+    </div>
+    <!-- Mensaje vacío -->
+    <div *ngIf="filteredChemicals.length === 0 && chemicals.length === 0" class="empty-state">
+      <div class="empty-icon">🧪</div>
+      <h3>No hay químicos registrados</h3>
+      <p>Importa químicos desde Excel para comenzar</p>
+      <app-touch-button
+        variant="primary"
+        size="lg"
+        icon="📊"
+        (clicked)="goToImport()"
+        class="import-btn"
+      >
+        Ir a Importar
+      </app-touch-button>
+    </div>
+
+    <!-- Mensaje de búsqueda sin resultados -->
+    <div *ngIf="filteredChemicals.length === 0 && chemicals.length > 0" class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No se encontraron químicos</h3>
+      <p>Intenta con otro término de búsqueda</p>
+    </div>
+  </div>
+
+  <!-- Notificaciones -->
+  <div *ngIf="showSuccessNotification" class="notification success-notification">
+    ✅ {{ successMessage }}
+  </div>
+
+  <div *ngIf="showErrorNotification" class="notification error-notification">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Overlay para el teclado virtual -->
+  <div
+    class="keyboard-overlay"
+    *ngIf="showKeyboard"
+    (click)="onKeyboardClose()"
+  ></div>
+
+  <!-- Teclado Virtual -->
+  <app-virtual-keyboard
+    [visible]="showKeyboard"
+    [showEnter]="false"
+    (keyPressed)="onKeyboardKey($event)"
+    (backspacePressed)="onKeyboardBackspace()"
+    (clearPressed)="onKeyboardClear()"
+    (closed)="onKeyboardClose()"
+  ></app-virtual-keyboard>
+</div>

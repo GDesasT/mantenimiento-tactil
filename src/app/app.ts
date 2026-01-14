@@ -46,15 +46,7 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
               >
                 Búsqueda Global
               </app-touch-button>
-                            <app-touch-button
-                [variant]="isCurrentRoute('/tools') ? 'primary' : 'secondary'"
-                size="lg"
-                icon="🛠️"
-                (clicked)="navigateTo('/tools')"
-                class="nav-touch-button"
-              >
-                Herramientas
-              </app-touch-button> 
+
 
               <app-touch-button
                 [variant]="

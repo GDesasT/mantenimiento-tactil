@@ -90,7 +90,72 @@ declare global {
             </app-touch-button>
           </div>
         </div>
-      </div>
+
+        <!-- Área de Herramienta -->
+        <div class="area-card herramientas-area" (click)="selectArea('herramientas')">
+          <div class="area-content">
+            <div class="area-icon">
+              <span class="icon-emoji">🛠️</span>
+            </div>
+
+            <h2 class="area-title">ÁREA DE HERRAMIENTAS</h2>
+            <p class="area-subtitle">Herramientas industriales</p>
+
+            <app-touch-button
+              variant="info"
+              size="xl"
+              [fullWidth]="true"
+              (clicked)="selectArea('herramientas')"
+              class="area-action-btn"
+            >
+              INGRESAR A HERRAMIENTAS
+            </app-touch-button>
+          </div>
+        </div>
+
+        <!-- Área de Quimicos -->
+        <div class="area-card quimicos-area" (click)="selectArea('quimicos')">
+          <div class="area-content">
+            <div class="area-icon">
+              <span class="icon-emoji">🧪</span>
+            </div>
+
+            <h2 class="area-title">ÁREA DE QUÍMICOS</h2>
+            <p class="area-subtitle">Químicos industriales</p>
+
+            <app-touch-button
+              variant="info"
+              size="xl"
+              [fullWidth]="true"
+              (clicked)="selectArea('quimicos')"
+              class="area-action-btn"
+            >
+              INGRESAR A QUÍMICOS
+            </app-touch-button>
+          </div>
+        </div>
+
+        <!-- Área de Tornillos -->
+        <div class="area-card tornillos-area" (click)="selectArea('tornillos')">
+          <div class="area-content">
+            <div class="area-icon">
+              <span class="icon-emoji">🔩</span>
+            </div>
+
+            <h2 class="area-title">ÁREA DE TORNILLOS</h2>
+            <p class="area-subtitle">Tornillos y fasteners</p>
+
+            <app-touch-button
+              variant="info"
+              size="xl"
+              [fullWidth]="true"
+              (clicked)="selectArea('tornillos')"
+              class="area-action-btn"
+            >
+              INGRESAR A TORNILLOS
+            </app-touch-button>
+          </div>
+        </div>
       </div>
 
 
@@ -320,6 +385,60 @@ declare global {
           #FFD700FF 100%
         );
       }
+      .herramientas-area {
+        background: linear-gradient(
+          135deg,
+          #4B5563 0%,
+          #6B7280 50%,
+          #9CA3AF 100%
+        );
+        color: white;
+      }
+
+      .herramientas-area:hover {
+        background: linear-gradient(
+          135deg,
+          #374151 0%,
+          #4B5563 50%,
+          #6B7280 100%
+        );
+      }
+      .quimicos-area {
+        background: linear-gradient(
+          135deg,
+          #6B21A8 0%,
+          #A855F7 50%,
+          #E0AAFF 100%
+        );
+        color: white;
+      }
+
+      .quimicos-area:hover {
+        background: linear-gradient(
+          135deg,
+          #581C87 0%,
+          #7E22CE 50%,
+          #A855F7 100%
+        );
+      }
+      .tornillos-area {
+        background: linear-gradient(
+          135deg,
+          #374151 0%,
+          #4B5563 50%,
+          #6B7280 100%
+        );
+        color: white;
+      }
+
+      .tornillos-area:hover {
+        background: linear-gradient(
+          135deg,
+          #1F2937 0%,
+          #374151 50%,
+          #4B5563 100%
+        );
+      }
 
       .area-content {
         height: 100%;
@@ -371,6 +490,7 @@ declare global {
         border: 2px solid rgba(255, 255, 255, 0.3) !important;
         color: white !important;
         backdrop-filter: blur(10px);
+        border-radius: var(--border-radius-lg);
       }
 
       .area-action-btn:hover {
@@ -436,9 +556,20 @@ declare global {
 export class HomeComponent {
   constructor(private router: Router) {}
 
-  selectArea(area: 'corte' | 'costura' | 'consumible') {
-    console.log(`📍 Navigating to ${area} machines`);
-    this.router.navigate(['/machines', area]);
+  selectArea(area: 'corte' | 'costura' | 'consumible' | 'herramientas' | 'quimicos' | 'tornillos') {
+    if (area === 'herramientas') {
+      console.log(`📍 Navigating to tools`);
+      this.router.navigate(['/tools']);
+    } else if (area === 'tornillos') {
+      console.log(`📍 Navigating to fasteners`);
+      this.router.navigate(['/fasteners']);
+    } else if (area === 'quimicos') {
+      console.log(`📍 Navigating to chemicals`);
+      this.router.navigate(['/chemicals']);
+    } else {
+      console.log(`📍 Navigating to ${area} machines`);
+      this.router.navigate(['/machines', area]);
+    }
   }
 
   globalSearch() {

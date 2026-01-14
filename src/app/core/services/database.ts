@@ -11,6 +11,8 @@ export class DatabaseService extends Dexie {
   employees!: Table<Employee>;
   petitions!: Table<Petition>;
   tools!: Table<Tool>;
+  fasteners!: Table<Tool>;
+  chemicals!: Table<Tool>;
 
   constructor() {
     super('MaintenanceDB');
@@ -104,6 +106,23 @@ export class DatabaseService extends Dexie {
           });
       });
 
+    // Version 7: Agregar tablas para fasteners y chemicals
+    this.version(7)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+        petitions:
+          '++id, partId, machineId, employeeNumber, employeeName, status, createdAt',
+        tools: '++id, name, location, createdAt',
+        fasteners: '++id, name, location, createdAt',
+        chemicals: '++id, name, location, createdAt',
+      })
+      .upgrade((trans) => {
+        return Promise.resolve();
+      });
+
     // Hooks para timestamps automáticos
     this.machines.hook('creating', (primKey, obj, trans) => {
       obj.createdAt = new Date();
@@ -150,6 +169,24 @@ export class DatabaseService extends Dexie {
     this.tools?.hook('updating', (modifications, primKey, obj, trans) => {
       (modifications as any).updatedAt = new Date();
     });
+
+    // fasteners hooks
+    this.fasteners?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.fasteners?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
+
+    // chemicals hooks
+    this.chemicals?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.chemicals?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
   }
 
   async initializeDatabase(): Promise<void> {
@@ -165,13 +202,15 @@ export class DatabaseService extends Dexie {
   async clearAllData(): Promise<void> {
     await this.transaction(
       'rw',
-      [this.machines, this.parts, this.employees, this.petitions, this.tools],
+      [this.machines, this.parts, this.employees, this.petitions, this.tools, this.fasteners, this.chemicals],
       async () => {
         await this.machines.clear();
         await this.parts.clear();
         await this.employees.clear();
         await this.petitions.clear();
         await this.tools.clear();
+        await this.fasteners.clear();
+        await this.chemicals.clear();
       }
     );
     console.log('🗑️ All data cleared');
