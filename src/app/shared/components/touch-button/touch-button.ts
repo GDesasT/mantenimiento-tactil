@@ -198,7 +198,7 @@ import { CommonModule } from '@angular/common';
       .btn-md {
         padding: 0.75rem 1.5rem;
         font-size: 0.875rem;
-        border-radius: 0.5rem;
+        border-radius: var(--border-radius, 0.5rem);
         min-height: 3rem;
       }
 
@@ -310,7 +310,7 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class TouchButtonComponent {
-  @Input() variant: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' =
+  @Input() variant: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'light' | 'dark'  =
     'primary';
   @Input() size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'md';
   @Input() disabled = false;
@@ -320,6 +320,7 @@ export class TouchButtonComponent {
   @Input() outline = false;
   @Input() ghost = false;
   @Input() icon = '';
+  @Input() borderRadius = '0.5rem';
 
   @Output() clicked = new EventEmitter<void>();
 

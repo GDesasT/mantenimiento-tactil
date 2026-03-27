@@ -5,12 +5,16 @@ import { Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { MachineService } from '../../core/services/machine';
 import { PartService } from '../../core/services/part';
+import { ToolService } from '../../core/services/tool';
+import { FastenerService } from '../../core/services/fastener';
+import { ChemicalService } from '../../core/services/chemical';
 import { DatabaseService } from '../../core/services/database';
 import {
   Machine,
   Part,
   CreateMachineDto,
   CreatePartDto,
+  CreateToolDto,
 } from '../../core/models';
 import * as XLSX from 'xlsx';
 
@@ -543,6 +547,314 @@ interface ImportResult {
                     isProcessing && processingType === 'machines'
                       ? 'Procesando...'
                       : 'IMPORTAR MÁQUINAS'
+                  }}
+                </app-touch-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Importar Herramientas -->
+        <div class="import-section" style="margin-top: 2rem;">
+          <div class="professional-grid grid-1">
+            <div
+              class="import-card professional-card tools-import animate-fadeInUp"
+              style="animation-delay: 0.4s"
+            >
+              <div class="professional-content">
+                <div class="import-header">
+                  <div class="import-icon-container tools-icon">
+                    <span class="import-emoji">🛠️</span>
+                  </div>
+                  <h3 class="import-title">Importar Herramientas</h3>
+                  <p class="import-subtitle">
+                    Cargar archivo Excel con listado de herramientas y sus fotos
+                  </p>
+                </div>
+
+                <div class="format-info" style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6;">
+                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">📋 Formato Requerido para Herramientas</h4>
+                  <ul style="margin: 0; padding-left: 1.5rem; color: #333;">
+                    <li><strong>NOMBRE:</strong> Nombre de la herramienta (obligatorio)</li>
+                    <li><strong>IMAGEN:</strong> URL completa de la imagen (opcional) - Ejemplos: https://ejemplo.com/herramienta.jpg, https://images.unsplash.com/photo-xxx</li>
+                    <li><strong>UBICACION:</strong> Ubicación física de la herramienta (opcional) - Ejemplos: Caja A-01, Estante 3</li>
+                    <li><strong>Nota:</strong> Las herramientas sin imagen mostrarán un icono de herramienta</li>
+                  </ul>
+                </div>
+
+                <div
+                  class="upload-area"
+                  [class.dragover]="isDragOverTools"
+                  [class.has-file]="toolsFile"
+                  (dragover)="onDragOver($event, 'tools')"
+                  (dragleave)="onDragLeave('tools')"
+                  (drop)="onDrop($event, 'tools')"
+                  (click)="triggerFileInput('tools')"
+                >
+                  <div class="upload-content" *ngIf="!toolsFile">
+                    <div class="upload-icon">
+                      <svg
+                        class="w-12 h-12"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <p class="upload-text">
+                      Arrastra tu archivo Excel aquí o
+                      <span class="upload-link">selecciona archivo</span>
+                    </p>
+                    <p class="upload-hint">Solo archivos .xlsx, .xls</p>
+                  </div>
+
+                  <div class="file-preview" *ngIf="toolsFile">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                      <div class="file-name">{{ toolsFile.name }}</div>
+                      <div class="file-size">{{ getFileSize(toolsFile) }}</div>
+                    </div>
+                    <button
+                      (click)="clearFile('tools'); $event.stopPropagation()"
+                      class="file-remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  #toolsFileInput
+                  type="file"
+                  accept=".xlsx,.xls"
+                  (change)="onFileSelected($event, 'tools')"
+                  class="hidden"
+                />
+
+                <app-touch-button
+                  variant="warning"
+                  size="xl"
+                  icon="🛠️"
+                  [fullWidth]="true"
+                  [disabled]="!toolsFile || isProcessing"
+                  [loading]="isProcessing && processingType === 'tools'"
+                  (clicked)="importTools()"
+                  class="import-action-btn"
+                >
+                  {{
+                    isProcessing && processingType === 'tools'
+                      ? 'Procesando...'
+                      : 'IMPORTAR HERRAMIENTAS'
+                  }}
+                </app-touch-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Importar Tornillos -->
+        <div class="import-section" style="margin-top: 2rem;">
+          <div class="professional-grid grid-1">
+            <div
+              class="import-card professional-card tools-import animate-fadeInUp"
+              style="animation-delay: 0.5s"
+            >
+              <div class="professional-content">
+                <div class="import-icon-container tools-icon">
+                  <span>⚙️</span>
+                </div>
+                <h3 class="import-title">Importar Tornillos</h3>
+                <p class="import-description">
+                  Cargar archivo Excel con listado de tornillos y fasteners
+                </p>
+
+                <div class="format-info">
+                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">📋 Formato Requerido para Tornillos</h4>
+                  <ul style="font-size: 0.85rem; color: #555;">
+                    <li><strong>NOMBRE:</strong> Nombre del tornillo o fastener</li>
+                    <li><strong>IMAGEN:</strong> URL de la imagen (opcional)</li>
+                    <li><strong>UBICACION:</strong> Ubicación física del tornillo (opcional)</li>
+                    <li><strong>Nota:</strong> Los tornillos sin imagen mostrarán un icono de engranaje</li>
+                  </ul>
+                </div>
+
+                <div
+                  class="drop-zone"
+                  [class.dragover]="isDragOverFasteners"
+                  [class.has-file]="fastenersFile"
+                  (dragover)="onDragOver($event, 'fasteners')"
+                  (dragleave)="onDragLeave('fasteners')"
+                  (drop)="onDrop($event, 'fasteners')"
+                  (click)="triggerFileInput('fasteners')"
+                >
+                  <div class="upload-content" *ngIf="!fastenersFile">
+                    <div class="upload-icon">
+                      <svg
+                        class="upload-svg"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <p class="upload-text">
+                      Arrastra tu archivo Excel aquí o
+                      <span class="upload-link">selecciona archivo</span>
+                    </p>
+                    <p class="upload-hint">Solo archivos .xlsx, .xls</p>
+                  </div>
+
+                  <div class="file-preview" *ngIf="fastenersFile">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                      <div class="file-name">{{ fastenersFile.name }}</div>
+                      <div class="file-size">{{ getFileSize(fastenersFile) }}</div>
+                    </div>
+                    <button
+                      (click)="clearFile('fasteners'); $event.stopPropagation()"
+                      class="file-remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  #fastenersFileInput
+                  type="file"
+                  accept=".xlsx,.xls"
+                  (change)="onFileSelected($event, 'fasteners')"
+                  class="hidden"
+                />
+
+                <app-touch-button
+                  variant="warning"
+                  size="xl"
+                  icon="⚙️"
+                  [fullWidth]="true"
+                  [disabled]="!fastenersFile || isProcessing"
+                  [loading]="isProcessing && processingType === 'fasteners'"
+                  (clicked)="importFasteners()"
+                  class="import-action-btn"
+                >
+                  {{
+                    isProcessing && processingType === 'fasteners'
+                      ? 'Procesando...'
+                      : 'IMPORTAR TORNILLOS'
+                  }}
+                </app-touch-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Importar Químicos -->
+        <div class="import-section" style="margin-top: 2rem;">
+          <div class="professional-grid grid-1">
+            <div
+              class="import-card professional-card tools-import animate-fadeInUp"
+              style="animation-delay: 0.6s"
+            >
+              <div class="professional-content">
+                <div class="import-icon-container tools-icon">
+                  <span>🧪</span>
+                </div>
+                <h3 class="import-title">Importar Químicos</h3>
+                <p class="import-description">
+                  Cargar archivo Excel con listado de químicos industriales
+                </p>
+
+                <div class="format-info">
+                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">📋 Formato Requerido para Químicos</h4>
+                  <ul style="font-size: 0.85rem; color: #555;">
+                    <li><strong>NOMBRE:</strong> Nombre del químico</li>
+                    <li><strong>IMAGEN:</strong> URL de la imagen (opcional)</li>
+                    <li><strong>UBICACION:</strong> Ubicación física del químico (opcional)</li>
+                    <li><strong>Nota:</strong> Los químicos sin imagen mostrarán un icono de matraz</li>
+                  </ul>
+                </div>
+
+                <div
+                  class="drop-zone"
+                  [class.dragover]="isDragOverChemicals"
+                  [class.has-file]="chemicalsFile"
+                  (dragover)="onDragOver($event, 'chemicals')"
+                  (dragleave)="onDragLeave('chemicals')"
+                  (drop)="onDrop($event, 'chemicals')"
+                  (click)="triggerFileInput('chemicals')"
+                >
+                  <div class="upload-content" *ngIf="!chemicalsFile">
+                    <div class="upload-icon">
+                      <svg
+                        class="upload-svg"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <p class="upload-text">
+                      Arrastra tu archivo Excel aquí o
+                      <span class="upload-link">selecciona archivo</span>
+                    </p>
+                    <p class="upload-hint">Solo archivos .xlsx, .xls</p>
+                  </div>
+
+                  <div class="file-preview" *ngIf="chemicalsFile">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                      <div class="file-name">{{ chemicalsFile.name }}</div>
+                      <div class="file-size">{{ getFileSize(chemicalsFile) }}</div>
+                    </div>
+                    <button
+                      (click)="clearFile('chemicals'); $event.stopPropagation()"
+                      class="file-remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  #chemicalsFileInput
+                  type="file"
+                  accept=".xlsx,.xls"
+                  (change)="onFileSelected($event, 'chemicals')"
+                  class="hidden"
+                />
+
+                <app-touch-button
+                  variant="warning"
+                  size="xl"
+                  icon="🧪"
+                  [fullWidth]="true"
+                  [disabled]="!chemicalsFile || isProcessing"
+                  [loading]="isProcessing && processingType === 'chemicals'"
+                  (clicked)="importChemicals()"
+                  class="import-action-btn"
+                >
+                  {{
+                    isProcessing && processingType === 'chemicals'
+                      ? 'Procesando...'
+                      : 'IMPORTAR QUÍMICOS'
                   }}
                 </app-touch-button>
               </div>
@@ -1997,13 +2309,22 @@ export class ExcelImportComponent implements OnInit {
   @ViewChild('machinesFileInput')
   machinesFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('partsFileInput') partsFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('toolsFileInput') toolsFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('fastenersFileInput') fastenersFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('chemicalsFileInput') chemicalsFileInput!: ElementRef<HTMLInputElement>;
 
   machinesFile: File | null = null;
   partsFile: File | null = null;
+  toolsFile: File | null = null;
+  fastenersFile: File | null = null;
+  chemicalsFile: File | null = null;
   isDragOverMachines = false;
   isDragOverParts = false;
+  isDragOverTools = false;
+  isDragOverFasteners = false;
+  isDragOverChemicals = false;
   isProcessing = false;
-  processingType: 'machines' | 'parts' | null = null;
+  processingType: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals' | null = null;
   importResults: ImportResult | null = null;
 
   machineCount = 0;
@@ -2027,6 +2348,9 @@ export class ExcelImportComponent implements OnInit {
     private router: Router,
     private machineService: MachineService,
     private partService: PartService,
+    private toolService: ToolService,
+    private fastenerService: FastenerService,
+    private chemicalService: ChemicalService,
     private databaseService: DatabaseService
   ) {}
 
@@ -2212,29 +2536,47 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
-  onDragOver(event: DragEvent, type: 'machines' | 'parts') {
+  onDragOver(event: DragEvent, type: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals') {
     event.preventDefault();
     if (type === 'machines') {
       this.isDragOverMachines = true;
-    } else {
+    } else if (type === 'parts') {
       this.isDragOverParts = true;
+    } else if (type === 'tools') {
+      this.isDragOverTools = true;
+    } else if (type === 'fasteners') {
+      this.isDragOverFasteners = true;
+    } else if (type === 'chemicals') {
+      this.isDragOverChemicals = true;
     }
   }
 
-  onDragLeave(type: 'machines' | 'parts') {
+  onDragLeave(type: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals') {
     if (type === 'machines') {
       this.isDragOverMachines = false;
-    } else {
+    } else if (type === 'parts') {
       this.isDragOverParts = false;
+    } else if (type === 'tools') {
+      this.isDragOverTools = false;
+    } else if (type === 'fasteners') {
+      this.isDragOverFasteners = false;
+    } else if (type === 'chemicals') {
+      this.isDragOverChemicals = false;
     }
   }
 
-  onDrop(event: DragEvent, type: 'machines' | 'parts') {
+  onDrop(event: DragEvent, type: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals') {
     event.preventDefault();
     if (type === 'machines') {
       this.isDragOverMachines = false;
-    } else {
+    } else if (type === 'parts') {
       this.isDragOverParts = false;
+    } else if (type === 'tools') {
+      this.isDragOverTools = false;
+    } else if (type === 'fasteners') {
+      this.isDragOverFasteners = false;
+    } else if (type === 'chemicals') {
+      this.isDragOverChemicals = false;
     }
 
     const files = event.dataTransfer?.files;
@@ -2243,22 +2585,28 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
-  triggerFileInput(type: 'machines' | 'parts') {
+  triggerFileInput(type: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals') {
     if (type === 'machines' && this.machinesFileInput) {
       this.machinesFileInput.nativeElement.click();
     } else if (type === 'parts' && this.partsFileInput) {
       this.partsFileInput.nativeElement.click();
+    } else if (type === 'tools' && this.toolsFileInput) {
+      this.toolsFileInput.nativeElement.click();
+    } else if (type === 'fasteners' && this.fastenersFileInput) {
+      this.fastenersFileInput.nativeElement.click();
+    } else if (type === 'chemicals' && this.chemicalsFileInput) {
+      this.chemicalsFileInput.nativeElement.click();
     }
   }
 
-  onFileSelected(event: Event, type: 'machines' | 'parts') {
+  onFileSelected(event: Event, type: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals') {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.handleFile(input.files[0], type);
     }
   }
 
-  private handleFile(file: File, type: 'machines' | 'parts') {
+  private handleFile(file: File, type: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals') {
     if (!this.isValidExcelFile(file)) {
       this.showNotificationMessage(
         'Por favor selecciona un archivo Excel válido (.xlsx o .xls)',
@@ -2269,8 +2617,14 @@ export class ExcelImportComponent implements OnInit {
 
     if (type === 'machines') {
       this.machinesFile = file;
-    } else {
+    } else if (type === 'parts') {
       this.partsFile = file;
+    } else if (type === 'tools') {
+      this.toolsFile = file;
+    } else if (type === 'fasteners') {
+      this.fastenersFile = file;
+    } else if (type === 'chemicals') {
+      this.chemicalsFile = file;
     }
 
     console.log(`📁 ${type} file selected:`, file.name);
@@ -2288,11 +2642,17 @@ export class ExcelImportComponent implements OnInit {
     );
   }
 
-  clearFile(type: 'machines' | 'parts') {
+  clearFile(type: 'machines' | 'parts' | 'tools' | 'fasteners' | 'chemicals') {
     if (type === 'machines') {
       this.machinesFile = null;
-    } else {
+    } else if (type === 'parts') {
       this.partsFile = null;
+    } else if (type === 'tools') {
+      this.toolsFile = null;
+    } else if (type === 'fasteners') {
+      this.fastenersFile = null;
+    } else if (type === 'chemicals') {
+      this.chemicalsFile = null;
     }
   }
 
@@ -2385,6 +2745,330 @@ export class ExcelImportComponent implements OnInit {
     } finally {
       this.isProcessing = false;
       this.processingType = null;
+    }
+  }
+
+  async importTools() {
+    if (!this.toolsFile) return;
+
+    this.isProcessing = true;
+    this.processingType = 'tools';
+    this.importResults = null;
+
+    try {
+      console.log('🔄 Iniciando importación de herramientas...');
+      const data = await this.readExcelFile(this.toolsFile);
+      const result = await this.processToolsData(data);
+      this.importResults = result;
+
+      await this.loadSystemStats();
+
+      console.log('✅ Tools import completed:', result);
+
+      if (result.success > 0) {
+        this.showNotificationMessage(
+          `${result.success} herramientas importadas exitosamente`,
+          'success'
+        );
+      } else {
+        this.showNotificationMessage(
+          'No se pudieron importar las herramientas',
+          'error'
+        );
+      }
+    } catch (error) {
+      console.error('❌ Error importing tools:', error);
+      this.showNotificationMessage(
+        'Error al procesar el archivo de herramientas',
+        'error'
+      );
+    } finally {
+      this.isProcessing = false;
+      this.processingType = null;
+    }
+  }
+
+  async importFasteners() {
+    if (!this.fastenersFile) return;
+
+    this.isProcessing = true;
+    this.processingType = 'fasteners';
+    this.importResults = null;
+
+    try {
+      console.log('🔄 Iniciando importación de tornillos...');
+      const data = await this.readExcelFile(this.fastenersFile);
+      const result = await this.processFastenersData(data);
+      this.importResults = result;
+
+      await this.loadSystemStats();
+
+      console.log('✅ Fasteners import completed:', result);
+
+      if (result.success > 0) {
+        this.showNotificationMessage(
+          `${result.success} tornillos importados exitosamente`,
+          'success'
+        );
+      } else {
+        this.showNotificationMessage(
+          'No se pudieron importar los tornillos',
+          'error'
+        );
+      }
+    } catch (error) {
+      console.error('❌ Error importing fasteners:', error);
+      this.showNotificationMessage(
+        'Error al procesar el archivo de tornillos',
+        'error'
+      );
+    } finally {
+      this.isProcessing = false;
+      this.processingType = null;
+    }
+  }
+
+  async importChemicals() {
+    if (!this.chemicalsFile) return;
+
+    this.isProcessing = true;
+    this.processingType = 'chemicals';
+    this.importResults = null;
+
+    try {
+      console.log('🔄 Iniciando importación de químicos...');
+      const data = await this.readExcelFile(this.chemicalsFile);
+      const result = await this.processChemicalsData(data);
+      this.importResults = result;
+
+      await this.loadSystemStats();
+
+      console.log('✅ Chemicals import completed:', result);
+
+      if (result.success > 0) {
+        this.showNotificationMessage(
+          `${result.success} químicos importados exitosamente`,
+          'success'
+        );
+      } else {
+        this.showNotificationMessage(
+          'No se pudieron importar los químicos',
+          'error'
+        );
+      }
+    } catch (error) {
+      console.error('❌ Error importing chemicals:', error);
+      this.showNotificationMessage(
+        'Error al procesar el archivo de químicos',
+        'error'
+      );
+    } finally {
+      this.isProcessing = false;
+      this.processingType = null;
+    }
+  }
+
+  private async processToolsData(
+    data: ExcelRow[]
+  ): Promise<ImportResult> {
+    const result: ImportResult = {
+      success: 0,
+      errors: [],
+      duplicates: 0,
+      omittedRows: [],
+      duplicatedSaps: [],
+    };
+
+    const existingToolNames = new Set<string>();
+
+    try {
+      for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+        const row = data[rowIndex];
+
+        // Validar que tenga nombre
+        const nombre = row['NOMBRE'] || row['Nombre'] || row['nombre'];
+        if (!nombre || nombre.toString().trim() === '') {
+          result.omittedRows.push(`Fila ${rowIndex + 2}: Falta el nombre`);
+          continue;
+        }
+
+        const nombre_trimmed = nombre.toString().trim();
+
+        // Validar nombre único
+        if (existingToolNames.has(nombre_trimmed.toUpperCase())) {
+          result.duplicates++;
+          result.duplicatedSaps.push(
+            `Fila ${rowIndex + 2}: "${nombre_trimmed}" (duplicado)`
+          );
+          continue;
+        }
+
+        const imagen = row['IMAGEN'] || row['Imagen'] || row['imagen'] || '';
+        const ubicacion = row['UBICACION'] || row['Ubicación'] || row['ubicacion'] || '';
+
+        try {
+          const toolData: CreateToolDto = {
+            name: nombre_trimmed,
+            image: imagen ? imagen.toString().trim() : '',
+            location: ubicacion ? ubicacion.toString().trim() : '',
+          };
+
+          await this.toolService.createTool(toolData).toPromise();
+          existingToolNames.add(nombre_trimmed.toUpperCase());
+          result.success++;
+
+          console.log(
+            `✅ Herramienta creada: ${toolData.name}`
+          );
+        } catch (error) {
+          result.errors.push(
+            `Hoja "HERRAMIENTAS", Fila ${rowIndex + 2}: ${error}`
+          );
+          console.error(`❌ Error en fila ${rowIndex + 2}:`, error);
+        }
+      }
+
+      console.log('📊 Resultado final:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error procesando datos de herramientas:', error);
+      throw error;
+    }
+  }
+
+  private async processFastenersData(
+    data: ExcelRow[]
+  ): Promise<ImportResult> {
+    const result: ImportResult = {
+      success: 0,
+      errors: [],
+      duplicates: 0,
+      omittedRows: [],
+      duplicatedSaps: [],
+    };
+
+    const existingFastenerNames = new Set<string>();
+
+    try {
+      for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+        const row = data[rowIndex];
+
+        // Validar que tenga nombre
+        const nombre = row['NOMBRE'] || row['Nombre'] || row['nombre'];
+        if (!nombre || nombre.toString().trim() === '') {
+          result.omittedRows.push(`Fila ${rowIndex + 2}: Falta el nombre`);
+          continue;
+        }
+
+        const nombre_trimmed = nombre.toString().trim();
+
+        // Validar nombre único
+        if (existingFastenerNames.has(nombre_trimmed.toUpperCase())) {
+          result.duplicates++;
+          result.duplicatedSaps.push(
+            `Fila ${rowIndex + 2}: "${nombre_trimmed}" (duplicado)`
+          );
+          continue;
+        }
+
+        const imagen = row['IMAGEN'] || row['Imagen'] || row['imagen'] || '';
+        const ubicacion = row['UBICACION'] || row['Ubicación'] || row['ubicacion'] || '';
+
+        try {
+          const fastenerData: CreateToolDto = {
+            name: nombre_trimmed,
+            image: imagen ? imagen.toString().trim() : '',
+            location: ubicacion ? ubicacion.toString().trim() : '',
+          };
+
+          await this.fastenerService.createFastener(fastenerData).toPromise();
+          existingFastenerNames.add(nombre_trimmed.toUpperCase());
+          result.success++;
+
+          console.log(
+            `✅ Tornillo creado: ${fastenerData.name}`
+          );
+        } catch (error) {
+          result.errors.push(
+            `Hoja "TORNILLOS", Fila ${rowIndex + 2}: ${error}`
+          );
+          console.error(`❌ Error en fila ${rowIndex + 2}:`, error);
+        }
+      }
+
+      console.log('📊 Resultado final:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error procesando datos de tornillos:', error);
+      throw error;
+    }
+  }
+
+  private async processChemicalsData(
+    data: ExcelRow[]
+  ): Promise<ImportResult> {
+    const result: ImportResult = {
+      success: 0,
+      errors: [],
+      duplicates: 0,
+      omittedRows: [],
+      duplicatedSaps: [],
+    };
+
+    const existingChemicalNames = new Set<string>();
+
+    try {
+      for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+        const row = data[rowIndex];
+
+        // Validar que tenga nombre
+        const nombre = row['NOMBRE'] || row['Nombre'] || row['nombre'];
+        if (!nombre || nombre.toString().trim() === '') {
+          result.omittedRows.push(`Fila ${rowIndex + 2}: Falta el nombre`);
+          continue;
+        }
+
+        const nombre_trimmed = nombre.toString().trim();
+
+        // Validar nombre único
+        if (existingChemicalNames.has(nombre_trimmed.toUpperCase())) {
+          result.duplicates++;
+          result.duplicatedSaps.push(
+            `Fila ${rowIndex + 2}: "${nombre_trimmed}" (duplicado)`
+          );
+          continue;
+        }
+
+        const imagen = row['IMAGEN'] || row['Imagen'] || row['imagen'] || '';
+        const ubicacion = row['UBICACION'] || row['Ubicación'] || row['ubicacion'] || '';
+
+        try {
+          const chemicalData: CreateToolDto = {
+            name: nombre_trimmed,
+            image: imagen ? imagen.toString().trim() : '',
+            location: ubicacion ? ubicacion.toString().trim() : '',
+          };
+
+          await this.chemicalService.createChemical(chemicalData).toPromise();
+          existingChemicalNames.add(nombre_trimmed.toUpperCase());
+          result.success++;
+
+          console.log(
+            `✅ Químico creado: ${chemicalData.name}`
+          );
+        } catch (error) {
+          result.errors.push(
+            `Hoja "QUÍMICOS", Fila ${rowIndex + 2}: ${error}`
+          );
+          console.error(`❌ Error en fila ${rowIndex + 2}:`, error);
+        }
+      }
+
+      console.log('📊 Resultado final:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error procesando datos de químicos:', error);
+      throw error;
     }
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import Dexie, { Table } from 'dexie';
-import { Machine, Part, Employee, Petition } from '../models/index';
+import { Machine, Part, Employee, Petition, Tool, Manual } from '../models/index';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +10,10 @@ export class DatabaseService extends Dexie {
   parts!: Table<Part>;
   employees!: Table<Employee>;
   petitions!: Table<Petition>;
+  tools!: Table<Tool>;
+  fasteners!: Table<Tool>;
+  chemicals!: Table<Tool>;
+  manuals!: Table<Manual>;
 
   constructor() {
     super('MaintenanceDB');
@@ -66,6 +70,78 @@ export class DatabaseService extends Dexie {
         return Promise.resolve();
       });
 
+    // Version 5: Tabla tools
+    this.version(5)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+        petitions:
+          '++id, partId, machineId, employeeNumber, employeeName, status, createdAt',
+        tools: '++id, name, createdAt',
+      })
+      .upgrade((trans) => {
+        return Promise.resolve();
+      });
+
+    // Version 6: Agregar location a tools
+    this.version(6)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+        petitions:
+          '++id, partId, machineId, employeeNumber, employeeName, status, createdAt',
+        tools: '++id, name, location, createdAt',
+      })
+      .upgrade((trans) => {
+        return trans
+          .table('tools')
+          .toCollection()
+          .modify((tool) => {
+            if (!tool.hasOwnProperty('location')) {
+              tool.location = '';
+            }
+          });
+      });
+
+    // Version 7: Agregar tablas para fasteners y chemicals
+    this.version(7)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+        petitions:
+          '++id, partId, machineId, employeeNumber, employeeName, status, createdAt',
+        tools: '++id, name, location, createdAt',
+        fasteners: '++id, name, location, createdAt',
+        chemicals: '++id, name, location, createdAt',
+      })
+      .upgrade((trans) => {
+        return Promise.resolve();
+      });
+
+    // Version 8: Tabla de manuales PDF
+    this.version(8)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+        petitions:
+          '++id, partId, machineId, employeeNumber, employeeName, status, createdAt',
+        tools: '++id, name, location, createdAt',
+        fasteners: '++id, name, location, createdAt',
+        chemicals: '++id, name, location, createdAt',
+        manuals: '++id, name, category, createdAt',
+      })
+      .upgrade((trans) => {
+        return Promise.resolve();
+      });
+
     // Hooks para timestamps automáticos
     this.machines.hook('creating', (primKey, obj, trans) => {
       obj.createdAt = new Date();
@@ -103,6 +179,42 @@ export class DatabaseService extends Dexie {
     this.petitions?.hook('updating', (modifications, primKey, obj, trans) => {
       (modifications as any).updatedAt = new Date();
     });
+
+    // tools hooks
+    this.tools?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.tools?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
+
+    // fasteners hooks
+    this.fasteners?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.fasteners?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
+
+    // chemicals hooks
+    this.chemicals?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.chemicals?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
+
+    // manuals hooks
+    this.manuals?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.manuals?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
   }
 
   async initializeDatabase(): Promise<void> {
@@ -116,12 +228,20 @@ export class DatabaseService extends Dexie {
   }
 
   async clearAllData(): Promise<void> {
-    await this.transaction('rw', this.machines, this.parts, this.employees, this.petitions, async () => {
-      await this.machines.clear();
-      await this.parts.clear();
-      await this.employees.clear();
-      await this.petitions.clear();
-    });
+    await this.transaction(
+      'rw',
+      [this.machines, this.parts, this.employees, this.petitions, this.tools, this.fasteners, this.chemicals, this.manuals],
+      async () => {
+        await this.machines.clear();
+        await this.parts.clear();
+        await this.employees.clear();
+        await this.petitions.clear();
+        await this.tools.clear();
+        await this.fasteners.clear();
+        await this.chemicals.clear();
+        await this.manuals.clear();
+      }
+    );
     console.log('🗑️ All data cleared');
   }
 

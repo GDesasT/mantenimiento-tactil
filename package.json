@@ -1,6 +1,6 @@
 {
   "name": "mantenimiento-tactil",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "author": "DTSoftware",
   "description": "Sistema de Gestion de Refacciones",
   "main": "main.js",
@@ -21,7 +21,11 @@
     "dist-linux": "npm run build-electron && electron-builder --linux",
     "dist-publish": "npm run build-electron && electron-builder --publish=always",
     "pack": "npm run build-electron && electron-builder --dir",
-    "pack-win": "npm run build-electron && electron-builder --win --dir"
+    "pack-win": "npm run build-electron && electron-builder --win --dir",
+    "driver": "node driver.js",
+    "driver:es": "ELEVENLABS_API_KEY=$ELEVENLABS_API_KEY node driver.js",
+    "audio-backend": "node backend-audio.js",
+    "dev": "concurrently \"npm run start\" \"npm run audio-backend\""
   },
   "prettier": {
     "overrides": [
@@ -45,12 +49,24 @@
     "@angular/platform-browser": "^20.1.0",
     "@angular/platform-browser-dynamic": "^20.1.0",
     "@angular/router": "^20.1.0",
+    "@elevenlabs/elevenlabs-js": "^2.31.0",
+    "@ngx-translate/core": "^17.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
+    "axios": "^1.6.0",
+    "bootstrap-icons": "^1.13.1",
+    "cors": "^2.8.5",
     "dexie": "^4.0.11",
+    "driver.js": "^1.4.0",
     "electron-updater": "^6.6.2",
+    "express": "^5.2.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "xlsx": "^0.18.5",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.15.0"  
+
+
+
+    
   },
   "devDependencies": {
     "@angular/build": "^20.1.0",

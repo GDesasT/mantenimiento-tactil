@@ -1,0 +1,133 @@
+<div class="app-container">
+  <!-- Header profesional -->
+  <div class="professional-header">
+    <div class="header-content">
+      <div class="header-left">
+        <app-touch-button
+          variant="secondary"
+          size="md"
+          icon="←"
+          (clicked)="goBack()"
+          class="back-btn"
+        >
+          Atrás
+        </app-touch-button>
+
+        <div class="header-text">
+          <h2 class="header-title">⚙️ Tornillos Disponibles</h2>
+          <p class="header-subtitle">Inventario de tornillos y fasteners</p>
+        </div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total</span>
+          <span class="stat-value">{{ fasteners.length }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-section">
+    <div class="search-container">
+      <input
+        #searchInput
+        type="text"
+        class="search-input"
+        placeholder="🔍 Buscar tornillos..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearch($event)"
+        (focus)="onSearchFocus()"
+      />
+      <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de tornillos -->
+  <div class="tools-section">
+    <div *ngIf="filteredFasteners.length > 0" class="tools-grid">
+      <div
+        *ngFor="let fastener of filteredFasteners"
+        class="tool-card"
+        (click)="selectFastener(fastener)"
+      >
+        <!-- Imagen del tornillo -->
+        <div class="tool-image-container">
+          <img
+            *ngIf="fastener.image"
+            [src]="fastener.image"
+            [alt]="fastener.name"
+            class="tool-image"
+          />
+          <div *ngIf="!fastener.image" class="tool-image-placeholder">
+            <span class="placeholder-icon">⚙️</span>
+          </div>
+        </div>
+
+        <!-- Información del tornillo -->
+        <div class="tool-info">
+          <h3 class="tool-name">{{ fastener.name }}</h3>
+          <p class="tool-location">
+            📍 {{ fastener.location || 'Ubicación no especificada' }}
+          </p>
+          <p class="tool-date">
+            Agregado: {{ fastener.createdAt | date : 'short' }}
+          </p>
+        </div>
+
+
+      </div>
+    </div>
+    <!-- Mensaje vacío -->
+    <div *ngIf="filteredFasteners.length === 0 && fasteners.length === 0" class="empty-state">
+      <div class="empty-icon">⚙️</div>
+      <h3>No hay tornillos registrados</h3>
+      <p>Importa tornillos desde Excel para comenzar</p>
+      <app-touch-button
+        variant="primary"
+        size="lg"
+        icon="📊"
+        (clicked)="goToImport()"
+        class="import-btn"
+      >
+        Ir a Importar
+      </app-touch-button>
+    </div>
+
+    <!-- Mensaje de búsqueda sin resultados -->
+    <div *ngIf="filteredFasteners.length === 0 && fasteners.length > 0" class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No se encontraron tornillos</h3>
+      <p>Intenta con otro término de búsqueda</p>
+    </div>
+  </div>
+
+  <!-- Notificaciones -->
+  <div *ngIf="showSuccessNotification" class="notification success-notification">
+    ✅ {{ successMessage }}
+  </div>
+
+  <div *ngIf="showErrorNotification" class="notification error-notification">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Overlay para el teclado virtual -->
+  <div
+    class="keyboard-overlay"
+    *ngIf="showKeyboard"
+    (click)="onKeyboardClose()"
+  ></div>
+
+  <!-- Teclado Virtual -->
+  <app-virtual-keyboard
+    [visible]="showKeyboard"
+    [showEnter]="false"
+    (keyPressed)="onKeyboardKey($event)"
+    (backspacePressed)="onKeyboardBackspace()"
+    (clearPressed)="onKeyboardClear()"
+    (closed)="onKeyboardClose()"
+  ></app-virtual-keyboard>
+</div>

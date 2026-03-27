@@ -5,7 +5,14 @@ contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
     invoke: (channel, ...args) => {
       // Permitir solo canales específicos
-      const validChannels = ['check-for-updates', 'get-app-version'];
+      const validChannels = [
+        'check-for-updates',
+        'get-app-version',
+        'pdf-save',
+        'pdf-open',
+        'pdf-delete',
+        'pdf-migrate',
+      ];
       if (validChannels.includes(channel)) {
         return ipcRenderer.invoke(channel, ...args);
       }

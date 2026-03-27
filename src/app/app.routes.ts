@@ -68,6 +68,30 @@ export const routes: Routes = [
     title: 'Búsqueda Global',
   },
   {
+    path: 'tools',
+    loadComponent: () =>
+      import('./features/herramientas/herramientas').then(
+        (m) => m.HerramientasComponent
+      ),
+    title: 'Herramientas',
+  },
+  {
+    path: 'fasteners',
+    loadComponent: () =>
+      import('./features/tornillos/tornillos').then(
+        (m) => m.TornillosComponent
+      ),
+    title: 'Tornillos',
+  },
+  {
+    path: 'chemicals',
+    loadComponent: () =>
+      import('./features/quimicos/quimicos').then(
+        (m) => m.QuimicosComponent
+      ),
+    title: 'Químicos',
+  },
+  {
     path: 'excel-import',
     loadComponent: () =>
       import('./features/excel-import/excel-import').then(
@@ -82,6 +106,20 @@ export const routes: Routes = [
         (m) => m.PeticionesAdmin
       ),
     title: 'Peticiones de Refacciones',
+  },
+  {
+    path: 'manuales',
+    loadComponent: () =>
+      import('./features/manuales/manuales').then((m) => m.ManualesComponent),
+    title: 'Manuales',
+  },
+  {
+    path: 'admin-manuales',
+    loadComponent: () =>
+      import('./features/admin-manuales/admin-manuales').then(
+        (m) => m.AdminManualesComponent
+      ),
+    title: 'Administrar Manuales',
   },
   // Redirección al home para rutas no encontradas
   { path: '**', redirectTo: '' },
