@@ -1,12 +1,14 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ViewChild, OnInit, AfterViewInit } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { TouchButtonComponent } from './shared/components/touch-button/touch-button';
+import { HomeTourService } from './core/services/home-tour.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, TouchButtonComponent],
+  imports: [RouterOutlet, CommonModule, TouchButtonComponent, HttpClientModule],
   template: `
     <div class="app-container">
       <nav class="professional-nav">
@@ -47,7 +49,6 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
                 Búsqueda Global
               </app-touch-button>
 
-
               <app-touch-button
                 [variant]="
                   isCurrentRoute('/excel-import') ? 'primary' : 'secondary'
@@ -59,17 +60,29 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
               >
                 Importar Excel
               </app-touch-button>
-              <!-- <app-touch-button
+                            <app-touch-button
                 [variant]="
-                  isCurrentRoute('/excel-import') ? 'primary' : 'secondary'
+                  isCurrentRoute('/manuales') ? 'primary' : 'secondary'
                 "
                 size="lg"
-                icon="🗒️"
-                (clicked)="navigateTo('/peticiones-admin')"
+                icon="📖"
+                (clicked)="navigateTo('/manuales')"
                 class="nav-touch-button"
               >
-                Peticiones
-              </app-touch-button> -->
+            Manuales
+            </app-touch-button>
+
+              <!-- Botón de Tour - Circular con Bootstrap Icons -->
+              <!-- <button
+                class="tour-button-circular"
+                (click)="startTour()"
+                title="Iniciar tour interactivo"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="blue" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                </svg>
+              </button> -->
             </div>
 
             <!-- Indicador de hora y fecha -->
@@ -217,6 +230,31 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
         border-color: rgba(255, 255, 255, 0.6) !important;
       }
 
+      /* Botón especial del Voice Driver */
+      .nav-menu .voice-driver-btn button {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+        border: 2px solid rgba(255, 255, 255, 0.4) !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4) !important;
+        animation: pulse-light 2s ease-in-out infinite;
+      }
+
+      .nav-menu .voice-driver-btn button:hover {
+        background: linear-gradient(135deg, #ff7f7f, #ff6b6b) !important;
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6) !important;
+        transform: translateY(-2px);
+      }
+
+      @keyframes pulse-light {
+        0%,
+        100% {
+          box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        50% {
+          box-shadow: 0 4px 25px rgba(255, 107, 107, 0.8);
+        }
+      }
+
       /* Efectos táctiles mejorados */
       .nav-menu .nav-touch-button button {
         transition: all 0.3s ease !important;
@@ -255,6 +293,44 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
         display: flex;
         align-items: center;
         flex-shrink: 0;
+      }
+
+      /* Botón circular del tour */
+      .tour-button-circular {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #FFFFFF, #FFF0E8);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+        flex-shrink: 0;
+        margin: auto;
+      }
+
+      .tour-button-circular:hover {
+        transform: scale(1.1);
+        color: white;
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.6);
+      }
+
+      .tour-button-circular:active {
+        transform: scale(0.95);
+      }
+
+      .tour-button-circular svg {
+        width: 28px;
+        height: 28px;
+        transition: transform 0.2s;
+      }
+
+      .tour-button-circular:hover svg {
+        transform: rotate(15deg) scale(1.1);
       }
 
       .time-indicator {
@@ -396,21 +472,35 @@ import { TouchButtonComponent } from './shared/components/touch-button/touch-but
     `,
   ],
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnDestroy, OnInit, AfterViewInit {
   title = 'mantenimiento-tactil';
   currentTime = '';
   currentDate = '';
   private timeInterval: any;
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private tourService: HomeTourService
+  ) {
+    console.log('🚀 AppComponent Constructor - Inicializando...');
     this.updateDateTime();
     // Actualizar cada segundo
     this.timeInterval = setInterval(() => {
       this.updateDateTime();
     }, 1000);
+    console.log('✅ AppComponent Constructor - Completado');
+  }
+
+  ngOnInit() {
+    console.log('🔄 AppComponent ngOnInit - Ciclo de vida iniciado');
+  }
+
+  ngAfterViewInit() {
+    console.log('✅ AppComponent ngAfterViewInit - Vista inicializada');
   }
 
   ngOnDestroy() {
+    console.log('🛑 AppComponent ngOnDestroy - Limpiando recursos');
     if (this.timeInterval) {
       clearInterval(this.timeInterval);
     }
@@ -446,5 +536,9 @@ export class AppComponent implements OnDestroy {
       return this.router.url === '/' || this.router.url === '';
     }
     return this.router.url.startsWith(route);
+  }
+
+  startTour(): void {
+    this.tourService.startTourWithLanguageSelection();
   }
 }

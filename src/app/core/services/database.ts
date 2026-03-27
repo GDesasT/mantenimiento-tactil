@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import Dexie, { Table } from 'dexie';
-import { Machine, Part, Employee, Petition, Tool } from '../models/index';
+import { Machine, Part, Employee, Petition, Tool, Manual } from '../models/index';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +13,7 @@ export class DatabaseService extends Dexie {
   tools!: Table<Tool>;
   fasteners!: Table<Tool>;
   chemicals!: Table<Tool>;
+  manuals!: Table<Manual>;
 
   constructor() {
     super('MaintenanceDB');
@@ -123,6 +124,24 @@ export class DatabaseService extends Dexie {
         return Promise.resolve();
       });
 
+    // Version 8: Tabla de manuales PDF
+    this.version(8)
+      .stores({
+        machines: '++id, name, area, createdAt',
+        parts:
+          '++id, sapNumber, partNumber, machineId, category, location, description, image, createdAt',
+        employees: '++id, employeeNumber, name, createdAt',
+        petitions:
+          '++id, partId, machineId, employeeNumber, employeeName, status, createdAt',
+        tools: '++id, name, location, createdAt',
+        fasteners: '++id, name, location, createdAt',
+        chemicals: '++id, name, location, createdAt',
+        manuals: '++id, name, category, createdAt',
+      })
+      .upgrade((trans) => {
+        return Promise.resolve();
+      });
+
     // Hooks para timestamps automáticos
     this.machines.hook('creating', (primKey, obj, trans) => {
       obj.createdAt = new Date();
@@ -187,6 +206,15 @@ export class DatabaseService extends Dexie {
     this.chemicals?.hook('updating', (modifications, primKey, obj, trans) => {
       (modifications as any).updatedAt = new Date();
     });
+
+    // manuals hooks
+    this.manuals?.hook('creating', (primKey, obj, trans) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+    this.manuals?.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as any).updatedAt = new Date();
+    });
   }
 
   async initializeDatabase(): Promise<void> {
@@ -202,7 +230,7 @@ export class DatabaseService extends Dexie {
   async clearAllData(): Promise<void> {
     await this.transaction(
       'rw',
-      [this.machines, this.parts, this.employees, this.petitions, this.tools, this.fasteners, this.chemicals],
+      [this.machines, this.parts, this.employees, this.petitions, this.tools, this.fasteners, this.chemicals, this.manuals],
       async () => {
         await this.machines.clear();
         await this.parts.clear();
@@ -211,6 +239,7 @@ export class DatabaseService extends Dexie {
         await this.tools.clear();
         await this.fasteners.clear();
         await this.chemicals.clear();
+        await this.manuals.clear();
       }
     );
     console.log('🗑️ All data cleared');

@@ -1,0 +1,208 @@
+<div class="app-container">
+
+  <!-- Notificaciones -->
+  <div class="notification success" *ngIf="showSuccess">
+    <span class="notif-icon">✅</span>{{ successMessage }}
+  </div>
+  <div class="notification error" *ngIf="showError">
+    <span class="notif-icon">❌</span>{{ errorMessage }}
+  </div>
+
+  <!-- Header -->
+  <div class="professional-header">
+    <div class="header-content">
+      <div class="header-left">
+        <app-touch-button variant="secondary" size="md" icon="←" (clicked)="goBack()">
+          Manuales
+        </app-touch-button>
+        <div class="header-text">
+          <h2 class="header-title">⚙️ Administrar Manuales</h2>
+          <p class="header-subtitle">Agrega, edita y elimina manuales PDF</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="stat-badge">
+          <span class="stat-value">{{ manuals.length }}</span>
+          <span class="stat-label">en total</span>
+        </div>
+        <app-touch-button variant="success" size="md" icon="➕" (clicked)="openAddForm()">
+          Agregar Manual
+        </app-touch-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de manuales -->
+  <div class="content-section">
+
+    <!-- Vacío -->
+    <div *ngIf="manuals.length === 0" class="empty-state">
+      <div class="empty-icon">📂</div>
+      <h3>Sin manuales registrados</h3>
+      <p>Agrega el primer manual con el botón de arriba</p>
+    </div>
+
+    <!-- Tabla de manuales -->
+    <div *ngIf="manuals.length > 0" class="manuals-table-wrapper">
+      <table class="manuals-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Archivo</th>
+            <th>Fecha</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let manual of manuals">
+            <td class="name-cell">
+              <span class="name-icon">📄</span>
+              <span class="name-text">{{ manual.name }}</span>
+            </td>
+            <td>
+              <span
+                class="cat-badge"
+                [style.background]="getCategoryColor(manual.category) + '20'"
+                [style.color]="getCategoryColor(manual.category)"
+              >
+                {{ getCategoryLabel(manual.category) }}
+              </span>
+            </td>
+            <td class="desc-cell">{{ manual.description || '—' }}</td>
+            <td class="file-cell">{{ manual.fileName }}</td>
+            <td class="date-cell">{{ manual.createdAt | date: 'dd/MM/yyyy' }}</td>
+            <td class="actions-cell">
+              <button class="action-btn edit" (click)="openEditForm(manual)" title="Editar">
+                ✏️
+              </button>
+              <button class="action-btn delete" (click)="askDelete(manual.id)" title="Eliminar">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── MODAL: Formulario ────────────────────────────────────── -->
+  <div *ngIf="showForm" class="modal-overlay" (click)="closeForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ isEditing ? '✏️ Editar Manual' : '➕ Nuevo Manual' }}</h3>
+        <button class="modal-close" (click)="closeForm()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Nombre -->
+        <div class="field">
+          <label class="field-label">Nombre del manual *</label>
+          <input
+            type="text"
+            class="field-input"
+            placeholder="Ej. Manual de operación CNC-200"
+            [(ngModel)]="form.name"
+          />
+        </div>
+
+        <!-- Descripción -->
+        <div class="field">
+          <label class="field-label">Descripción (opcional)</label>
+          <textarea
+            class="field-input field-textarea"
+            placeholder="Descripción breve del contenido..."
+            [(ngModel)]="form.description"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Categoría -->
+        <div class="field">
+          <label class="field-label">Categoría *</label>
+          <select class="field-input field-select" [(ngModel)]="form.category">
+            <option *ngFor="let cat of categories" [value]="cat.value">
+              {{ cat.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Archivo PDF -->
+        <div class="field">
+          <label class="field-label">Archivo PDF *</label>
+          <div
+            class="drop-zone"
+            [class.drag-over]="dragOver"
+            [class.has-file]="form.pdfData"
+            (click)="triggerFileInput()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop($event)"
+          >
+            <input
+              #fileInput
+              type="file"
+              accept="application/pdf"
+              style="display: none"
+              (change)="onFileSelected($event)"
+            />
+            <div *ngIf="!form.pdfData" class="drop-zone-placeholder">
+              <span class="drop-icon">📤</span>
+              <p class="drop-main">Arrastra el PDF aquí o haz clic para seleccionar</p>
+              <p class="drop-hint">Solo archivos PDF · máximo 50 MB</p>
+            </div>
+            <div *ngIf="form.pdfData" class="drop-zone-file">
+              <span class="file-ok-icon">✅</span>
+              <div class="file-ok-info">
+                <p class="file-ok-name">{{ selectedFileName }}</p>
+                <p class="file-ok-hint">Haz clic para cambiar el archivo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cargando -->
+        <div *ngIf="isLoading" class="loading-bar">
+          <div class="loading-bar-inner"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <app-touch-button variant="secondary" size="md" (clicked)="closeForm()">
+          Cancelar
+        </app-touch-button>
+        <app-touch-button
+          variant="success"
+          size="md"
+          icon="{{ isEditing ? '💾' : '➕' }}"
+          [disabled]="isLoading"
+          (clicked)="saveManual()"
+        >
+          {{ isEditing ? 'Guardar Cambios' : 'Agregar Manual' }}
+        </app-touch-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL: Confirmar eliminación ───────────────────────── -->
+  <div *ngIf="confirmDeleteId !== null" class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header danger">
+        <h3>🗑️ Eliminar Manual</h3>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text">¿Estás seguro de que deseas eliminar este manual? Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <app-touch-button variant="secondary" size="md" (clicked)="cancelDelete()">
+          Cancelar
+        </app-touch-button>
+        <app-touch-button variant="danger" size="md" icon="🗑️" (clicked)="confirmDelete()">
+          Eliminar
+        </app-touch-button>
+      </div>
+    </div>
+  </div>
+
+</div>

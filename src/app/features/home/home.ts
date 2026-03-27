@@ -2,8 +2,9 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
+import { HomeTourService } from '../../core/services/home-tour.service';
 
-// Declarar electron como variable global para acceder desde el renderer
+// Declarar electron como variable global
 declare global {
   interface Window {
     electron?: any;
@@ -25,7 +26,7 @@ declare global {
       </div>
 
       <!-- Áreas principales usando tu sistema -->
-      <div class="professional-grid grid-3 max-w-8xl mx-auto mb-12">
+      <div class="professional-grid grid-3 max-w-8xl mx-auto mb-12" #areasPanel>
         <!-- Área de Corte -->
         <div class="area-card corte-area" (click)="selectArea('corte')">
           <div class="area-content">
@@ -168,7 +169,7 @@ declare global {
           <p class="text-lg text-gray-600">Gestión avanzada del sistema</p>
         </div>
 
-        <div class="professional-grid grid-2 max-w-2xl mx-auto">
+        <div class="professional-grid grid-2 max-w-4xl mx-auto">
           <!-- Búsqueda Global -->
           <div class="professional-card hover:shadow-lg transition-all">
             <div class="professional-content text-center">
@@ -239,7 +240,10 @@ declare global {
               </app-touch-button>
             </div>
           </div>
-        </div>
+
+          <!-- Manuales -->
+          </div>
+          
 
         <!-- Botón de verificar actualizaciones -->
         <div class="max-w-md mx-auto mt-8">
@@ -554,7 +558,14 @@ declare global {
   ],
 })
 export class HomeComponent {
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private tourService: HomeTourService
+  ) {}
+
+  startTour() {
+    this.tourService.startTourWithLanguageSelection();
+  }
 
   selectArea(area: 'corte' | 'costura' | 'consumible' | 'herramientas' | 'quimicos' | 'tornillos') {
     if (area === 'herramientas') {
@@ -580,6 +591,11 @@ export class HomeComponent {
   goToExcelImport() {
     console.log('📊 Navigating to Excel import');
     this.router.navigate(['/excel-import']);
+  }
+
+  goToManuales() {
+    console.log('📚 Navigating to Manuales');
+    this.router.navigate(['/manuales']);
   }
 
   checkForUpdates() {

@@ -3,3 +3,4 @@ export * from './part.model';
 export * from './employee.model';
 export * from './petition.model';
 export * from './tools';
+export * from './manual.model';

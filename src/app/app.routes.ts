@@ -107,6 +107,20 @@ export const routes: Routes = [
       ),
     title: 'Peticiones de Refacciones',
   },
+  {
+    path: 'manuales',
+    loadComponent: () =>
+      import('./features/manuales/manuales').then((m) => m.ManualesComponent),
+    title: 'Manuales',
+  },
+  {
+    path: 'admin-manuales',
+    loadComponent: () =>
+      import('./features/admin-manuales/admin-manuales').then(
+        (m) => m.AdminManualesComponent
+      ),
+    title: 'Administrar Manuales',
+  },
   // Redirección al home para rutas no encontradas
   { path: '**', redirectTo: '' },
 ];

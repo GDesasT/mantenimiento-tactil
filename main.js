@@ -1,6 +1,7 @@
-const { app, BrowserWindow, Menu, dialog, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, dialog, ipcMain, shell } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const path = require("path");
+const fs = require("fs");
 const isDev = process.env.NODE_ENV === "development";
 
 let mainWindow;
@@ -120,7 +121,7 @@ function createWindow() {
 
     try {
       require("electron-reload")(__dirname, {
-        electron: path.join(
+          electron: path.join(
           __dirname,
           "..",
           "node_modules",
@@ -353,6 +354,64 @@ Funciones principales:
 app.whenReady().then(() => {
   createWindow();
   createMenu();
+
+  // ── Manuales: guardar PDF en disco ────────────────────────────
+  ipcMain.handle('pdf-save', async (event, { fileName, base64Data }) => {
+    try {
+      const manualesDir = path.join(app.getPath('userData'), 'manuales');
+      if (!fs.existsSync(manualesDir)) fs.mkdirSync(manualesDir, { recursive: true });
+
+      // Limpiar nombre de archivo y hacerlo único
+      const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const unique = `${Date.now()}_${safeName}`;
+      const filePath = path.join(manualesDir, unique);
+
+      // base64Data puede venir como "data:application/pdf;base64,XXX" o solo "XXX"
+      const raw = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+      fs.writeFileSync(filePath, Buffer.from(raw, 'base64'));
+
+      return { success: true, filePath };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  // ── Manuales: abrir PDF guardado en disco ──────────────────────
+  ipcMain.handle('pdf-open', async (event, { filePath }) => {
+    try {
+      if (!fs.existsSync(filePath)) return { success: false, error: 'Archivo no encontrado' };
+      await shell.openPath(filePath);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  // ── Manuales: borrar PDF del disco ────────────────────────────
+  ipcMain.handle('pdf-delete', async (event, { filePath }) => {
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  // ── Manuales: migrar base64 antiguo → disco ───────────────────
+  ipcMain.handle('pdf-migrate', async (event, { fileName, base64Data }) => {
+    try {
+      const manualesDir = path.join(app.getPath('userData'), 'manuales');
+      if (!fs.existsSync(manualesDir)) fs.mkdirSync(manualesDir, { recursive: true });
+      const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const unique = `migrated_${Date.now()}_${safeName}`;
+      const filePath = path.join(manualesDir, unique);
+      const raw = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+      fs.writeFileSync(filePath, Buffer.from(raw, 'base64'));
+      return { success: true, filePath };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
 
   // IPC Handler para verificar actualizaciones
   ipcMain.handle('check-for-updates', () => {
