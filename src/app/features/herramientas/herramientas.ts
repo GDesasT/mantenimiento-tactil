@@ -135,6 +135,11 @@ export class HerramientasComponent implements OnInit, OnDestroy {
     this.filteredTools = this.tools;
   }
 
+  onKeyboardEnter() {
+    this.onSearch(this.searchQuery);
+    this.onKeyboardClose();
+  }
+
   onKeyboardClose() {
     this.showKeyboard = false;
     if (this.searchInput) {

@@ -124,10 +124,11 @@
   <!-- Teclado Virtual -->
   <app-virtual-keyboard
     [visible]="showKeyboard"
-    [showEnter]="false"
+    [showEnter]="true"
     (keyPressed)="onKeyboardKey($event)"
     (backspacePressed)="onKeyboardBackspace()"
     (clearPressed)="onKeyboardClear()"
+    (enterPressed)="onKeyboardEnter()"
     (closed)="onKeyboardClose()"
   ></app-virtual-keyboard>
 </div>

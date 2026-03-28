@@ -352,10 +352,11 @@ interface SearchFilters {
       <!-- Teclado virtual -->
       <app-virtual-keyboard
         [visible]="keyboardVisible"
-        [showEnter]="false"
+        [showEnter]="true"
         (keyPressed)="onKeyPressed($event)"
         (backspacePressed)="onBackspacePressed()"
         (clearPressed)="onClearPressed()"
+        (enterPressed)="onEnterPressed()"
         (closed)="hideKeyboard()"
       ></app-virtual-keyboard>
 
@@ -1615,6 +1616,14 @@ export class GlobalSearchComponent implements OnInit {
   onClearPressed() {
     this.searchQuery = '';
     this.onSearchInput();
+  }
+
+  onEnterPressed() {
+    this.onSearchInput();
+    this.hideKeyboard();
+    if (this.searchInput) {
+      this.searchInput.nativeElement.blur();
+    }
   }
 
   goBack() {

@@ -135,6 +135,11 @@ export class QuimicosComponent implements OnInit, OnDestroy {
     this.filteredChemicals = this.chemicals;
   }
 
+  onKeyboardEnter() {
+    this.onSearch(this.searchQuery);
+    this.onKeyboardClose();
+  }
+
   onKeyboardClose() {
     this.showKeyboard = false;
     if (this.searchInput) {

@@ -1,35 +1,42 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TouchButtonComponent } from '../touch-button/touch-button';
 
 @Component({
   selector: 'app-virtual-keyboard',
   standalone: true,
-  imports: [CommonModule, TouchButtonComponent],
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="virtual-keyboard"
       *ngIf="visible"
       (click)="onKeyboardClick($event)"
     >
-      <div class="keyboard-container">
+      <div class="keyboard-container" role="dialog" aria-label="Teclado virtual">
         <div class="keyboard-header">
-          <app-touch-button
-            variant="secondary"
-            size="sm"
-            icon="✕"
-            (clicked)="close()"
-            class="close-btn"
+          <button
+            type="button"
+            class="close-keyboard-btn"
+            (click)="close()"
+            aria-label="Cerrar teclado"
           >
-          </app-touch-button>
+            ✕
+          </button>
         </div>
 
         <div class="keyboard-grid">
           <!-- Fila de números -->
           <div class="keyboard-row">
             <button
-              *ngFor="let key of keyboardLayout.numbers"
+              *ngFor="let key of keyboardLayout.numbers; trackBy: trackByIndex"
               class="key"
+              type="button"
               (click)="typeKey(key)"
             >
               {{ key }}
@@ -39,8 +46,9 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
           <!-- Primera fila de letras -->
           <div class="keyboard-row">
             <button
-              *ngFor="let key of keyboardLayout.row1"
+              *ngFor="let key of keyboardLayout.row1; trackBy: trackByIndex"
               class="key"
+              type="button"
               (click)="typeKey(key)"
             >
               {{ key }}
@@ -50,8 +58,9 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
           <!-- Segunda fila de letras -->
           <div class="keyboard-row">
             <button
-              *ngFor="let key of keyboardLayout.row2"
+              *ngFor="let key of keyboardLayout.row2; trackBy: trackByIndex"
               class="key"
+              type="button"
               (click)="typeKey(key)"
             >
               {{ key }}
@@ -61,8 +70,9 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
           <!-- Tercera fila de letras -->
           <div class="keyboard-row">
             <button
-              *ngFor="let key of keyboardLayout.row3"
+              *ngFor="let key of keyboardLayout.row3; trackBy: trackByIndex"
               class="key"
+              type="button"
               (click)="typeKey(key)"
             >
               {{ key }}
@@ -70,14 +80,23 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
           </div>
 
           <!-- Fila de acciones -->
-          <div class="keyboard-row">
-            <button class="key key-space" (click)="typeKey(' ')">
+          <div class="keyboard-row keyboard-actions-row">
+            <button class="key key-space" type="button" (click)="typeKey(' ')">
               Espacio
             </button>
-            <button class="key key-backspace" (click)="backspace()">⌫</button>
-            <button class="key key-clear" (click)="clear()">Limpiar</button>
-            <button class="key key-enter" (click)="enter()" *ngIf="showEnter">
-              Enter
+            <button
+              class="key key-enter"
+              type="button"
+              (click)="enter()"
+              *ngIf="showEnter"
+            >
+              ↵ Enter
+            </button>
+            <button class="key key-backspace" type="button" (click)="backspace()">
+              ⌫
+            </button>
+            <button class="key key-clear" type="button" (click)="clear()">
+              Limpiar
             </button>
           </div>
         </div>
@@ -88,54 +107,75 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
     `
       .virtual-keyboard {
         position: fixed;
-        bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: auto;
-        max-width: 800px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 0.75rem;
+        padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
         background: transparent;
         border: none;
-        border-radius: 1.5rem;
         z-index: 1000;
+        pointer-events: none;
       }
 
       .keyboard-container {
-        max-width: 750px;
-        margin: 0 auto;
-        padding: 1rem;
+        width: min(980px, calc(100vw - 1rem));
+        max-height: min(72vh, 560px);
+        overflow-y: auto;
+        margin: 0;
+        padding: 0.9rem;
+        border-radius: 1rem;
+        background: rgba(248, 250, 252, 0.08);
+        pointer-events: auto;
       }
 
       .keyboard-header {
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
       }
 
-      .close-btn {
-        opacity: 0.7;
-        transition: opacity 0.2s ease;
+      .close-keyboard-btn {
+        width: 56px;
+        height: 56px;
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        border-radius: 0.75rem;
+        background: rgba(241, 245, 249, 0.95);
+        color: #64748b;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
       }
 
-      .close-btn:hover {
-        opacity: 1;
+      .close-keyboard-btn:hover {
+        background: rgba(226, 232, 240, 0.95);
+        transform: translateY(-1px);
       }
 
       .keyboard-grid {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.55rem;
       }
 
       .keyboard-row {
         display: flex;
         justify-content: center;
-        gap: 0.5rem;
+        gap: clamp(0.25rem, 0.8vw, 0.5rem);
+        width: 100%;
       }
 
       .key {
-        min-width: 50px;
-        height: 60px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 72px;
+        height: 56px;
         border: 1px solid rgba(226, 232, 240, 0.4);
         border-radius: 0.75rem;
         background: rgba(247, 250, 252, 0.9);
@@ -147,7 +187,7 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
+        font-size: clamp(0.95rem, 1.8vw, 1.05rem);
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
       }
 
@@ -164,12 +204,19 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
       }
 
       .key-space {
-        min-width: 200px;
+        flex: 2.2 1 0;
+        max-width: none;
+      }
+
+      .key-enter,
+      .key-backspace,
+      .key-clear {
+        flex: 1 1 0;
+        max-width: 130px;
       }
 
       .key-backspace,
       .key-clear {
-        min-width: 90px;
         background: rgba(254, 215, 215, 0.9);
         color: #c53030;
       }
@@ -180,7 +227,6 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
       }
 
       .key-enter {
-        min-width: 100px;
         background: rgba(198, 246, 213, 0.9);
         color: #276749;
       }
@@ -191,42 +237,59 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
 
       /* Responsive */
       @media (max-width: 768px) {
-        .keyboard-container {
+        .virtual-keyboard {
           padding: 0.5rem;
+          padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+        }
+
+        .keyboard-container {
+          width: calc(100vw - 0.5rem);
+          max-height: 68vh;
+          padding: 0.75rem;
         }
 
         .key {
-          min-width: 35px;
-          height: 45px;
-          font-size: 0.8rem;
+          height: 48px;
+          max-width: none;
+          font-size: 0.9rem;
+          border-radius: 0.6rem;
         }
 
         .key-space {
-          min-width: 150px;
+          flex: 1.8 1 0;
         }
 
+        .key-enter,
         .key-backspace,
-        .key-clear,
-        .key-enter {
-          min-width: 60px;
+        .key-clear {
+          max-width: none;
+        }
+
+        .close-keyboard-btn {
+          width: 46px;
+          height: 46px;
+          font-size: 1.2rem;
         }
       }
 
       @media (max-width: 480px) {
+        .keyboard-container {
+          max-height: 64vh;
+        }
+
         .key {
-          min-width: 30px;
-          height: 40px;
-          font-size: 0.7rem;
+          height: 44px;
+          font-size: 0.82rem;
         }
 
         .key-space {
-          min-width: 120px;
+          flex: 1.6 1 0;
         }
 
+        .key-enter,
         .key-backspace,
-        .key-clear,
-        .key-enter {
-          min-width: 50px;
+        .key-clear {
+          flex: 0.95 1 0;
         }
       }
     `,
@@ -234,7 +297,7 @@ import { TouchButtonComponent } from '../touch-button/touch-button';
 })
 export class VirtualKeyboardComponent {
   @Input() visible = false;
-  @Input() showEnter = false;
+  @Input() showEnter = true;
   @Output() keyPressed = new EventEmitter<string>();
   @Output() backspacePressed = new EventEmitter<void>();
   @Output() clearPressed = new EventEmitter<void>();
@@ -266,6 +329,10 @@ export class VirtualKeyboardComponent {
 
   close() {
     this.closed.emit();
+  }
+
+  trackByIndex(index: number) {
+    return index;
   }
 
   onKeyboardClick(event: Event) {

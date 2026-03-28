@@ -135,6 +135,11 @@ export class TornillosComponent implements OnInit, OnDestroy {
     this.filteredFasteners = this.fasteners;
   }
 
+  onKeyboardEnter() {
+    this.onSearch(this.searchQuery);
+    this.onKeyboardClose();
+  }
+
   onKeyboardClose() {
     this.showKeyboard = false;
     if (this.searchInput) {
