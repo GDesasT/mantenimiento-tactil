@@ -6,6 +6,12 @@ import { Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { ManualService } from '../../core/services/manual';
 import { Manual } from '../../core/models';
+import {
+  MANUAL_CATEGORIES,
+  getManualCategoryColor,
+  normalizeManualCategory,
+  resolveManualCategory,
+} from '../../core/constants/manual-categories';
 
 @Component({
   selector: 'app-manuales',
@@ -50,8 +56,28 @@ export class ManualesComponent implements OnInit {
   }
 
   extractCategories(manuals: Manual[]) {
-    const cats = new Set(manuals.map((m) => m.category).filter(Boolean));
-    this.categories = Array.from(cats);
+    const categories = manuals
+      .map((manual) => resolveManualCategory(manual.category))
+      .filter((category): category is string => !!category);
+
+    const existingMap = new Map<string, string>();
+    for (const category of categories) {
+      existingMap.set(category.toLowerCase(), category);
+    }
+
+    const orderedHardcoded = MANUAL_CATEGORIES.filter((category) =>
+      existingMap.has(category.toLowerCase())
+    ).map((category) => existingMap.get(category.toLowerCase()) || category);
+
+    const remaining = Array.from(existingMap.entries())
+      .filter(
+        ([normalized]) =>
+          !MANUAL_CATEGORIES.some((hardcoded) => hardcoded.toLowerCase() === normalized)
+      )
+      .map(([, value]) => value)
+      .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+    this.categories = [...orderedHardcoded, ...remaining];
   }
 
   onSearch(query: string) {
@@ -66,8 +92,11 @@ export class ManualesComponent implements OnInit {
 
   applyFilters() {
     let result = this.manuals;
+    const selectedCategoryNormalized = normalizeManualCategory(this.selectedCategory).toLowerCase();
     if (this.selectedCategory !== 'todos') {
-      result = result.filter((m) => m.category === this.selectedCategory);
+      result = result.filter(
+        (m) => normalizeManualCategory(m.category).toLowerCase() === selectedCategoryNormalized
+      );
     }
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
@@ -75,7 +104,7 @@ export class ManualesComponent implements OnInit {
         (m) =>
           m.name.toLowerCase().includes(q) ||
           (m.description || '').toLowerCase().includes(q) ||
-          m.category.toLowerCase().includes(q)
+          normalizeManualCategory(m.category).toLowerCase().includes(q)
       );
     }
     this.filteredManuals = result;
@@ -93,7 +122,9 @@ export class ManualesComponent implements OnInit {
   }
 
   getCountByCategory(cat: string): number {
-    return this.manuals.filter((m) => m.category === cat).length;
+    const normalized = normalizeManualCategory(cat).toLowerCase();
+    return this.manuals.filter((m) => normalizeManualCategory(m.category).toLowerCase() === normalized)
+      .length;
   }
 
   openManual(manual: Manual) {
@@ -138,24 +169,10 @@ export class ManualesComponent implements OnInit {
   }
 
   getCategoryLabel(cat: string): string {
-    const labels: Record<string, string> = {
-      maquinaria: 'Maquinaria',
-      seguridad: 'Seguridad',
-      mantenimiento: 'Mantenimiento',
-      proceso: 'Proceso',
-      general: 'General',
-    };
-    return labels[cat] || cat;
+    return resolveManualCategory(cat) || 'Sin categoría';
   }
 
   getCategoryColor(cat: string): string {
-    const colors: Record<string, string> = {
-      maquinaria: '#3b82f6',
-      seguridad: '#ef4444',
-      mantenimiento: '#f59e0b',
-      proceso: '#10b981',
-      general: '#8b5cf6',
-    };
-    return colors[cat] || '#6b7280';
+    return getManualCategoryColor(cat);
   }
 }

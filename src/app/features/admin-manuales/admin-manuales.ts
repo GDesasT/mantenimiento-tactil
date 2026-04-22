@@ -5,6 +5,11 @@ import { Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { ManualService } from '../../core/services/manual';
 import { Manual, CreateManualDto } from '../../core/models';
+import {
+  MANUAL_CATEGORIES,
+  getManualCategoryColor,
+  resolveManualCategory,
+} from '../../core/constants/manual-categories';
 
 @Component({
   selector: 'app-admin-manuales',
@@ -15,6 +20,8 @@ import { Manual, CreateManualDto } from '../../core/models';
 })
 export class AdminManualesComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  readonly categories = MANUAL_CATEGORIES;
 
   manuals: Manual[] = [];
 
@@ -27,7 +34,7 @@ export class AdminManualesComponent implements OnInit {
   form: CreateManualDto = {
     name: '',
     description: '',
-    category: 'general',
+    category: '',
     fileName: '',
     pdfData: '',
   };
@@ -43,13 +50,6 @@ export class AdminManualesComponent implements OnInit {
 
   // Confirmar eliminación
   confirmDeleteId: number | null = null;
-
-  readonly categories = [
-    { value: 'Costura', label: '🧵 Costura' },
-    { value: 'Corte', label: '✂️ Corte' },
-    { value: 'General', label: '📁 General' },
-    { value: 'Sistemas Mantenimiento', label: '⚙️ Sistemas Mantenimiento' },
-  ];
 
   constructor(private manualService: ManualService, private router: Router) {}
 
@@ -91,7 +91,7 @@ export class AdminManualesComponent implements OnInit {
   }
 
   resetForm() {
-    this.form = { name: '', description: '', category: 'general', fileName: '', pdfData: '' };
+    this.form = { name: '', description: '', category: '', fileName: '', pdfData: '' };
     this.selectedFileName = '';
     if (this.fileInput) this.fileInput.nativeElement.value = '';
   }
@@ -156,15 +156,25 @@ export class AdminManualesComponent implements OnInit {
       this.showErrorMsg('El nombre es obligatorio');
       return;
     }
+    const normalizedCategory = resolveManualCategory(this.form.category);
+    if (!normalizedCategory) {
+      this.showErrorMsg('La categoría es obligatoria');
+      return;
+    }
     if (!this.form.pdfData) {
       this.showErrorMsg('Debes seleccionar un archivo PDF');
       return;
     }
 
+    const payload: CreateManualDto = {
+      ...this.form,
+      category: normalizedCategory,
+    };
+
     this.isLoading = true;
 
     if (this.isEditing && this.editingId !== null) {
-      this.manualService.updateManual(this.editingId, this.form).subscribe({
+      this.manualService.updateManual(this.editingId, payload).subscribe({
         next: () => {
           this.isLoading = false;
           this.closeForm();
@@ -177,7 +187,7 @@ export class AdminManualesComponent implements OnInit {
         },
       });
     } else {
-      this.manualService.createManual(this.form).subscribe({
+      this.manualService.createManual(payload).subscribe({
         next: () => {
           this.isLoading = false;
           this.closeForm();
@@ -220,18 +230,11 @@ export class AdminManualesComponent implements OnInit {
   }
 
   getCategoryLabel(val: string): string {
-    return this.categories.find((c) => c.value === val)?.label || val;
+    return resolveManualCategory(val) || 'Sin categoría';
   }
 
   getCategoryColor(cat: string): string {
-    const colors: Record<string, string> = {
-      maquinaria: '#3b82f6',
-      seguridad: '#ef4444',
-      mantenimiento: '#f59e0b',
-      proceso: '#10b981',
-      general: '#8b5cf6',
-    };
-    return colors[cat] || '#6b7280';
+    return getManualCategoryColor(cat);
   }
 
   showSuccessMsg(msg: string) {

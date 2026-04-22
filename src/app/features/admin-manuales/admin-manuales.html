@@ -122,9 +122,8 @@
         <div class="field">
           <label class="field-label">Categoría *</label>
           <select class="field-input field-select" [(ngModel)]="form.category">
-            <option *ngFor="let cat of categories" [value]="cat.value">
-              {{ cat.label }}
-            </option>
+            <option value="" disabled>Selecciona una categoría</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
           </select>
         </div>
 
