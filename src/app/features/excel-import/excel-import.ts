@@ -1619,6 +1619,16 @@ interface ImportResult {
       .upload-icon {
         color: var(--gray-400);
         margin-bottom: 1rem;
+        width: 4rem;
+        height: 4rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .upload-svg,
+      .upload-icon svg {
+        width: 100%;
+        height: 100%;
       }
 
       .upload-text {

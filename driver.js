@@ -10,7 +10,7 @@ const { Readable } = require('stream');
 
 // Configuración
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || '73dd87b0ebd67f53cf416a4a8c7ce7b492fd2b6934d7bbb3695323930f04e217';
-const ELEVENLABS_VOICE_ID = 'dlGxemPxFMTY7iXagmOj'; 
+const ELEVENLABS_VOICE_ID = 'qSeXEcewz7tA0Q0qk9fH'; 
 const API_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
 
 // Idiomas soportados
