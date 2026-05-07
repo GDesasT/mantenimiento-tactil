@@ -91,19 +91,19 @@ import { firstValueFrom } from 'rxjs';
             <div class="machine-stats" *ngIf="machineStats[machine.id!]">
               <div class="stat-item stat-blue">
                 <div class="stat-number">
-                  {{ machineStats[machine.id!].mecanica }}
+                  {{ machineStats[machine.id!]['mecanica'] }}
                 </div>
                 <div class="stat-label">MEC</div>
               </div>
               <div class="stat-item stat-yellow">
                 <div class="stat-number">
-                  {{ machineStats[machine.id!].electronica }}
+                  {{ machineStats[machine.id!]['electronica'] }}
                 </div>
                 <div class="stat-label">ELEC</div>
               </div>
               <div class="stat-item stat-green">
                 <div class="stat-number">
-                  {{ machineStats[machine.id!].consumible }}
+                  {{ machineStats[machine.id!]['consumible'] }}
                 </div>
                 <div class="stat-label">CON</div>
               </div>
@@ -221,7 +221,7 @@ import { firstValueFrom } from 'rxjs';
                   <span class="summary-icon">⚙️</span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
-                      ? machineStats[machineToDelete.id!].mecanica
+                      ? machineStats[machineToDelete.id!]['mecanica']
                       : 0
                   }}</span>
                   <span class="summary-label">Mecánicas</span>
@@ -230,7 +230,7 @@ import { firstValueFrom } from 'rxjs';
                   <span class="summary-icon">⚡</span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
-                      ? machineStats[machineToDelete.id!].electronica
+                      ? machineStats[machineToDelete.id!]['electronica']
                       : 0
                   }}</span>
                   <span class="summary-label">Electrónicas</span>
@@ -239,7 +239,7 @@ import { firstValueFrom } from 'rxjs';
                   <span class="summary-icon">🛠️</span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
-                      ? machineStats[machineToDelete.id!].consumible
+                      ? machineStats[machineToDelete.id!]['consumible']
                       : 0
                   }}</span>
                   <span class="summary-label">Consumibles</span>

@@ -1,0 +1,146 @@
+
+> mantenimiento-tactil@1.0.8 build
+> ng build
+
+❯ Building...
+✔ Building...
+Application bundle generation failed. [2.511 seconds]
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/add-part/add-part.ts:923:11:
+[37m      923 │     return [32micons[category][37m;
+          ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/add-part/add-part.ts:932:11:
+[37m      932 │     return [32mlabels[category][37m;
+          ╵            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/add-part/add-part.ts:941:11:
+[37m      941 │     return [32mdescriptions[category][37m;
+          ╵            [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/edit-part/edit-part.ts:1084:11:
+[37m      1084 │     return [32micons[category][37m;
+           ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/edit-part/edit-part.ts:1093:11:
+[37m      1093 │     return [32mlabels[category][37m;
+           ╵            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/edit-part/edit-part.ts:1102:11:
+[37m      1102 │     return [32mdescriptions[category][37m;
+           ╵            [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/global-search/global-search-new.ts:1142:11:
+[37m      1142 │     return [32micons[category][37m || '📦';
+           ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/global-search/global-search-new.ts:1151:11:
+[37m      1151 │     return [32mnames[category][37m || category;
+           ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/global-search/global-search-old.ts:1558:11:
+[37m      1558 │     return [32micons[category][37m;
+           ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/global-search/global-search-old.ts:1567:11:
+[37m      1567 │     return [32mlabels[category][37m;
+           ╵            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/global-search/global-search.ts:1562:11:
+[37m      1562 │     return [32micons[category][37m || '📦';
+           ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mecanica: string; electronica: string; consumible: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mecanica: string; electronica: string; consumible: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/global-search/global-search.ts:1571:11:
+[37m      1571 │     return [32mnames[category][37m || category;
+           ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS4111: Property 'mecanica' comes from an index signature, so it must be accessed with ['mecanica'].[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/machine-list/machine-list-new.ts:94:47:
+[37m      94 │                   {{ machineStats[machine.id!].[32mmecanica[37m }}
+         ╵                                                [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS4111: Property 'electronica' comes from an index signature, so it must be accessed with ['electronica'].[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/machine-list/machine-list-new.ts:100:47:
+[37m      100 │                   {{ machineStats[machine.id!].[32melectronica[37m }}
+          ╵                                                [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS4111: Property 'consumible' comes from an index signature, so it must be accessed with ['consumible'].[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/machine-list/machine-list-new.ts:106:47:
+[37m      106 │                   {{ machineStats[machine.id!].[32mconsumible[37m }}
+          ╵                                                [32m~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS4111: Property 'mecanica' comes from an index signature, so it must be accessed with ['mecanica'].[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/machine-list/machine-list-new.ts:224:58:
+[37m      224 │                       ? machineStats[machineToDelete.id!].[32mmecanica[37m
+          ╵                                                           [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS4111: Property 'electronica' comes from an index signature, so it must be accessed with ['electronica'].[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/machine-list/machine-list-new.ts:233:58:
+[37m      233 │ ...                  ? machineStats[machineToDelete.id!].[32melectronica[37m
+          ╵                                                          [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS4111: Property 'consumible' comes from an index signature, so it must be accessed with ['consumible'].[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/machine-list/machine-list-new.ts:242:58:
+[37m      242 │                       ? machineStats[machineToDelete.id!].[32mconsumible[37m
+          ╵                                                           [32m~~~~~~~~~~[0m
+
+

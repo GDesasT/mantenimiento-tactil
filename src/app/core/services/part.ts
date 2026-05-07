@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { DatabaseService } from './database';
-import { Part, CreatePartDto, PartCategory } from '../models';
+import { environment } from '../../../environments/environment';
+import { CreatePartDto, Part, PartCategory } from '../models';
+import { normalizePart, unwrapApiData } from './api-utils';
 
 @Injectable({
   providedIn: 'root',
@@ -11,11 +13,15 @@ export class PartService {
   private partsSubject = new BehaviorSubject<Part[]>([]);
   public parts$ = this.partsSubject.asObservable();
 
-  constructor(private db: DatabaseService) {}
+  private readonly apiBaseUrl = environment.apiBaseUrl;
+
+  constructor(private http: HttpClient) {}
 
   // Cargar todas las refacciones
   loadParts(): Observable<Part[]> {
-    return from(this.db.parts.orderBy('description').toArray()).pipe(
+    return this.http.get(`${this.apiBaseUrl}/parts`).pipe(
+      map((response) => unwrapApiData<any[]>(response)),
+      map((parts) => parts.map((part) => normalizePart(part))),
       tap((parts) => {
         console.log('📦 Loaded parts:', parts);
         this.partsSubject.next(parts);
@@ -25,12 +31,11 @@ export class PartService {
 
   // Obtener refacciones por máquina
   getPartsByMachine(machineId: number): Observable<Part[]> {
-    return from(
-      this.db.parts.where('machineId').equals(machineId).toArray()
-    ).pipe(
+    return this.loadParts().pipe(
       map((parts) =>
         parts.sort((a, b) => a.description.localeCompare(b.description))
       ),
+      map((parts) => parts.filter((part) => part.machineId === machineId)),
       tap((parts) => console.log(`🔧 Parts for machine ${machineId}:`, parts))
     );
   }
@@ -40,14 +45,14 @@ export class PartService {
     machineId: number,
     category: PartCategory
   ): Observable<Part[]> {
-    return from(
-      this.db.parts
-        .where(['machineId', 'category'])
-        .equals([machineId, category])
-        .toArray()
-    ).pipe(
+    return this.loadParts().pipe(
       map((parts) =>
         parts.sort((a, b) => a.description.localeCompare(b.description))
+      ),
+      map((parts) =>
+        parts.filter(
+          (part) => part.machineId === machineId && part.category === category
+        )
       ),
       tap((parts) =>
         console.log(`🔧 ${category} parts for machine ${machineId}:`, parts)
@@ -59,9 +64,9 @@ export class PartService {
   searchParts(query: string, machineId?: number): Observable<Part[]> {
     const searchTerm = query.toLowerCase();
 
-    return from(
-      this.db.parts
-        .filter((part) => {
+    return this.loadParts().pipe(
+      map((parts) =>
+        parts.filter((part) => {
           const matchesSearch =
             part.description.toLowerCase().includes(searchTerm) ||
             part.sapNumber.toLowerCase().includes(searchTerm) ||
@@ -71,32 +76,34 @@ export class PartService {
 
           return matchesSearch && matchesMachine;
         })
-        .toArray()
-    ).pipe(tap((parts) => console.log(`🔍 Search "${query}":`, parts)));
+      ),
+      tap((parts) => console.log(`🔍 Search "${query}":`, parts))
+    );
   }
 
   // Obtener refacción por ID
   getPartById(id: number): Observable<Part | undefined> {
-    return from(this.db.parts.get(id)).pipe(
+    return this.http.get(`${this.apiBaseUrl}/parts/${id}`).pipe(
+      map((response) => normalizePart(unwrapApiData<any>(response))),
       tap((part) => console.log('🔍 Found part:', part))
     );
   }
 
   // Crear nueva refacción
   createPart(partData: CreatePartDto): Observable<Part> {
-    return from(
-      this.db.parts
-        .add(partData as Part)
-        .then(
-          (id) =>
-            ({
-              ...partData,
-              id,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            } as Part)
-        )
-    ).pipe(
+    const payload = {
+      sap_number: partData.sapNumber,
+      part_number: partData.partNumber,
+      description: partData.description,
+      category_id: partData.categoryId ?? (partData.category === 'mecanica' ? 1 : partData.category === 'electronica' ? 2 : partData.category === 'consumible' ? 3 : 1),
+      machine_id: partData.machineId,
+      location: partData.location,
+      image: partData.image ?? '',
+      stock: partData.stock ?? 0,
+    };
+
+    return this.http.post(`${this.apiBaseUrl}/parts`, payload).pipe(
+      map((response) => normalizePart(unwrapApiData<any>(response))),
       tap((part) => {
         console.log('✅ Created part:', part);
         this.loadParts().subscribe();
@@ -106,7 +113,18 @@ export class PartService {
 
   // Actualizar refacción
   updatePart(id: number, updates: Partial<Part>): Observable<void> {
-    return from(this.db.parts.update(id, updates)).pipe(
+    const payload = {
+      ...(updates.sapNumber ? { sap_number: updates.sapNumber } : {}),
+      ...(updates.partNumber ? { part_number: updates.partNumber } : {}),
+      ...(updates.description ? { description: updates.description } : {}),
+      ...(updates.categoryId || updates.category ? { category_id: updates.categoryId ?? (updates.category === 'mecanica' ? 1 : updates.category === 'electronica' ? 2 : updates.category === 'consumible' ? 3 : 1) } : {}),
+      ...(updates.machineId ? { machine_id: updates.machineId } : {}),
+      ...(updates.location ? { location: updates.location } : {}),
+      ...(updates.image !== undefined ? { image: updates.image } : {}),
+      ...(updates.stock !== undefined ? { stock: updates.stock } : {}),
+    };
+
+    return this.http.put(`${this.apiBaseUrl}/parts/${id}`, payload).pipe(
       map(() => void 0),
       tap(() => {
         console.log('📝 Updated part:', id, updates);
@@ -117,7 +135,7 @@ export class PartService {
 
   // Eliminar refacción
   deletePart(id: number): Observable<void> {
-    return from(this.db.parts.delete(id)).pipe(
+    return this.http.delete(`${this.apiBaseUrl}/parts/${id}`).pipe(
       map(() => void 0),
       tap(() => {
         console.log('🗑️ Deleted part:', id);
@@ -131,10 +149,8 @@ export class PartService {
     sapNumber: string,
     excludeId?: number
   ): Promise<boolean> {
-    const existing = await this.db.parts
-      .where('sapNumber')
-      .equals(sapNumber)
-      .first();
+    const parts = await firstValueFrom(this.loadParts());
+    const existing = parts.find((part) => part.sapNumber === sapNumber);
 
     if (!existing) {
       return true;
@@ -151,15 +167,13 @@ export class PartService {
   async getPartStats(
     machineId: number
   ): Promise<{ [key in PartCategory]: number }> {
-    const parts = await this.db.parts
-      .where('machineId')
-      .equals(machineId)
-      .toArray();
+    const parts = await firstValueFrom(this.loadParts());
+    const machineParts = parts.filter((part) => part.machineId === machineId);
 
     const stats = {
-      mecanica: parts.filter((p) => p.category === 'mecanica').length,
-      electronica: parts.filter((p) => p.category === 'electronica').length,
-      consumible: parts.filter((p) => p.category === 'consumible').length,
+      mecanica: machineParts.filter((p) => p.category === 'mecanica').length,
+      electronica: machineParts.filter((p) => p.category === 'electronica').length,
+      consumible: machineParts.filter((p) => p.category === 'consumible').length,
     };
 
     console.log(`📊 Stats for machine ${machineId}:`, stats);

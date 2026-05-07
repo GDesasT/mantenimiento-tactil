@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { DatabaseService } from './database';
-import { Tool, CreateToolDto } from '../models';
+import { environment } from '../../../environments/environment';
+import { CreateToolDto, Tool } from '../models';
+import { normalizeTool, unwrapApiData } from './api-utils';
 
 @Injectable({
   providedIn: 'root',
@@ -11,11 +13,15 @@ export class FastenerService {
   private fastenersSubject = new BehaviorSubject<Tool[]>([]);
   public fasteners$ = this.fastenersSubject.asObservable();
 
-  constructor(private db: DatabaseService) {}
+  private readonly apiBaseUrl = environment.apiBaseUrl;
+
+  constructor(private http: HttpClient) {}
 
   // Cargar todos los tornillos
   loadFasteners(): Observable<Tool[]> {
-    return from(this.db.fasteners.toArray()).pipe(
+    return this.http.get(`${this.apiBaseUrl}/fasteners`).pipe(
+      map((response) => unwrapApiData<any[]>(response)),
+      map((fasteners) => fasteners.map((fastener) => normalizeTool(fastener))),
       tap((fasteners) => {
         console.log('⚙️ Loaded fasteners:', fasteners);
         this.fastenersSubject.next(fasteners);
@@ -25,26 +31,16 @@ export class FastenerService {
 
   // Obtener tornillo por ID
   getFastenerById(id: number): Observable<Tool | undefined> {
-    return from(this.db.fasteners.get(id)).pipe(
+    return this.http.get(`${this.apiBaseUrl}/fasteners/${id}`).pipe(
+      map((response) => normalizeTool(unwrapApiData<any>(response))),
       tap((fastener) => console.log('🔍 Found fastener:', fastener))
     );
   }
 
   // Crear nuevo tornillo
   createFastener(fastenerData: CreateToolDto): Observable<Tool> {
-    return from(
-      this.db.fasteners
-        .add(fastenerData as Tool)
-        .then(
-          (id) =>
-            ({
-              ...fastenerData,
-              id,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            } as Tool)
-        )
-    ).pipe(
+    return this.http.post(`${this.apiBaseUrl}/fasteners`, fastenerData).pipe(
+      map((response) => normalizeTool(unwrapApiData<any>(response))),
       tap((fastener) => {
         console.log('✅ Created fastener:', fastener);
         this.loadFasteners().subscribe();
@@ -54,7 +50,7 @@ export class FastenerService {
 
   // Actualizar tornillo
   updateFastener(id: number, updates: Partial<Tool>): Observable<void> {
-    return from(this.db.fasteners.update(id, updates)).pipe(
+    return this.http.put(`${this.apiBaseUrl}/fasteners/${id}`, updates).pipe(
       map(() => void 0),
       tap(() => {
         console.log('📝 Updated fastener:', id, updates);
@@ -65,7 +61,7 @@ export class FastenerService {
 
   // Eliminar tornillo
   deleteFastener(id: number): Observable<void> {
-    return from(this.db.fasteners.delete(id)).pipe(
+    return this.http.delete(`${this.apiBaseUrl}/fasteners/${id}`).pipe(
       map(() => void 0),
       tap(() => {
         console.log('🗑️ Deleted fastener:', id);
@@ -76,10 +72,8 @@ export class FastenerService {
 
   // Validar nombre único
   async isNameUnique(name: string, excludeId?: number): Promise<boolean> {
-    const existing = await this.db.fasteners
-      .where('name')
-      .equals(name)
-      .first();
+    const fasteners = await firstValueFrom(this.loadFasteners());
+    const existing = fasteners.find((fastener) => fastener.name === name);
 
     if (!existing) {
       return true;
@@ -94,11 +88,10 @@ export class FastenerService {
 
   // Obtener tornillos por búsqueda
   searchFasteners(query: string): Observable<Tool[]> {
-    return from(this.db.fasteners.toArray()).pipe(
+    const normalizedQuery = query.toLowerCase();
+    return this.loadFasteners().pipe(
       map((fasteners) =>
-        fasteners.filter((fastener) =>
-          fastener.name.toLowerCase().includes(query.toLowerCase())
-        )
+        fasteners.filter((fastener) => fastener.name.toLowerCase().includes(normalizedQuery))
       )
     );
   }

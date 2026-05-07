@@ -4,12 +4,24 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { PartService } from '../../core/services/part';
+import { CategoryService } from '../../core/services/category';
+import { Category } from '../../core/models/category.model';
 import { MachineService } from '../../core/services/machine';
 import { DatabaseService } from '../../core/services/database';
 import { Part, PartCategory, Machine } from '../../core/models';
 import { EmployeeService } from '../../core/services/employee';
 import { PetitionService } from '../../core/services/petition';
 import { firstValueFrom } from 'rxjs';
+
+
+// Visual maps for categories
+const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
+  'mecanica': { icon: '⚙️', variant: 'primary' },
+  'electronica': { icon: '⚡', variant: 'warning' },
+  'consumible': { icon: '💡', variant: 'success' },
+  'neumatica': { icon: '💨', variant: 'info' },
+  'hidraulica': { icon: '💧', variant: 'primary' }
+};
 
 @Component({
   selector: 'app-part-list',
@@ -146,17 +158,12 @@ import { firstValueFrom } from 'rxjs';
         <div *ngIf="filteredParts.length > 0" class="parts-grid">
           <div
             *ngFor="let part of filteredParts; let i = index"
-            class="part-card"
+            class="part-card modern-card"
           >
-            <div class="part-header">
-              <div class="part-sap">{{ part.sapNumber }}</div>
-              <div class="part-category">
-                {{ getCategoryIcon(part.category) }}
-                {{ getCategoryName(part.category) }}
-              </div>
-            </div>
-
             <div class="part-image-container">
+              <div class="part-status-badge" [ngClass]="{'status-in-stock': part.stock > 0, 'status-out-of-stock': part.stock <= 0}">
+                {{ part.stock > 0 ? part.stock + ' en stock' : 'Sin stock' }}
+              </div>
               <img
                 *ngIf="part.image && part.image.trim()"
                 [src]="part.image"
@@ -180,35 +187,39 @@ import { firstValueFrom } from 'rxjs';
             </div>
 
             <div class="part-content">
-              <h3 class="part-title">{{ part.description }}</h3>
-
-              <div class="part-details">
-                <div class="detail-row">
-                  <span class="detail-label">📍 Ubicación:</span>
-                  <span class="detail-value">{{
-                    part.location || 'No especificada'
-                  }}</span>
-                </div>
-
-                <div class="detail-row">
-                  <span class="detail-label">🔧 Parte:</span>
-                  <span class="detail-value">{{ part.partNumber }}</span>
-                </div>
-
-                <div class="detail-row">
-                  <span class="detail-label">🏭 Máquina:</span>
-                  <span class="detail-value">{{ machine?.name || 'N/A' }}</span>
-                </div>
+              <div class="part-header-info">
+                <span class="part-sap">SAP: {{ part.sapNumber }}</span>
+                <span class="part-category-badge" [attr.data-category]="part.category">
+                  {{ getCategoryIcon(part.category) }} {{ getCategoryName(part.category) }}
+                </span>
               </div>
-              <div class="petition-part">
-                <!-- <app-touch-button
-                  variant="success"
-                  size="sm"
-                  icon="🛒"
-                  (clicked)="openPetitionModal(part)"
-                >
-                  Pedir Refaccion
-                </app-touch-button> -->
+              
+              <h3 class="part-title" [title]="part.description">{{ part.description }}</h3>
+
+              <div class="part-details-grid">
+                <div class="detail-item">
+                  <span class="detail-icon">📍</span>
+                  <div class="detail-text">
+                    <span class="detail-label">Ubicación</span>
+                    <span class="detail-value">{{ part.location || 'N/A' }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-icon">🔧</span>
+                  <div class="detail-text">
+                    <span class="detail-label">No. Parte</span>
+                    <span class="detail-value" [title]="part.partNumber">{{ part.partNumber || 'N/A' }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-icon">🏭</span>
+                  <div class="detail-text">
+                    <span class="detail-label">Máquina</span>
+                    <span class="detail-value" [title]="machine?.name">{{ machine?.name || 'N/A' }}</span>
+                  </div>
+                </div>
               </div>
 
               <!-- Botones de admin si está en modo admin -->
@@ -721,52 +732,66 @@ import { firstValueFrom } from 'rxjs';
       }
 
       .part-card {
-        background: #f7fafc;
-        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
         border-radius: 1rem;
         overflow: hidden;
-      }
-
-      .part-header {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.03);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem;
-        background: #edf2f7;
-        border-bottom: 1px solid #e2e8f0;
+        flex-direction: column;
       }
 
-      .part-sap {
-        font-weight: 700;
-        color: #2d3748;
-        font-size: 0.95rem;
-      }
-
-      .part-category {
-        font-size: 0.7rem;
-        color: #718096;
-        font-weight: 600;
+      .part-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08), 0 16px 32px rgba(0, 0, 0, 0.04);
       }
 
       .part-image-container {
-        height: 150px;
+        height: 180px;
+        position: relative;
+        background: #f8fafc;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f7fafc;
         overflow: hidden;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+      }
+
+      .part-status-badge {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .status-in-stock {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
+      .status-out-of-stock {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.3);
       }
 
       .part-image {
-        width: 100%;
-        height: 100%;
+        max-width: 90%;
+        max-height: 90%;
         object-fit: contain;
-        transition: transform 0.3s ease;
+        transition: transform 0.5s ease;
       }
 
       .part-card:hover .part-image {
-        transform: scale(1.15);
-        object-fit: cover;
+        transform: scale(1.05);
       }
 
       .part-image-placeholder {
@@ -777,56 +802,123 @@ import { firstValueFrom } from 'rxjs';
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        background: linear-gradient(135deg, #f7fafc, #edf2f7);
-        color: #718096;
-        text-align: center;
-        padding: 0.5rem;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        color: #64748b;
       }
 
       .placeholder-icon {
-        font-size: 2rem;
-        opacity: 0.7;
+        font-size: 2.5rem;
+        opacity: 0.6;
       }
 
       .placeholder-text {
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.025em;
-        line-height: 1.2;
+        letter-spacing: 0.05em;
       }
 
       .part-content {
-        padding: 0.75rem;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
       }
 
-      .part-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin: 0 0 0.75rem 0;
-        line-height: 1.3;
-      }
-
-      .part-details {
+      .part-header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 0.75rem;
       }
 
-      .detail-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.2rem 0;
+      .part-sap {
         font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.375rem;
+        border: 1px solid #e2e8f0;
+      }
+
+      .part-category-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.375rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .part-category-badge[data-category="mecanica"] { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+      .part-category-badge[data-category="electronica"] { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+      .part-category-badge[data-category="consumible"] { background: rgba(16, 185, 129, 0.1); color: #059669; }
+
+      .part-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 1rem 0;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .part-details-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin-bottom: auto;
+      }
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        background: #f8fafc;
+        border-radius: 0.5rem;
+        border: 1px solid #f1f5f9;
+      }
+
+      .detail-icon {
+        font-size: 1.25rem;
+        background: #ffffff;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+
+      .detail-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
       }
 
       .detail-label {
-        color: #718096;
-        font-weight: 500;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 0.05em;
       }
 
       .detail-value {
-        color: #2d3748;
+        font-size: 0.85rem;
         font-weight: 600;
+        color: #334155;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .admin-controls {
@@ -2069,7 +2161,7 @@ export class PartListComponent implements OnInit {
   machine: Machine | null = null;
   allParts: Part[] = [];
   filteredParts: Part[] = [];
-  selectedCategory: 'all' | PartCategory = 'all';
+  selectedCategory: string = 'all';
   isLoading = true;
 
   /** Configuración de paginación */
@@ -2107,7 +2199,10 @@ export class PartListComponent implements OnInit {
   // Teclado numérico para número de empleado
   showNumericKeyboard = false;
 
+  categories$!: import('rxjs').Observable<Category[]>;
+
   constructor(
+    private categoryService: CategoryService,
     private route: ActivatedRoute,
     private router: Router,
     private partService: PartService,
@@ -2115,15 +2210,18 @@ export class PartListComponent implements OnInit {
     private databaseService: DatabaseService,
     private employeeService: EmployeeService,
     private petitionService: PetitionService
-  ) {}
+  ) {
+    this.categories$ = this.categoryService.categories$;}
 
   async ngOnInit() {
+    this.categoryService.loadCategories().subscribe();
+
     this.route.params.subscribe(async (params) => {
       this.selectedArea = params['area'] || 'costura';
       this.machineId = +params['machineId'];
       const categoryParam = params['category'] || 'all';
 
-      this.selectedCategory = categoryParam as 'all' | PartCategory;
+      this.selectedCategory = categoryParam || 'all';
 
       if (this.machineId) {
         await this.loadMachine();
@@ -2205,16 +2303,19 @@ export class PartListComponent implements OnInit {
       const existing = await firstValueFrom(
         this.employeeService.getByEmployeeNumber(num)
       );
+      let employeeId: number | undefined;
       let name = '';
       if (existing) {
         name = existing.name;
+        employeeId = existing.id;
       } else {
         // Si el empleado no existe, usar el número como nombre temporal
         name = `Empleado ${num}`;
         // Crear el empleado con nombre temporal
-        await firstValueFrom(
+        const createdEmployee = await firstValueFrom(
           this.employeeService.create({ employeeNumber: num, name: name })
         );
+        employeeId = createdEmployee.id;
       }
 
       await firstValueFrom(
@@ -2223,6 +2324,7 @@ export class PartListComponent implements OnInit {
           machineId: this.machine.id!,
           employeeNumber: num,
           employeeName: name,
+          employeeId,
         })
       );
 
@@ -2429,7 +2531,7 @@ export class PartListComponent implements OnInit {
   }
 
   getCategoryIcon(category: PartCategory): string {
-    const icons = {
+    const icons: Record<string, string> = {
       mecanica: '⚙️',
       electronica: '⚡',
       consumible: '📦',
@@ -2438,7 +2540,7 @@ export class PartListComponent implements OnInit {
   }
 
   getCategoryLabel(category: PartCategory): string {
-    const labels = {
+    const labels: Record<string, string> = {
       mecanica: 'Mecánica',
       electronica: 'Electrónica',
       consumible: 'Consumible',
@@ -2447,7 +2549,7 @@ export class PartListComponent implements OnInit {
   }
 
   getCategoryName(category: PartCategory): string {
-    const names = {
+    const names: Record<string, string> = {
       mecanica: 'Mecánica',
       electronica: 'Electrónica',
       consumible: 'Consumible',
@@ -2464,7 +2566,7 @@ export class PartListComponent implements OnInit {
       return 'Todas las Refacciones';
     }
     return `Refacciones ${this.getCategoryLabel(
-      this.selectedCategory as PartCategory
+      this.selectedCategory
     )}`;
   }
 
@@ -2473,7 +2575,7 @@ export class PartListComponent implements OnInit {
       return 'No hay refacciones registradas';
     }
     return `No hay refacciones de ${this.getCategoryLabel(
-      this.selectedCategory as PartCategory
+      this.selectedCategory
     )}`;
   }
 
@@ -2484,7 +2586,7 @@ export class PartListComponent implements OnInit {
       }`;
     }
     return `No se encontraron refacciones de tipo ${this.getCategoryLabel(
-      this.selectedCategory as PartCategory
+      this.selectedCategory
     )} para esta máquina`;
   }
 
@@ -2492,7 +2594,7 @@ export class PartListComponent implements OnInit {
     if (this.selectedCategory === 'all') {
       return '📦';
     }
-    return this.getCategoryIcon(this.selectedCategory as PartCategory);
+    return this.getCategoryIcon(this.selectedCategory);
   }
 
   getAddButtonText(): string {
@@ -2500,7 +2602,7 @@ export class PartListComponent implements OnInit {
       return 'Agregar Primera Refacción';
     }
     return `Agregar ${this.getCategoryLabel(
-      this.selectedCategory as PartCategory
+      this.selectedCategory
     )}`;
   }
 
@@ -2747,4 +2849,16 @@ export class PartListComponent implements OnInit {
       this.showErrorNotification = false;
     }, 3000);
   }
+
+  getCategoryVariant(name: string): any {
+    const s = name?.toLowerCase() || '';
+    for(const key of Object.keys(CAT_VISUALS)) { if(s.includes(key)) return CAT_VISUALS[key].variant; }
+    return 'primary';
+  }
+  getCategoryIconStr(name: string): string {
+    const s = name?.toLowerCase() || '';
+    for(const key of Object.keys(CAT_VISUALS)) { if(s.includes(key)) return CAT_VISUALS[key].icon; }
+    return '🔖';
+  }
+
 }

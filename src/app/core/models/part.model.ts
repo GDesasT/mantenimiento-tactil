@@ -3,10 +3,14 @@ export interface Part {
   sapNumber: string;
   partNumber: string;
   description: string;
-  category: 'mecanica' | 'electronica' | 'consumible';
+  category: string;
+  categoryId?: number;
   machineId: number;
   location: string;
   image?: string;
+  stock: number;
+  minStock?: number;
+  maxStock?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,10 +19,12 @@ export interface CreatePartDto {
   sapNumber: string;
   partNumber: string;
   description: string;
-  category: 'mecanica' | 'electronica' | 'consumible';
+  category: string;
+  categoryId?: number;
   machineId: number;
   location: string;
   image?: string;
+  stock?: number;
 }
 
-export type PartCategory = 'mecanica' | 'electronica' | 'consumible';
+export type PartCategory = string;

@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { DatabaseService } from './database';
-import { Machine, CreateMachineDto } from '../models';
+import { environment } from '../../../environments/environment';
+import { CreateMachineDto, Machine } from '../models';
+import { normalizeMachine, unwrapApiData } from './api-utils';
 
 @Injectable({
   providedIn: 'root',
@@ -11,11 +13,15 @@ export class MachineService {
   private machinesSubject = new BehaviorSubject<Machine[]>([]);
   public machines$ = this.machinesSubject.asObservable();
 
-  constructor(private db: DatabaseService) {}
+  private readonly apiBaseUrl = environment.apiBaseUrl;
+
+  constructor(private http: HttpClient) {}
 
   // Cargar todas las máquinas
   loadMachines(): Observable<Machine[]> {
-    return from(this.db.machines.orderBy('name').toArray()).pipe(
+    return this.http.get(`${this.apiBaseUrl}/machines`).pipe(
+      map((response) => unwrapApiData<any[]>(response)),
+      map((machines) => machines.map((machine) => normalizeMachine(machine))),
       tap((machines) => {
         console.log('📋 Loaded machines:', machines);
         this.machinesSubject.next(machines);
@@ -24,8 +30,13 @@ export class MachineService {
   }
 
   // Obtener máquinas por área
-  getMachinesByArea(area: 'corte' | 'costura' | 'consumible'): Observable<Machine[]> {
-    return from(this.db.machines.where('area').equals(area).toArray()).pipe(
+  getMachinesByArea(area: string): Observable<Machine[]> {
+    return this.loadMachines().pipe(
+      map((machines) => machines.filter((m) => {
+        const machineArea = (m.area || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const requestedArea = (area || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        return machineArea === requestedArea;
+      })),
       map((machines) => machines.sort((a, b) => a.name.localeCompare(b.name))),
       tap((machines) => console.log(`🔧 Machines in ${area}:`, machines))
     );
@@ -33,26 +44,16 @@ export class MachineService {
 
   // Obtener máquina por ID
   getMachineById(id: number): Observable<Machine | undefined> {
-    return from(this.db.machines.get(id)).pipe(
+    return this.http.get(`${this.apiBaseUrl}/machines/${id}`).pipe(
+      map((response) => normalizeMachine(unwrapApiData<any>(response))),
       tap((machine) => console.log('🔍 Found machine:', machine))
     );
   }
 
   // Crear nueva máquina
   createMachine(machineData: CreateMachineDto): Observable<Machine> {
-    return from(
-      this.db.machines
-        .add(machineData as Machine)
-        .then(
-          (id) =>
-            ({
-              ...machineData,
-              id,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            } as Machine)
-        )
-    ).pipe(
+    return this.http.post(`${this.apiBaseUrl}/machines`, machineData).pipe(
+      map((response) => normalizeMachine(unwrapApiData<any>(response))),
       tap((machine) => {
         console.log('✅ Created machine:', machine);
         this.loadMachines().subscribe();
@@ -62,7 +63,7 @@ export class MachineService {
 
   // Actualizar máquina
   updateMachine(id: number, updates: Partial<Machine>): Observable<void> {
-    return from(this.db.machines.update(id, updates)).pipe(
+    return this.http.put(`${this.apiBaseUrl}/machines/${id}`, updates).pipe(
       map(() => void 0),
       tap(() => {
         console.log('📝 Updated machine:', id, updates);
@@ -73,7 +74,7 @@ export class MachineService {
 
   // Eliminar máquina
   deleteMachine(id: number): Observable<void> {
-    return from(this.db.machines.delete(id)).pipe(
+    return this.http.delete(`${this.apiBaseUrl}/machines/${id}`).pipe(
       map(() => void 0),
       tap(() => {
         console.log('🗑️ Deleted machine:', id);
@@ -85,13 +86,13 @@ export class MachineService {
   // Validar nombre único
   async isNameUnique(
     name: string,
-    area: 'corte' | 'costura' | 'consumible',
+    area: string,
     excludeId?: number
   ): Promise<boolean> {
-    const existing = await this.db.machines
-      .where(['name', 'area'])
-      .equals([name, area])
-      .first();
+    const machines = await firstValueFrom(this.loadMachines());
+    const existing = machines.find(
+      (machine) => machine.name === name && machine.area === area
+    );
 
     if (!existing) {
       return true;

@@ -915,7 +915,7 @@ export class AddPartComponent implements OnInit {
   }
 
   getCategoryIcon(category: PartCategory): string {
-    const icons = {
+    const icons: Record<string, string> = {
       mecanica: '🔩',
       electronica: '⚡',
       consumible: '🔄',
@@ -924,7 +924,7 @@ export class AddPartComponent implements OnInit {
   }
 
   getCategoryLabel(category: PartCategory): string {
-    const labels = {
+    const labels: Record<string, string> = {
       mecanica: 'Mecánica',
       electronica: 'Electrónica',
       consumible: 'Consumible',
@@ -933,7 +933,7 @@ export class AddPartComponent implements OnInit {
   }
 
   getCategoryDescription(category: PartCategory): string {
-    const descriptions = {
+    const descriptions: Record<string, string> = {
       mecanica: 'Piezas físicas, tornillos, engranes, etc.',
       electronica: 'Componentes eléctricos y electrónicos',
       consumible: 'Materiales que se gastan con el uso',

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
+import { environment } from '../../../environments/environment';
 
 type Language = 'es' | 'en';
 
@@ -32,7 +33,7 @@ export class HomeTourService {
   private backendDisabledReason: string | null = null;
   private audioSessionId = 0;
   private isTourActive = false;
-  private readonly BACKEND_URL = 'http://localhost:3001';
+  private readonly BACKEND_URL = environment.audioBackendUrl;
   private readonly BACKEND_AUDIO_GAIN = 1.8;
   private selectedLanguage: Language = 'es';
   private readonly browserVoiceProfiles: Record<Language, BrowserVoiceProfile> = {

@@ -1371,16 +1371,19 @@ export class GlobalSearchComponent implements OnInit {
       const existing = await firstValueFrom(
         this.employeeService.getByEmployeeNumber(num)
       );
+      let employeeId: number | undefined;
       let name = '';
       if (existing) {
         name = existing.name;
+        employeeId = existing.id;
       } else {
         // Si el empleado no existe, usar el número como nombre temporal
         name = `Empleado ${num}`;
         // Crear el empleado con nombre temporal
-        await firstValueFrom(
+        const createdEmployee = await firstValueFrom(
           this.employeeService.create({ employeeNumber: num, name: name })
         );
+        employeeId = createdEmployee.id;
       }
 
       await firstValueFrom(
@@ -1389,6 +1392,7 @@ export class GlobalSearchComponent implements OnInit {
           machineId: this.selectedPartForPetition.machineId,
           employeeNumber: num,
           employeeName: name,
+          employeeId,
         })
       );
 
@@ -1550,7 +1554,7 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   getCategoryIcon(category: PartCategory): string {
-    const icons = {
+    const icons: Record<string, string> = {
       mecanica: '🔩',
       electronica: '⚡',
       consumible: '🔄',
@@ -1559,7 +1563,7 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   getCategoryName(category: PartCategory): string {
-    const names = {
+    const names: Record<string, string> = {
       mecanica: 'Mecánica',
       electronica: 'Electrónica',
       consumible: 'Consumible',

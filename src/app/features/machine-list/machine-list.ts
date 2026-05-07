@@ -66,19 +66,19 @@ import { Machine, PartCategory } from '../../core/models';
             <div class="machine-stats" *ngIf="machineStats[machine.id!]">
               <div class="stat-item stat-blue">
                 <div class="stat-number">
-                  {{ machineStats[machine.id!].mecanica }}
+                  {{ machineStats[machine.id!]['mecanica'] }}
                 </div>
                 <div class="stat-label">MEC</div>
               </div>
               <div class="stat-item stat-yellow">
                 <div class="stat-number">
-                  {{ machineStats[machine.id!].electronica }}
+                  {{ machineStats[machine.id!]['electronica'] }}
                 </div>
                 <div class="stat-label">ELEC</div>
               </div>
               <div class="stat-item stat-green">
                 <div class="stat-number">
-                  {{ machineStats[machine.id!].consumible }}
+                  {{ machineStats[machine.id!]['consumible'] }}
                 </div>
                 <div class="stat-label">CON</div>
               </div>
@@ -167,7 +167,7 @@ import { Machine, PartCategory } from '../../core/models';
                   <span class="summary-icon">⚙️</span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
-                      ? machineStats[machineToDelete.id!].mecanica
+                      ? machineStats[machineToDelete.id!]['mecanica']
                       : 0
                   }}</span>
                   <span class="summary-label">Mecánicas</span>
@@ -176,7 +176,7 @@ import { Machine, PartCategory } from '../../core/models';
                   <span class="summary-icon">⚡</span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
-                      ? machineStats[machineToDelete.id!].electronica
+                      ? machineStats[machineToDelete.id!]['electronica']
                       : 0
                   }}</span>
                   <span class="summary-label">Electrónicas</span>
@@ -185,7 +185,7 @@ import { Machine, PartCategory } from '../../core/models';
                   <span class="summary-icon">🛠️</span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
-                      ? machineStats[machineToDelete.id!].consumible
+                      ? machineStats[machineToDelete.id!]['consumible']
                       : 0
                   }}</span>
                   <span class="summary-label">Consumibles</span>
@@ -1181,7 +1181,7 @@ import { Machine, PartCategory } from '../../core/models';
   ],
 })
 export class MachineListComponent implements OnInit, OnDestroy {
-  selectedArea: 'corte' | 'costura' | 'consumible' = 'costura';
+  selectedArea: string = 'costura';
   machines: Machine[] = [];
   machineStats: { [key: number]: { [key in PartCategory]: number } } = {};
   isLoading = true;
@@ -1206,8 +1206,7 @@ export class MachineListComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    this.selectedArea =
-      (this.route.snapshot.params['area'] as 'corte' | 'costura' | 'consumible') || 'costura';
+    this.selectedArea = this.route.snapshot.params['area'] || 'costura';
     await this.loadMachines();
   }
 
@@ -1238,19 +1237,33 @@ export class MachineListComponent implements OnInit, OnDestroy {
   }
 
   getAreaTitle(): string {
-    return this.selectedArea === 'costura'
-      ? '🧵 ÁREA DE COSTURA'
-      : this.selectedArea === 'consumible' ? '💡 ÁREA DE CONSUMIBLES' : '✂️ ÁREA DE CORTE';
+    const s = this.selectedArea.toLowerCase();
+    if(s.includes('corte')) return '✂️ ÁREA DE CORTE';
+    if(s.includes('costura')) return '🧵 ÁREA DE COSTURA';
+    if(s.includes('consumible')) return '💡 ÁREA DE CONSUMIBLES';
+    if(s.includes('limpieza')) return '🧹 ÁREA DE LIMPIEZA';
+    if(s.includes('herramienta')) return '🧰 ÁREA DE HERRAMIENTAS';
+    return '🏭 ' + this.selectedArea.toUpperCase();
   }
 
   getAreaLabel(): string {
-    return this.selectedArea === 'costura'
-      ? 'Costura Industrial'
-      : this.selectedArea === 'consumible' ? 'Consumibles Industriales' : 'Corte Industrial';
+    const s = this.selectedArea.toLowerCase();
+    if(s.includes('corte')) return 'Corte Industrial';
+    if(s.includes('costura')) return 'Costura Industrial';
+    if(s.includes('consumible')) return 'Consumibles Industriales';
+    if(s.includes('limpieza')) return 'Mantenimiento / Limpieza';
+    if(s.includes('herramienta')) return 'Taller Mecánico';
+    return this.selectedArea.charAt(0).toUpperCase() + this.selectedArea.slice(1);
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'costura' ? '🧵' : this.selectedArea === 'consumible' ? '💡' : '✂️';
+    const s = this.selectedArea.toLowerCase();
+    if(s.includes('corte')) return '✂️';
+    if(s.includes('costura')) return '🧵';
+    if(s.includes('consumible')) return '💡';
+    if(s.includes('limpieza')) return '🧹';
+    if(s.includes('herramienta')) return '🧰';
+    return '📦';
   }
 
   goBack() {

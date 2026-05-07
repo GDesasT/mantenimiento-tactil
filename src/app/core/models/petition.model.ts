@@ -1,4 +1,4 @@
-export type PetitionStatus = 'pending' | 'approved' | 'rejected';
+export type PetitionStatus = 'pending' | 'approved' | 'preparing' | 'ready' | 'delivered' | 'rejected';
 
 export interface Petition {
   id?: number; // Dexie PK
@@ -17,5 +17,6 @@ export interface CreatePetitionDto {
   machineId: number;
   employeeNumber: string;
   employeeName: string;
+  employeeId?: number;
   note?: string;
 }

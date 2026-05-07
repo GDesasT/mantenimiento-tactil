@@ -12,10 +12,11 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
-// Configuración ElevenLabs
 const DEFAULT_ELEVENLABS_API_KEY = '73dd87b0ebd67f53cf416a4a8c7ce7b492fd2b6934d7bbb3695323930f04e217';
 const DEFAULT_ELEVENLABS_VOICE_ID_ES = 'qSeXEcewz7tA0Q0qk9fH';
 const DEFAULT_ELEVENLABS_VOICE_ID_EN = 'qSeXEcewz7tA0Q0qk9fH';
+const DEFAULT_ELEVENLABS_VOICE_ID_FR = 'qSeXEcewz7tA0Q0qk9fH';
+const DEFAULT_ELEVENLABS_VOICE_ID_PT = 'qSeXEcewz7tA0Q0qk9fH';
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY?.trim() || DEFAULT_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_IDS = {
   es:
@@ -25,7 +26,15 @@ const ELEVENLABS_VOICE_IDS = {
   en:
     process.env.ELEVENLABS_VOICE_ID_EN?.trim() ||
     process.env.ELEVENLABS_VOICE_ID?.trim() ||
-    DEFAULT_ELEVENLABS_VOICE_ID_EN
+    DEFAULT_ELEVENLABS_VOICE_ID_EN,
+  fr:
+    process.env.ELEVENLABS_VOICE_ID_FR?.trim() ||
+    process.env.ELEVENLABS_VOICE_ID?.trim() ||
+    DEFAULT_ELEVENLABS_VOICE_ID_FR,
+  pt:
+    process.env.ELEVENLABS_VOICE_ID_PT?.trim() ||
+    process.env.ELEVENLABS_VOICE_ID?.trim() ||
+    DEFAULT_ELEVENLABS_VOICE_ID_PT
 };
 const ELEVENLABS_MODEL_ID = process.env.ELEVENLABS_MODEL_ID?.trim() || 'eleven_multilingual_v2';
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
@@ -41,8 +50,21 @@ if (!process.env.ELEVENLABS_API_KEY) {
 app.post('/api/text-to-speech', async (req, res) => {
   try {
     const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
-    const requestedLanguage = req.body?.language === 'en' ? 'en' : 'es';
-    const voiceId = ELEVENLABS_VOICE_IDS[requestedLanguage];
+    const requestedLanguage = ['es', 'en', 'fr', 'pt'].includes(req.body?.language)
+      ? req.body.language
+      : 'es';
+    const voiceId = typeof req.body?.voiceId === 'string' && req.body.voiceId.trim()
+      ? req.body.voiceId.trim()
+      : ELEVENLABS_VOICE_IDS[requestedLanguage];
+    const modelId = typeof req.body?.modelId === 'string' && req.body.modelId.trim()
+      ? req.body.modelId.trim()
+      : ELEVENLABS_MODEL_ID;
+    const voiceSettings = req.body?.voiceSettings && typeof req.body.voiceSettings === 'object'
+      ? req.body.voiceSettings
+      : {
+          stability: 0.42,
+          similarityBoost: 0.82
+        };
 
     if (!text) {
       return res.status(400).json({ error: 'El texto es requerido' });
@@ -59,10 +81,10 @@ app.post('/api/text-to-speech', async (req, res) => {
       `${ELEVENLABS_API_URL}/${voiceId}`,
       {
         text,
-        model_id: ELEVENLABS_MODEL_ID,
+        model_id: modelId,
         voice_settings: {
-          stability: 0.42,
-          similarity_boost: 0.82
+          stability: Number(voiceSettings.stability ?? 0.42),
+          similarity_boost: Number(voiceSettings.similarityBoost ?? voiceSettings.similarity_boost ?? 0.82)
         }
       },
       {

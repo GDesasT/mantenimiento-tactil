@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { DatabaseService } from './database';
-import { Tool, CreateToolDto } from '../models';
+import { environment } from '../../../environments/environment';
+import { CreateToolDto, Tool } from '../models';
+import { normalizeTool, unwrapApiData } from './api-utils';
 
 @Injectable({
   providedIn: 'root',
@@ -11,11 +13,15 @@ export class ChemicalService {
   private chemicalsSubject = new BehaviorSubject<Tool[]>([]);
   public chemicals$ = this.chemicalsSubject.asObservable();
 
-  constructor(private db: DatabaseService) {}
+  private readonly apiBaseUrl = environment.apiBaseUrl;
+
+  constructor(private http: HttpClient) {}
 
   // Cargar todos los químicos
   loadChemicals(): Observable<Tool[]> {
-    return from(this.db.chemicals.toArray()).pipe(
+    return this.http.get(`${this.apiBaseUrl}/chemicals`).pipe(
+      map((response) => unwrapApiData<any[]>(response)),
+      map((chemicals) => chemicals.map((chemical) => normalizeTool(chemical))),
       tap((chemicals) => {
         console.log('🧪 Loaded chemicals:', chemicals);
         this.chemicalsSubject.next(chemicals);
@@ -25,26 +31,16 @@ export class ChemicalService {
 
   // Obtener químico por ID
   getChemicalById(id: number): Observable<Tool | undefined> {
-    return from(this.db.chemicals.get(id)).pipe(
+    return this.http.get(`${this.apiBaseUrl}/chemicals/${id}`).pipe(
+      map((response) => normalizeTool(unwrapApiData<any>(response))),
       tap((chemical) => console.log('🔍 Found chemical:', chemical))
     );
   }
 
   // Crear nuevo químico
   createChemical(chemicalData: CreateToolDto): Observable<Tool> {
-    return from(
-      this.db.chemicals
-        .add(chemicalData as Tool)
-        .then(
-          (id) =>
-            ({
-              ...chemicalData,
-              id,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            } as Tool)
-        )
-    ).pipe(
+    return this.http.post(`${this.apiBaseUrl}/chemicals`, chemicalData).pipe(
+      map((response) => normalizeTool(unwrapApiData<any>(response))),
       tap((chemical) => {
         console.log('✅ Created chemical:', chemical);
         this.loadChemicals().subscribe();
@@ -54,7 +50,7 @@ export class ChemicalService {
 
   // Actualizar químico
   updateChemical(id: number, updates: Partial<Tool>): Observable<void> {
-    return from(this.db.chemicals.update(id, updates)).pipe(
+    return this.http.put(`${this.apiBaseUrl}/chemicals/${id}`, updates).pipe(
       map(() => void 0),
       tap(() => {
         console.log('📝 Updated chemical:', id, updates);
@@ -65,7 +61,7 @@ export class ChemicalService {
 
   // Eliminar químico
   deleteChemical(id: number): Observable<void> {
-    return from(this.db.chemicals.delete(id)).pipe(
+    return this.http.delete(`${this.apiBaseUrl}/chemicals/${id}`).pipe(
       map(() => void 0),
       tap(() => {
         console.log('🗑️ Deleted chemical:', id);
@@ -76,10 +72,8 @@ export class ChemicalService {
 
   // Validar nombre único
   async isNameUnique(name: string, excludeId?: number): Promise<boolean> {
-    const existing = await this.db.chemicals
-      .where('name')
-      .equals(name)
-      .first();
+    const chemicals = await firstValueFrom(this.loadChemicals());
+    const existing = chemicals.find((chemical) => chemical.name === name);
 
     if (!existing) {
       return true;
@@ -94,11 +88,10 @@ export class ChemicalService {
 
   // Obtener químicos por búsqueda
   searchChemicals(query: string): Observable<Tool[]> {
-    return from(this.db.chemicals.toArray()).pipe(
+    const normalizedQuery = query.toLowerCase();
+    return this.loadChemicals().pipe(
       map((chemicals) =>
-        chemicals.filter((chemical) =>
-          chemical.name.toLowerCase().includes(query.toLowerCase())
-        )
+        chemicals.filter((chemical) => chemical.name.toLowerCase().includes(normalizedQuery))
       )
     );
   }

@@ -1550,7 +1550,7 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   getCategoryIcon(category: PartCategory): string {
-    const icons = {
+    const icons: Record<string, string> = {
       mecanica: '🔩',
       electronica: '⚡',
       consumible: '🔄',
@@ -1559,7 +1559,7 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   getCategoryLabel(category: PartCategory): string {
-    const labels = {
+    const labels: Record<string, string> = {
       mecanica: 'Mecánica',
       electronica: 'Electrónica',
       consumible: 'Consumible',

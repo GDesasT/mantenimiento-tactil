@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type LanguageCode = 'es' | 'en' | 'fr' | 'pt';
 
@@ -21,7 +22,6 @@ export interface Language {
 }
 
 export interface VoiceDriverConfig {
-  apiKey: string;
   voiceId: string;
   modelId: string;
   stability: number;
@@ -32,8 +32,8 @@ export interface VoiceDriverConfig {
   providedIn: 'root',
 })
 export class VoiceDriverService {
-  private readonly API_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
-  private readonly ELEVENLABS_API_KEY = '73dd87b0ebd67f53cf416a4a8c7ce7b492fd2b6934d7bbb3695323930f04e217';
+  private readonly AUDIO_BACKEND_URL = environment.audioBackendUrl;
+  private readonly AUDIO_ENDPOINT = environment.audioEndpoint;
 
   private selectedLanguage$ = new BehaviorSubject<LanguageCode>('es');
   private isPlaying$ = new BehaviorSubject<boolean>(false);
@@ -143,31 +143,38 @@ export class VoiceDriverService {
    * Sintetiza texto a voz usando ElevenLabs
    */
   async synthesizeAudio(text: string, languageCode: LanguageCode): Promise<Blob> {
-    const voiceId = this.languages[languageCode].voiceId;
+    const voiceConfig: VoiceDriverConfig = {
+      voiceId: this.languages[languageCode].voiceId,
+      modelId: 'eleven_multilingual_v2',
+      stability: 0.5,
+      similarityBoost: 0.75,
+    };
 
     try {
       this.isPlaying$.next(true);
 
-      const response = await this.http
-        .post(
-          `${this.API_URL}/${voiceId}`,
+      const response = await firstValueFrom(
+        this.http.post(
+          `${this.AUDIO_BACKEND_URL}${this.AUDIO_ENDPOINT}`,
           {
             text,
-            model_id: 'eleven_monolingual_v1',
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
+            language: languageCode,
+            voiceId: voiceConfig.voiceId,
+            modelId: voiceConfig.modelId,
+            voiceSettings: {
+              stability: voiceConfig.stability,
+              similarityBoost: voiceConfig.similarityBoost,
             },
           },
           {
             headers: {
-              'xi-api-key': this.ELEVENLABS_API_KEY,
               'Content-Type': 'application/json',
+              Accept: 'audio/mpeg, application/json',
             },
             responseType: 'blob',
           }
         )
-        .toPromise();
+      );
 
       return response!;
     } catch (error: any) {
