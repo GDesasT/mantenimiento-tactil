@@ -23,7 +23,7 @@ import { DatabaseService } from '../../core/services/database';
           <app-touch-button
             variant="secondary"
             size="md"
-            icon="←"
+            iconClass="bi bi-arrow-left"
             (clicked)="goBack()"
             class="mr-4"
           >
@@ -323,7 +323,7 @@ export class AddMachineComponent implements OnInit {
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'corte' ? '✂️' : this.selectedArea === 'costura' ? '🧵' : '💡';
+    return this.selectedArea === 'corte' ? 'bi-scissors' : this.selectedArea === 'costura' ? 'bi-hexagon' : 'bi-lightbulb-fill';
   }
 
   goBack() {
@@ -350,7 +350,7 @@ export class AddMachineComponent implements OnInit {
   }
 
   getNotificationIcon(): string {
-    return this.notificationType === 'success' ? '✅' : '❌';
+    return this.notificationType === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
   }
 
   async onSubmit() {

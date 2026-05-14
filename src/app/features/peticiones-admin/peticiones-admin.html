@@ -34,14 +34,14 @@
 				<app-touch-button
 					variant="success"
 					size="sm"
-					icon="✅"
+					iconClass="bi bi-check-circle-fill"
 					(clicked)="approve(p)"
 					>Aprobar</app-touch-button
 				>
 				<app-touch-button
 					variant="danger"
 					size="sm"
-					icon="✖️"
+					iconClass="bi bi-x-circle-fill"
 					(clicked)="reject(p)"
 					>Rechazar</app-touch-button
 				>
@@ -50,7 +50,7 @@
 	</div>
 
 	<div class="footer">
-		<app-touch-button variant="secondary" size="md" icon="🔄" (clicked)="refresh()"
+		<app-touch-button variant="secondary" size="md" iconClass="bi bi-arrow-clockwise" (clicked)="refresh()"
 			>Actualizar</app-touch-button
 		>
 	</div>

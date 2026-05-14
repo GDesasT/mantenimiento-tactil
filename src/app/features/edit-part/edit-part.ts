@@ -26,7 +26,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
             <app-touch-button
               variant="secondary"
               size="md"
-              icon="←"
+              iconClass="bi bi-arrow-left"
               (clicked)="goBack()"
               class="back-btn"
             >
@@ -34,9 +34,9 @@ import { Machine, PartCategory, Part } from '../../core/models';
             </app-touch-button>
 
             <div class="header-text">
-              <h2 class="header-title">✏️ Editar Refacción</h2>
+              <h2 class="header-title"><i class="bi bi-pencil-fill"></i> Editar Refacción</h2>
               <p class="header-subtitle">
-                🔧 {{ machine?.name || 'Cargando máquina...' }}
+                <i class="bi bi-wrench"></i> {{ machine?.name || 'Cargando máquina...' }}
                 <span *ngIf="selectedCategory">
                   • {{ getCategoryLabel(selectedCategory) }}
                 </span>
@@ -62,7 +62,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
           <div class="professional-card animate-fadeInUp">
             <div class="professional-content">
               <div class="loading-content">
-                <div class="loading-spinner">⚙️</div>
+                <div class="loading-spinner"><i class="bi bi-gear-fill"></i></div>
                 <h3 class="loading-title">Cargando refacción...</h3>
                 <p class="loading-subtitle">Por favor espera un momento</p>
               </div>
@@ -95,7 +95,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
             >
               <div class="professional-content">
                 <div class="edit-indicator">
-                  <div class="edit-icon">✏️</div>
+                  <div class="edit-icon"><i class="bi bi-pencil-fill"></i></div>
                   <div class="edit-info">
                     <h3 class="edit-title">Modo Edición</h3>
                     <p class="edit-description">
@@ -122,11 +122,11 @@ import { Machine, PartCategory, Part } from '../../core/models';
               >
                 <div class="professional-card">
                   <div class="professional-content">
-                    <h3 class="section-title">📋 Identificación</h3>
+                    <h3 class="section-title"><i class="bi bi-clipboard-data-fill"></i> Identificación</h3>
 
                     <!-- SAP Number -->
                     <div class="form-group">
-                      <label class="form-label">📦 Número SAP *</label>
+                      <label class="form-label"><i class="bi bi-box-seam-fill"></i> Número SAP *</label>
                       <input
                         type="text"
                         formControlName="sapNumber"
@@ -165,7 +165,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
 
                     <!-- Part Number -->
                     <div class="form-group">
-                      <label class="form-label">🔖 Part Number *</label>
+                      <label class="form-label"><i class="bi bi-tag-fill"></i> Part Number *</label>
                       <input
                         type="text"
                         formControlName="partNumber"
@@ -199,7 +199,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
 
                     <!-- Categoría -->
                     <div class="form-group">
-                      <label class="form-label">📂 Categoría *</label>
+                      <label class="form-label"><i class="bi bi-folder2-open"></i> Categoría *</label>
                       <select
                         formControlName="category"
                         class="form-select"
@@ -207,9 +207,9 @@ import { Machine, PartCategory, Part } from '../../core/models';
                         [class.success]="isFieldValid('category')"
                       >
                         <option value="">Selecciona una categoría</option>
-                        <option value="mecanica">🔩 Mecánica</option>
-                        <option value="electronica">⚡ Electrónica</option>
-                        <option value="consumible">🔄 Consumible</option>
+                        <option value="mecanica">Mecánica</option>
+                        <option value="electronica">Electrónica</option>
+                        <option value="consumible">Consumible</option>
                       </select>
                       <div
                         *ngIf="isFieldInvalid('category')"
@@ -235,11 +235,11 @@ import { Machine, PartCategory, Part } from '../../core/models';
               >
                 <div class="professional-card">
                   <div class="professional-content">
-                    <h3 class="section-title">📝 Detalles</h3>
+                    <h3 class="section-title"><i class="bi bi-pencil-square"></i> Detalles</h3>
 
                     <!-- Descripción -->
                     <div class="form-group">
-                      <label class="form-label">📄 Descripción *</label>
+                      <label class="form-label"><i class="bi bi-file-text-fill"></i> Descripción *</label>
                       <textarea
                         formControlName="description"
                         placeholder="Describe la refacción detalladamente..."
@@ -273,7 +273,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
 
                     <!-- Ubicación -->
                     <div class="form-group">
-                      <label class="form-label">📍 Ubicación *</label>
+                      <label class="form-label"><i class="bi bi-geo-alt-fill"></i> Ubicación *</label>
                       <input
                         type="text"
                         formControlName="location"
@@ -350,9 +350,9 @@ import { Machine, PartCategory, Part } from '../../core/models';
             >
               <div class="professional-card">
                 <div class="professional-content">
-                  <h3 class="section-title">📸 Imagen (Opcional)</h3>
+                  <h3 class="section-title"><i class="bi bi-camera-fill"></i> Imagen (Opcional)</h3>
                   <div class="form-group">
-                    <label class="form-label">🖼️ URL de Imagen</label>
+                    <label class="form-label"><i class="bi bi-image"></i> URL de Imagen</label>
                     <input
                       type="url"
                       formControlName="image"
@@ -360,7 +360,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
                       class="form-input"
                     />
                     <div class="field-hint">
-                      💡 Puedes agregar una URL de imagen para ayudar a
+                      <i class="bi bi-lightbulb-fill"></i> Puedes agregar una URL de imagen para ayudar a
                       identificar la refacción
                     </div>
 
@@ -393,7 +393,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
                       type="button"
                       variant="secondary"
                       size="xl"
-                      icon="❌"
+                      iconClass="bi bi-x-circle-fill"
                       [fullWidth]="true"
                       (clicked)="goBack()"
                     >
@@ -404,7 +404,7 @@ import { Machine, PartCategory, Part } from '../../core/models';
                       type="submit"
                       variant="warning"
                       size="xl"
-                      icon="💾"
+                      iconClass="bi bi-floppy-fill"
                       [fullWidth]="true"
                       [disabled]="partForm.invalid || isSubmitting"
                       [loading]="isSubmitting"
@@ -1066,7 +1066,7 @@ export class EditPartComponent implements OnInit {
   }
 
   getAreaIcon(): string {
-    return this.machine?.area === 'corte' ? '✂️' : '🧵';
+    return this.machine?.area === 'corte' ? 'bi-scissors' : 'bi-hexagon';
   }
 
   getAreaLabel(): string {
@@ -1077,9 +1077,9 @@ export class EditPartComponent implements OnInit {
 
   getCategoryIcon(category: PartCategory): string {
     const icons: Record<string, string> = {
-      mecanica: '🔩',
-      electronica: '⚡',
-      consumible: '🔄',
+      mecanica: 'bi-gear-fill',
+      electronica: 'bi-lightning-fill',
+      consumible: 'bi-box-seam-fill',
     };
     return icons[category];
   }
@@ -1110,7 +1110,7 @@ export class EditPartComponent implements OnInit {
   }
 
   getNotificationIcon(): string {
-    return this.notificationType === 'success' ? '✅' : '❌';
+    return this.notificationType === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
   }
 
   showNotificationMessage(

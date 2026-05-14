@@ -26,7 +26,7 @@ import { CommonModule } from '@angular/common';
             (click)="close()"
             aria-label="Cerrar teclado"
           >
-            ✕
+            <i class="bi bi-x-lg"></i>
           </button>
         </div>
 
@@ -93,7 +93,7 @@ import { CommonModule } from '@angular/common';
               ↵ Enter
             </button>
             <button class="key key-backspace" type="button" (click)="backspace()">
-              ⌫
+              <i class="bi bi-backspace-fill"></i>
             </button>
             <button class="key key-clear" type="button" (click)="clear()">
               Limpiar

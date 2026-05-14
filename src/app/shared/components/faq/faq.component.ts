@@ -28,17 +28,17 @@ export class FilterByCategoryPipe implements PipeTransform {
   template: `
     <div class="faq-container">
       <div class="faq-header">
-        <h1>❓ Preguntas Frecuentes (FAQ)</h1>
+        <h1><i class="bi bi-question-circle-fill"></i> Preguntas Frecuentes (FAQ)</h1>
         <p class="subtitle">
           Todo lo que necesitas saber sobre el Sistema de Gestión de Refacciones
         </p>
-        <button class="tour-btn" (click)="startTour()">🎬 Ver Tour Interactivo</button>
+        <button class="tour-btn" (click)="startTour()"><i class="bi bi-play-circle-fill"></i> Ver Tour Interactivo</button>
       </div>
 
       <div class="faq-content">
         <!-- Sección: Acerca del Sistema -->
         <section class="faq-section">
-          <h2>📋 Acerca del Sistema</h2>
+          <h2><i class="bi bi-clipboard-data-fill"></i> Acerca del Sistema</h2>
           <div class="faq-items">
             <div class="faq-item" *ngFor="let item of faqItems | filterByCategory: 'about'">
               <div class="faq-question" (click)="toggleItem(item)">
@@ -56,7 +56,7 @@ export class FilterByCategoryPipe implements PipeTransform {
 
         <!-- Sección: Uso del Sistema -->
         <section class="faq-section">
-          <h2>🚀 Cómo Usar el Sistema</h2>
+          <h2><i class="bi bi-rocket-takeoff-fill"></i> Cómo Usar el Sistema</h2>
           <div class="faq-items">
             <div class="faq-item" *ngFor="let item of faqItems | filterByCategory: 'usage'">
               <div class="faq-question" (click)="toggleItem(item)">
@@ -74,7 +74,7 @@ export class FilterByCategoryPipe implements PipeTransform {
 
         <!-- Sección: Búsqueda y Filtrado -->
         <section class="faq-section">
-          <h2>🔍 Búsqueda y Filtrado</h2>
+          <h2><i class="bi bi-search"></i> Búsqueda y Filtrado</h2>
           <div class="faq-items">
             <div class="faq-item" *ngFor="let item of faqItems | filterByCategory: 'search'">
               <div class="faq-question" (click)="toggleItem(item)">
@@ -92,7 +92,7 @@ export class FilterByCategoryPipe implements PipeTransform {
 
         <!-- Sección: Importación -->
         <section class="faq-section">
-          <h2>📤 Importación de Datos</h2>
+          <h2><i class="bi bi-upload"></i> Importación de Datos</h2>
           <div class="faq-items">
             <div class="faq-item" *ngFor="let item of faqItems | filterByCategory: 'import'">
               <div class="faq-question" (click)="toggleItem(item)">
@@ -110,7 +110,7 @@ export class FilterByCategoryPipe implements PipeTransform {
 
         <!-- Sección: Troubleshooting -->
         <section class="faq-section">
-          <h2>🔧 Solución de Problemas</h2>
+          <h2><i class="bi bi-wrench"></i> Solución de Problemas</h2>
           <div class="faq-items">
             <div class="faq-item" *ngFor="let item of faqItems | filterByCategory: 'troubleshooting'">
               <div class="faq-question" (click)="toggleItem(item)">
@@ -314,7 +314,7 @@ export class FAQComponent implements OnInit {
         expanded: false,
         question: '¿Cómo puedo ver el tour interactivo?',
         answer:
-          'Haz clic en el botón "🎬 Ver Tour Interactivo" en esta página. El tour te guiará a través de todas las funciones principales del sistema con explicaciones paso a paso.',
+          'Haz clic en el botón "Ver Tour Interactivo" en esta página. El tour te guiará a través de todas las funciones principales del sistema con explicaciones paso a paso.',
       },
       {
         category: 'usage',

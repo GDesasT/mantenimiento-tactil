@@ -35,7 +35,7 @@ interface SearchFilters {
             <app-touch-button
               variant="secondary"
               size="md"
-              icon="←"
+              iconClass="bi bi-arrow-left"
               (clicked)="goBack()"
               class="back-btn"
             >
@@ -43,7 +43,7 @@ interface SearchFilters {
             </app-touch-button>
 
             <div class="header-text">
-              <h2 class="header-title">🔍 Búsqueda Global</h2>
+              <h2 class="header-title"><i class="bi bi-search"></i> Búsqueda Global</h2>
               <p class="header-subtitle">
                 {{ filteredParts.length }} de {{ allParts.length }} refacciones
               </p>
@@ -53,7 +53,7 @@ interface SearchFilters {
           <div class="header-right">
             <div class="search-stats">
               <div class="stats-chip">
-                📊 {{ filteredParts.length }} resultados
+                <i class="bi bi-bar-chart-fill"></i> {{ filteredParts.length }} resultados
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@ interface SearchFilters {
                 [(ngModel)]="searchQuery"
                 (input)="onSearchInput()"
                 (focus)="showKeyboard()"
-                placeholder="🔎 Buscar por SAP, descripción, ubicación o máquina..."
+                placeholder="Buscar por SAP, descripción, ubicación o máquina..."
                 class="search-input"
               />
             </div>
@@ -92,7 +92,7 @@ interface SearchFilters {
                 size="sm"
                 (clicked)="setFilter('category', 'mecanica')"
               >
-                🔩 Mecánica
+                <i class="bi bi-gear-fill"></i> Mecánica
               </app-touch-button>
               <app-touch-button
                 [variant]="
@@ -101,7 +101,7 @@ interface SearchFilters {
                 size="sm"
                 (clicked)="setFilter('category', 'electronica')"
               >
-                ⚡ Electrónica
+                <i class="bi bi-lightning-fill"></i> Electrónica
               </app-touch-button>
               <app-touch-button
                 [variant]="
@@ -110,7 +110,7 @@ interface SearchFilters {
                 size="sm"
                 (clicked)="setFilter('category', 'consumible')"
               >
-                🔄 Consumible
+                <i class="bi bi-box-seam-fill"></i> Consumible
               </app-touch-button>
             </div>
 
@@ -128,14 +128,14 @@ interface SearchFilters {
                 size="sm"
                 (clicked)="setFilter('area', 'corte')"
               >
-                ✂️ Corte
+                <i class="bi bi-scissors"></i> Corte
               </app-touch-button>
               <app-touch-button
                 [variant]="filters.area === 'costura' ? 'primary' : 'secondary'"
                 size="sm"
                 (clicked)="setFilter('area', 'costura')"
               >
-                🧵 Costura
+                <i class="bi bi-hexagon"></i> Costura
               </app-touch-button>
             </div>
           </div>
@@ -148,7 +148,7 @@ interface SearchFilters {
               <div class="part-header">
                 <div class="part-sap">{{ part.sapNumber }}</div>
                 <div class="part-category">
-                  {{ getCategoryIcon(part.category) }}
+                  <i class="bi" [ngClass]="getCategoryIcon(part.category)"></i>
                   {{ getCategoryName(part.category) }}
                 </div>
               </div>
@@ -167,9 +167,7 @@ interface SearchFilters {
                   class="part-image-placeholder"
                   [attr.data-category]="part.category"
                 >
-                  <span class="placeholder-icon">{{
-                    getCategoryIcon(part.category)
-                  }}</span>
+                  <span class="placeholder-icon"><i class="bi" [ngClass]="getCategoryIcon(part.category)"></i></span>
                   <span class="placeholder-text">{{
                     getCategoryName(part.category)
                   }}</span>
@@ -181,19 +179,19 @@ interface SearchFilters {
 
                 <div class="part-details">
                   <div class="detail-row">
-                    <span class="detail-label">📍 Ubicación:</span>
+                    <span class="detail-label"><i class="bi bi-geo-alt-fill"></i> Ubicación:</span>
                     <span class="detail-value">{{
                       part.location || 'No especificada'
                     }}</span>
                   </div>
 
                   <div class="detail-row">
-                    <span class="detail-label">� Parte:</span>
+                    <span class="detail-label"><i class="bi bi-tag-fill"></i> Parte:</span>
                     <span class="detail-value">{{ part.partNumber }}</span>
                   </div>
 
                   <div class="detail-row">
-                    <span class="detail-label">🏭 Máquina:</span>
+                    <span class="detail-label"><i class="bi bi-building"></i> Máquina:</span>
                     <span class="detail-value">{{
                       getMachineName(part.machineId)
                     }}</span>
@@ -201,7 +199,7 @@ interface SearchFilters {
                   <!-- <app-touch-button
                     variant="success"
                     size="sm"
-                    icon="🛒"
+                    iconClass="bi bi-cart3"
                     (clicked)="openPetitionModal(part)"
                   >
                     Pedir Refacción
@@ -241,7 +239,7 @@ interface SearchFilters {
                 (click)="goToFirstPage()"
                 title="Primera página"
               >
-                ⏮️
+                <i class="bi bi-skip-start-fill"></i>
               </button>
 
               <button
@@ -250,7 +248,7 @@ interface SearchFilters {
                 (click)="previousPage()"
                 title="Página anterior"
               >
-                ⬅️
+                <i class="bi bi-chevron-left"></i>
               </button>
 
               <button
@@ -259,7 +257,7 @@ interface SearchFilters {
                 (click)="nextPage()"
                 title="Página siguiente"
               >
-                ➡️
+                <i class="bi bi-chevron-right"></i>
               </button>
 
               <button
@@ -268,7 +266,7 @@ interface SearchFilters {
                 (click)="goToLastPage()"
                 title="Última página"
               >
-                ⏭️
+                <i class="bi bi-skip-end-fill"></i>
               </button>
             </div>
 
@@ -298,7 +296,7 @@ interface SearchFilters {
                 [disabled]="currentPage === 1"
                 (click)="previousPage()"
               >
-                ⬅️ Anterior
+                <i class="bi bi-chevron-left"></i> Anterior
               </button>
 
               <div class="mobile-page-numbers">
@@ -317,7 +315,7 @@ interface SearchFilters {
                 [disabled]="currentPage === totalPages"
                 (click)="nextPage()"
               >
-                Siguiente ➡️
+                Siguiente <i class="bi bi-chevron-right"></i>
               </button>
             </div>
           </div>
@@ -328,7 +326,7 @@ interface SearchFilters {
           class="empty-state"
           *ngIf="paginatedParts.length === 0 && !isLoading"
         >
-          <div class="empty-icon">🔍</div>
+          <div class="empty-icon"><i class="bi bi-search" style="font-size: 4rem;"></i></div>
           <h3 class="empty-title">No se encontraron resultados</h3>
           <p class="empty-message">
             Intenta modificar tu búsqueda o filtros para encontrar refacciones.
@@ -344,7 +342,7 @@ interface SearchFilters {
 
         <!-- Estado de carga -->
         <div class="loading-state" *ngIf="isLoading">
-          <div class="loading-spinner">🔄</div>
+          <div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>
           <p>Cargando refacciones...</p>
         </div>
       </div>
@@ -369,10 +367,10 @@ interface SearchFilters {
 
       <!-- Notificaciones -->
       <div *ngIf="showSuccessNotification" class="success-notification">
-        ✅ {{ successMessage }}
+        <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
       </div>
       <div *ngIf="showErrorNotification" class="error-notification">
-        ❌ {{ errorMessage }}
+        <i class="bi bi-x-circle-fill"></i> {{ errorMessage }}
       </div>
 
       <!-- Modal: Pedir Refacción (Empleado) -->
@@ -384,11 +382,11 @@ interface SearchFilters {
         <div class="modal-container" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <div class="modal-title">
-              <span>🛒</span>
+              <span><i class="bi bi-cart3"></i></span>
               <h3>Pedir refacción</h3>
             </div>
             <button class="modal-close" (click)="closePetitionModal()">
-              ✕
+              <i class="bi bi-x-lg"></i>
             </button>
           </div>
           <div class="modal-content" *ngIf="selectedPartForPetition as p">
@@ -450,7 +448,7 @@ interface SearchFilters {
                     class="numpad-key numpad-clear"
                     (click)="onNumpadClear()"
                   >
-                    🗑️
+                    <i class="bi bi-trash3-fill"></i>
                   </button>
                   <button class="numpad-key" (click)="onNumberPressed('0')">
                     0
@@ -459,13 +457,13 @@ interface SearchFilters {
                     class="numpad-key numpad-backspace"
                     (click)="onNumpadBackspace()"
                   >
-                    ⌫
+                    <i class="bi bi-backspace-fill"></i>
                   </button>
                 </div>
               </div>
 
               <div *ngIf="employeeExists" class="employee-recognized">
-                ✅ Empleado: {{ employeeNameInput }} (reconocido)
+                <i class="bi bi-check-circle-fill"></i> Empleado: {{ employeeNameInput }} (reconocido)
               </div>
             </div>
           </div>
@@ -473,7 +471,7 @@ interface SearchFilters {
             <app-touch-button
               variant="primary"
               size="lg"
-              icon="✅"
+              iconClass="bi bi-check-circle-fill"
               (clicked)="submitPetition()"
               [loading]="isSubmittingPetition"
               [disabled]="!employeeNumberInput.trim() || isSubmittingPetition"
@@ -483,7 +481,7 @@ interface SearchFilters {
             <app-touch-button
               variant="secondary"
               size="lg"
-              icon="✕"
+              iconClass="bi bi-x-lg"
               (clicked)="closePetitionModal()"
               [disabled]="isSubmittingPetition"
               >Cancelar</app-touch-button
@@ -1555,11 +1553,11 @@ export class GlobalSearchComponent implements OnInit {
 
   getCategoryIcon(category: PartCategory): string {
     const icons: Record<string, string> = {
-      mecanica: '🔩',
-      electronica: '⚡',
-      consumible: '🔄',
+      mecanica: 'bi-gear-fill',
+      electronica: 'bi-lightning-fill',
+      consumible: 'bi-box-seam-fill',
     };
-    return icons[category] || '📦';
+    return icons[category] || 'bi-box-seam-fill';
   }
 
   getCategoryName(category: PartCategory): string {

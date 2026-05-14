@@ -4,11 +4,11 @@
   <div class="professional-header">
     <div class="header-content">
       <div class="header-left">
-        <app-touch-button variant="secondary" size="md" icon="←" (clicked)="goBack()" class="back-btn">
+        <app-touch-button variant="secondary" size="md" iconClass="bi bi-arrow-left" (clicked)="goBack()" class="back-btn">
           Atrás
         </app-touch-button>
         <div class="header-text">
-          <h2 class="header-title">📚 Manuales</h2>
+          <h2 class="header-title"><i class="bi bi-book-half"></i> Manuales</h2>
           <p class="header-subtitle">Consulta los manuales técnicos disponibles</p>
         </div>
       </div>
@@ -19,7 +19,7 @@
             <span class="stat-label">manuales</span>
           </div>
         </div>
-        <app-touch-button variant="primary" size="md" icon="⚙️" (clicked)="goToAdmin()">
+        <app-touch-button variant="primary" size="md" iconClass="bi bi-gear-fill" (clicked)="goToAdmin()">
           Administrar
         </app-touch-button>
       </div>
@@ -41,7 +41,7 @@
         [(ngModel)]="searchQuery"
         (ngModelChange)="onSearch($event)"
       />
-      <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+      <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <div class="categories-row" *ngIf="categories.length > 0">
@@ -50,7 +50,7 @@
         [class.active]="selectedCategory === 'todos'"
         (click)="onCategoryChange('todos')"
       >
-        🗂️ Todos <span class="chip-count">{{ manuals.length }}</span>
+        <i class="bi bi-folder2-open"></i> Todos <span class="chip-count">{{ manuals.length }}</span>
       </button>
       <button
         *ngFor="let cat of categories"
@@ -71,14 +71,14 @@
     <!-- Estado vacío -->
     <div *ngIf="filteredManuals.length === 0" class="empty-state">
       <div class="empty-blob">
-        <span class="empty-emoji">{{ manuals.length === 0 ? '📂' : '🔍' }}</span>
+        <span class="empty-emoji"><i class="bi" [ngClass]="manuals.length === 0 ? 'bi-folder2' : 'bi-search'" style="font-size: 3rem;"></i></span>
       </div>
       <h3 class="empty-title">{{ manuals.length === 0 ? 'Aún no hay manuales' : 'Sin resultados' }}</h3>
       <p class="empty-subtitle">
         <ng-container *ngIf="manuals.length === 0">Agrega manuales PDF desde el panel de administración</ng-container>
         <ng-container *ngIf="manuals.length > 0">Intenta con otro término o cambia la categoría</ng-container>
       </p>
-      <app-touch-button *ngIf="manuals.length === 0" variant="primary" size="lg" icon="➕" (clicked)="goToAdmin()">
+      <app-touch-button *ngIf="manuals.length === 0" variant="primary" size="lg" iconClass="bi bi-plus-circle-fill" (clicked)="goToAdmin()">
         Agregar primer manual
       </app-touch-button>
       <button *ngIf="manuals.length > 0" class="clear-filters-btn" (click)="clearFilters()">Limpiar filtros</button>
@@ -140,7 +140,7 @@
             </p>
           </div>
         </div>
-        <app-touch-button variant="secondary" size="md" icon="✕" (clicked)="closeViewer()">
+        <app-touch-button variant="secondary" size="md" iconClass="bi bi-x-lg" (clicked)="closeViewer()">
           Cerrar
         </app-touch-button>
       </div>

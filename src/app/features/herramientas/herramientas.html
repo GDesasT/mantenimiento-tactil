@@ -6,7 +6,7 @@
         <app-touch-button
           variant="secondary"
           size="md"
-          icon="←"
+          iconClass="bi bi-arrow-left"
           (clicked)="goBack()"
           class="back-btn"
         >
@@ -14,7 +14,7 @@
         </app-touch-button>
 
         <div class="header-text">
-          <h2 class="header-title">🛠️ Herramientas Disponibles</h2>
+          <h2 class="header-title"><i class="bi bi-tools"></i> Herramientas Disponibles</h2>
           <p class="header-subtitle">Inventario de herramientas del taller</p>
         </div>
       </div>
@@ -35,13 +35,13 @@
         #searchInput
         type="text"
         class="search-input"
-        placeholder="🔍 Buscar herramientas..."
+        placeholder="Buscar herramientas..."
         [(ngModel)]="searchQuery"
         (ngModelChange)="onSearch($event)"
         (focus)="onSearchFocus()"
       />
       <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()">
-        ✕
+        <i class="bi bi-x-lg"></i>
       </button>
     </div>
   </div>
@@ -63,7 +63,7 @@
             class="tool-image"
           />
           <div *ngIf="!tool.image" class="tool-image-placeholder">
-            <span class="placeholder-icon">🛠️</span>
+            <span class="placeholder-icon"><i class="bi bi-tools" style="font-size: 2rem;"></i></span>
           </div>
         </div>
 
@@ -71,7 +71,7 @@
         <div class="tool-info">
           <h3 class="tool-name">{{ tool.name }}</h3>
           <p class="tool-location">
-            📍 {{ tool.location || 'Ubicación no especificada' }}
+            <i class="bi bi-geo-alt-fill"></i> {{ tool.location || 'Ubicación no especificada' }}
           </p>
           <p class="tool-date">
             Agregada: {{ tool.createdAt | date : 'short' }}
@@ -83,13 +83,13 @@
     </div>
     <!-- Mensaje vacío -->
     <div *ngIf="filteredTools.length === 0 && tools.length === 0" class="empty-state">
-      <div class="empty-icon">🛠️</div>
+      <div class="empty-icon"><i class="bi bi-tools" style="font-size: 4rem;"></i></div>
       <h3>No hay herramientas registradas</h3>
       <p>Importa herramientas desde Excel para comenzar</p>
       <app-touch-button
         variant="primary"
         size="lg"
-        icon="📊"
+        iconClass="bi bi-file-earmark-spreadsheet"
         (clicked)="goToImport()"
         class="import-btn"
       >
@@ -99,7 +99,7 @@
 
     <!-- Mensaje de búsqueda sin resultados -->
     <div *ngIf="filteredTools.length === 0 && tools.length > 0" class="empty-state">
-      <div class="empty-icon">🔍</div>
+      <div class="empty-icon"><i class="bi bi-search" style="font-size: 4rem;"></i></div>
       <h3>No se encontraron herramientas</h3>
       <p>Intenta con otro término de búsqueda</p>
     </div>
@@ -107,11 +107,11 @@
 
   <!-- Notificaciones -->
   <div *ngIf="showSuccessNotification" class="notification success-notification">
-    ✅ {{ successMessage }}
+    <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
   </div>
 
   <div *ngIf="showErrorNotification" class="notification error-notification">
-    ❌ {{ errorMessage }}
+    <i class="bi bi-x-circle-fill"></i> {{ errorMessage }}
   </div>
 
   <!-- Overlay para el teclado virtual -->

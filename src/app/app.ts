@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy, ViewChild, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -11,7 +11,7 @@ import { HomeTourService } from './core/services/home-tour.service';
   imports: [RouterOutlet, CommonModule, TouchButtonComponent, HttpClientModule],
   template: `
     <div class="app-container">
-      <nav class="professional-nav">
+      <nav class="professional-nav" [class.scrolled]="isScrolled">
         <div class="nav-container">
           <div class="nav-content">
             <!-- Logo y branding -->
@@ -32,7 +32,7 @@ import { HomeTourService } from './core/services/home-tour.service';
               <app-touch-button
                 [variant]="isCurrentRoute('') ? 'primary' : 'secondary'"
                 size="lg"
-                icon="🏠"
+                iconClass="bi bi-house-door-fill"
                 (clicked)="navigateTo('')"
                 class="nav-touch-button"
               >
@@ -42,7 +42,7 @@ import { HomeTourService } from './core/services/home-tour.service';
               <app-touch-button
                 [variant]="isCurrentRoute('/search') ? 'primary' : 'secondary'"
                 size="lg"
-                icon="🔍"
+                iconClass="bi bi-search"
                 (clicked)="navigateTo('/search')"
                 class="nav-touch-button"
               >
@@ -54,34 +54,31 @@ import { HomeTourService } from './core/services/home-tour.service';
                   isCurrentRoute('/excel-import') ? 'primary' : 'secondary'
                 "
                 size="lg"
-                icon="📊"
+                iconClass="bi bi-file-earmark-spreadsheet"
                 (clicked)="navigateTo('/excel-import')"
                 class="nav-touch-button"
               >
                 Importar Excel
               </app-touch-button>
-                            <app-touch-button
+                  <app-touch-button
                 [variant]="
                   isCurrentRoute('/manuales') ? 'primary' : 'secondary'
                 "
                 size="lg"
-                icon="📖"
+                iconClass="bi bi-book-half"
                 (clicked)="navigateTo('/manuales')"
                 class="nav-touch-button"
               >
-            Manuales
-            </app-touch-button>
+                Manuales
+              </app-touch-button>
 
-              <!-- Botón de Tour - Circular con Bootstrap Icons -->
+              <!-- Botón de Tour -->
               <button
                 class="tour-button-circular"
                 (click)="startTour()"
                 title="Iniciar tour interactivo"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="blue" viewBox="0 0 16 16">
-                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                  <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
+                <i class="bi bi-info-circle-fill" style="font-size: 1.5rem; color: #2563eb;"></i>
               </button>
             </div>
 
@@ -127,31 +124,67 @@ import { HomeTourService } from './core/services/home-tour.service';
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        background: var(--gray-50);
+        background-color: #f8fafc; /* slate-50 */
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.5) 0px, transparent 50%),
+          radial-gradient(at 100% 0%, rgba(224, 231, 255, 0.5) 0px, transparent 50%),
+          radial-gradient(at 100% 100%, rgba(219, 234, 254, 0.5) 0px, transparent 50%),
+          radial-gradient(at 0% 100%, rgba(224, 231, 255, 0.5) 0px, transparent 50%);
+        background-attachment: fixed;
+        padding-top: 130px; /* Space for the fixed navbar */
       }
 
       /* Navegación principal optimizada para táctil */
       .professional-nav {
-        background: linear-gradient(135deg, #1e40af, #3b82f6);
-        border-bottom: 3px solid #1d4ed8;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        position: sticky;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 58, 138, 0.98)); /* slate-900 to blue-900 */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        width: 100%;
+        left: 0;
+        right: 0;
         top: 0;
         z-index: 100;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(16px);
+      }
+
+      .professional-nav.scrolled {
+        margin: 1.5rem auto;
+        max-width: 1000px;
+        border-radius: 60px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+        left: 1rem;
+        right: 1rem;
+        width: calc(100% - 2rem);
+        background: rgba(15, 23, 42, 0.9);
       }
 
       .nav-container {
         max-width: 1400px;
         margin: 0 auto;
         padding: 0 1rem;
+        transition: padding 0.5s ease;
+      }
+
+      .professional-nav.scrolled .nav-container {
+        padding: 0 2rem;
       }
 
       .nav-content {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem 0;
+        padding: 1.25rem 0;
         gap: 2rem;
+        transition: padding 0.5s ease;
+      }
+
+      .professional-nav.scrolled .nav-content {
+        padding: 0.75rem 0;
+        gap: 1.5rem;
       }
 
       /* Branding */
@@ -172,6 +205,16 @@ import { HomeTourService } from './core/services/home-tour.service';
         display: flex;
         flex-direction: column;
         color: white;
+        transition: opacity 0.3s ease, max-width 0.4s ease, margin 0.4s ease;
+        max-width: 200px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .professional-nav.scrolled .brand-text {
+        opacity: 0;
+        max-width: 0;
+        margin-left: 0;
       }
 
       .brand-title {
@@ -199,6 +242,47 @@ import { HomeTourService } from './core/services/home-tour.service';
       .nav-touch-button {
         min-width: 140px;
         min-height: 80px;
+        transition: all 0.4s ease;
+      }
+
+      .professional-nav.scrolled .nav-touch-button {
+        min-width: 65px !important;
+        min-height: 65px !important;
+      }
+
+      ::ng-deep .nav-touch-button button {
+        transition: all 0.4s ease !important;
+      }
+
+      ::ng-deep .nav-touch-button .button-text {
+        transition: max-width 0.4s ease, opacity 0.3s ease, margin 0.4s ease;
+        max-width: 150px;
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      ::ng-deep .professional-nav.scrolled .nav-touch-button .button-text {
+        max-width: 0;
+        opacity: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      ::ng-deep .nav-touch-button .button-icon {
+        transition: all 0.4s ease;
+      }
+
+      ::ng-deep .professional-nav.scrolled .nav-touch-button .button-icon {
+        margin: 0 !important;
+        font-size: 1.5rem;
+      }
+
+      ::ng-deep .professional-nav.scrolled .nav-touch-button button {
+        min-width: 65px !important;
+        min-height: 65px !important;
+        padding: 0.75rem !important;
+        border-radius: 50% !important;
       }
 
       /* Override para botones secundarios en navbar */
@@ -297,20 +381,34 @@ import { HomeTourService } from './core/services/home-tour.service';
 
       /* Botón circular del tour */
       .tour-button-circular {
-        width: 56px;
-        height: 56px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #FFFFFF, #FFF0E8);
-        border: 3px solid rgba(255, 255, 255, 0.3);
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        border: 1px solid rgba(255, 255, 255, 0.2);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+        transition: all 0.4s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         flex-shrink: 0;
-        margin: auto;
+        margin-left: 0.5rem;
+      }
+
+      .tour-button-circular i {
+        color: #60a5fa !important; /* blue-400 */
+        font-size: 1.75rem !important;
+      }
+
+      .professional-nav.scrolled .tour-button-circular {
+        width: 56px;
+        height: 56px;
+        border-width: 1px;
+      }
+      .professional-nav.scrolled .tour-button-circular i {
+        font-size: 1.5rem !important;
       }
 
       .tour-button-circular:hover {
@@ -343,6 +441,19 @@ import { HomeTourService } from './core/services/home-tour.service';
         color: white;
         backdrop-filter: blur(10px);
         min-width: 140px;
+        max-width: 200px;
+        transition: all 0.4s ease;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .professional-nav.scrolled .time-indicator {
+        opacity: 0;
+        max-width: 0;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        border-width: 0;
       }
 
       .time-display {
@@ -476,7 +587,18 @@ export class AppComponent implements OnDestroy, OnInit, AfterViewInit {
   title = 'mantenimiento-tactil';
   currentTime = '';
   currentDate = '';
+  isScrolled = false;
   private timeInterval: any;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    // Add hysteresis to avoid flickering when scrolling very slowly near the threshold
+    if (window.scrollY > 80 && !this.isScrolled) {
+      this.isScrolled = true;
+    } else if (window.scrollY < 20 && this.isScrolled) {
+      this.isScrolled = false;
+    }
+  }
 
   constructor(
     private router: Router,

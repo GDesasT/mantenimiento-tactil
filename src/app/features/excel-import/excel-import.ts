@@ -43,7 +43,7 @@ interface ImportResult {
             <app-touch-button
               variant="secondary"
               size="md"
-              icon="←"
+              iconClass="bi bi-arrow-left"
               (clicked)="goBack()"
               class="back-btn"
             >
@@ -51,7 +51,7 @@ interface ImportResult {
             </app-touch-button>
 
             <div class="header-text">
-              <h2 class="header-title">📊 Importación de Excel</h2>
+              <h2 class="header-title"><i class="bi bi-file-earmark-spreadsheet"></i> Importación de Excel</h2>
               <p class="header-subtitle">
                 Importar máquinas y refacciones desde archivos Excel
               </p>
@@ -61,14 +61,14 @@ interface ImportResult {
           <!-- Estadísticas del sistema -->
           <div class="system-stats">
             <div class="stats-item">
-              <div class="stats-icon">🔧</div>
+              <div class="stats-icon"><i class="bi bi-wrench"></i></div>
               <div class="stats-info">
                 <div class="stats-number">{{ machineCount }}</div>
                 <div class="stats-label">Máquinas</div>
               </div>
             </div>
             <div class="stats-item">
-              <div class="stats-icon">📦</div>
+              <div class="stats-icon"><i class="bi bi-box-seam-fill"></i></div>
               <div class="stats-info">
                 <div class="stats-number">{{ partCount }}</div>
                 <div class="stats-label">Refacciones</div>
@@ -84,14 +84,14 @@ interface ImportResult {
           <div class="professional-card animate-fadeInUp">
             <div class="professional-content">
               <h3 class="section-title">
-                📋 Formatos Requeridos para tus Archivos Excel
+                <i class="bi bi-clipboard-data-fill"></i> Formatos Requeridos para tus Archivos Excel
               </h3>
 
               <div class="format-grid">
                 <div class="format-item">
-                  <div class="format-icon">📦</div>
+                  <div class="format-icon"><i class="bi bi-box-seam-fill"></i></div>
                   <div class="format-content">
-                    <h4 class="format-title">📦 Formato para Refacciones</h4>
+                    <h4 class="format-title"><i class="bi bi-box-seam-fill"></i> Formato para Refacciones</h4>
                     <ul class="format-list">
                       <li><strong>SAP:</strong> Columna con código SAP</li>
                       <li><strong>#PARTE:</strong> Columna con Part Number</li>
@@ -115,7 +115,7 @@ interface ImportResult {
                         GENERAL)
                       </li>
                       <li>
-                        <strong>⚠️ NOMBRES DE HOJAS OBLIGATORIOS:</strong>
+                        <strong><i class="bi bi-exclamation-triangle-fill"></i> NOMBRES DE HOJAS OBLIGATORIOS:</strong>
                         <span style="color: #dc2626; font-weight: bold;"
                           >CONSUMIBLE</span
                         >,
@@ -135,9 +135,9 @@ interface ImportResult {
                 </div>
 
                 <div class="format-item">
-                  <div class="format-icon">🔧</div>
+                  <div class="format-icon"><i class="bi bi-wrench"></i></div>
                   <div class="format-content">
-                    <h4 class="format-title">🔧 Formato para Máquinas</h4>
+                    <h4 class="format-title"><i class="bi bi-wrench"></i> Formato para Máquinas</h4>
                     <ul class="format-list">
                       <li>
                         <strong>Nombre:</strong> Columna con nombre de la
@@ -171,13 +171,13 @@ interface ImportResult {
           >
             <div class="professional-content">
               <h3 class="section-title">
-                🖼️ Guía para Agregar Imágenes de Refacciones
+                <i class="bi bi-image"></i> Guía para Agregar Imágenes de Refacciones
               </h3>
 
               <div class="images-grid">
                 <div class="image-info-card">
                   <div class="info-header">
-                    <div class="info-icon">📝</div>
+                    <div class="info-icon"><i class="bi bi-pencil-square"></i></div>
                     <h4 class="info-title">Cómo Incluir URLs de Imagen</h4>
                   </div>
                   <ul class="info-list">
@@ -202,24 +202,24 @@ interface ImportResult {
 
                 <div class="image-info-card">
                   <div class="info-header">
-                    <div class="info-icon">💡</div>
+                    <div class="info-icon"><i class="bi bi-lightbulb-fill"></i></div>
                     <h4 class="info-title">Ejemplos de URLs Válidas</h4>
                   </div>
                   <div class="examples-container">
                     <div class="example-item">
-                      <div class="example-label">🌐 URL Directa:</div>
+                      <div class="example-label"><i class="bi bi-globe"></i> URL Directa:</div>
                       <code class="example-code"
                         >https://ejemplo.com/refaccion.jpg</code
                       >
                     </div>
                     <div class="example-item">
-                      <div class="example-label">📷 Unsplash:</div>
+                      <div class="example-label"><i class="bi bi-camera-fill"></i> Unsplash:</div>
                       <code class="example-code"
                         >https://images.unsplash.com/photo-xxx</code
                       >
                     </div>
                     <div class="example-item">
-                      <div class="example-label">🔧 Sitio del Fabricante:</div>
+                      <div class="example-label"><i class="bi bi-wrench"></i> Sitio del Fabricante:</div>
                       <code class="example-code"
                         >https://fabricante.com/productos/imagen.png</code
                       >
@@ -229,7 +229,7 @@ interface ImportResult {
 
                 <div class="image-info-card">
                   <div class="info-header">
-                    <div class="info-icon">⚠️</div>
+                    <div class="info-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
                     <h4 class="info-title">Consejos Importantes</h4>
                   </div>
                   <ul class="info-list">
@@ -255,7 +255,7 @@ interface ImportResult {
 
               <div class="image-example-section">
                 <h4 class="example-title">
-                  📋 Ejemplo de Hoja Excel con Imágenes:
+                  <i class="bi bi-clipboard-data-fill"></i> Ejemplo de Hoja Excel con Imágenes:
                 </h4>
                 <div class="excel-example">
                   <table class="example-table">
@@ -289,7 +289,7 @@ interface ImportResult {
                     </tbody>
                   </table>
                   <p class="example-note">
-                    💡 <strong>Nota:</strong> La segunda fila no tiene imagen,
+                    <i class="bi bi-lightbulb-fill"></i> <strong>Nota:</strong> La segunda fila no tiene imagen,
                     así que mostrará un placeholder automáticamente.
                   </p>
                 </div>
@@ -305,22 +305,22 @@ interface ImportResult {
             style="animation-delay: 0.1s"
           >
             <div class="professional-content">
-              <h3 class="section-title">⚙️ Configuración de Importación</h3>
+              <h3 class="section-title"><i class="bi bi-gear-fill"></i> Configuración de Importación</h3>
 
               <div class="controls-grid">
                 <!-- Selector de área -->
                 <div class="control-card area-control">
                   <div class="control-header">
-                    <div class="control-icon">🏭</div>
+                    <div class="control-icon"><i class="bi bi-building"></i></div>
                     <div class="control-title">Área por Defecto</div>
                   </div>
                   <select
                     [(ngModel)]="selectedAreaForParts"
                     class="professional-input"
                   >
-                    <option value="costura">🧵 Área de Costura</option>
-                    <option value="corte">✂️ Área de Corte</option>
-                    <option value="consumible">💡 Área de Consumibles</option>
+                    <option value="costura">Área de Costura</option>
+                    <option value="corte">Área de Corte</option>
+                    <option value="consumible">Área de Consumibles</option>
                   </select>
                   <p class="control-hint">
                     Las máquinas detectadas en las refacciones se crearán en
@@ -331,13 +331,13 @@ interface ImportResult {
                 <!-- Botón de limpieza -->
                 <div class="control-card cleanup-control">
                   <div class="control-header">
-                    <div class="control-icon danger-icon">🗑️</div>
+                    <div class="control-icon danger-icon"><i class="bi bi-trash3-fill"></i></div>
                     <div class="control-title">Limpiar Sistema</div>
                   </div>
                   <app-touch-button
                     variant="danger"
                     size="lg"
-                    icon="🗑️"
+                    iconClass="bi bi-trash3-fill"
                     [fullWidth]="true"
                     [disabled]="isDeleting"
                     [loading]="isDeleting"
@@ -346,7 +346,7 @@ interface ImportResult {
                     {{ isDeleting ? 'Eliminando...' : 'Borrar Todo' }}
                   </app-touch-button>
                   <p class="control-hint danger-hint">
-                    ⚠️ Elimina todas las máquinas y refacciones del sistema
+                    <i class="bi bi-exclamation-triangle-fill"></i> Elimina todas las máquinas y refacciones del sistema
                   </p>
                 </div>
               </div>
@@ -365,7 +365,7 @@ interface ImportResult {
               <div class="professional-content">
                 <div class="import-header">
                   <div class="import-icon-container parts-icon">
-                    <span class="import-emoji">📦</span>
+                    <span class="import-emoji"><i class="bi bi-box-seam-fill"></i></span>
                   </div>
                   <h3 class="import-title">Importar Refacciones</h3>
                   <p class="import-subtitle">
@@ -407,13 +407,13 @@ interface ImportResult {
                       class="upload-hint"
                       style="color: #dc2626; font-weight: bold; margin-top: 0.5rem;"
                     >
-                      ⚠️ Las hojas deben llamarse exactamente: CONSUMIBLE,
+                      <i class="bi bi-exclamation-triangle-fill"></i> Las hojas deben llamarse exactamente: CONSUMIBLE,
                       ELECTRONICA, MECANICA
                     </p>
                   </div>
 
                   <div class="file-preview" *ngIf="partsFile">
-                    <div class="file-icon">📄</div>
+                    <div class="file-icon"><i class="bi bi-file-earmark"></i></div>
                     <div class="file-info">
                       <div class="file-name">{{ partsFile.name }}</div>
                       <div class="file-size">{{ getFileSize(partsFile) }}</div>
@@ -422,7 +422,7 @@ interface ImportResult {
                       (click)="clearFile('parts'); $event.stopPropagation()"
                       class="file-remove"
                     >
-                      ✕
+                      <i class="bi bi-x-lg"></i>
                     </button>
                   </div>
                 </div>
@@ -438,7 +438,7 @@ interface ImportResult {
                 <app-touch-button
                   variant="success"
                   size="xl"
-                  icon="📦"
+                  iconClass="bi bi-box-seam-fill"
                   [fullWidth]="true"
                   [disabled]="!partsFile || isProcessing"
                   [loading]="isProcessing && processingType === 'parts'"
@@ -462,7 +462,7 @@ interface ImportResult {
               <div class="professional-content">
                 <div class="import-header">
                   <div class="import-icon-container machines-icon">
-                    <span class="import-emoji">🔧</span>
+                    <span class="import-emoji"><i class="bi bi-wrench"></i></span>
                   </div>
                   <h3 class="import-title">Importar Máquinas</h3>
                   <p class="import-subtitle">
@@ -504,12 +504,12 @@ interface ImportResult {
                       class="upload-hint"
                       style="color: #059669; font-weight: bold; margin-top: 0.5rem;"
                     >
-                      💡 Área debe ser: costura o corte
+                      <i class="bi bi-lightbulb-fill"></i> Área debe ser: costura o corte
                     </p>
                   </div>
 
                   <div class="file-preview" *ngIf="machinesFile">
-                    <div class="file-icon">📄</div>
+                    <div class="file-icon"><i class="bi bi-file-earmark"></i></div>
                     <div class="file-info">
                       <div class="file-name">{{ machinesFile.name }}</div>
                       <div class="file-size">
@@ -520,7 +520,7 @@ interface ImportResult {
                       (click)="clearFile('machines'); $event.stopPropagation()"
                       class="file-remove"
                     >
-                      ✕
+                      <i class="bi bi-x-lg"></i>
                     </button>
                   </div>
                 </div>
@@ -536,7 +536,7 @@ interface ImportResult {
                 <app-touch-button
                   variant="primary"
                   size="xl"
-                  icon="🔧"
+                  iconClass="bi bi-wrench"
                   [fullWidth]="true"
                   [disabled]="!machinesFile || isProcessing"
                   [loading]="isProcessing && processingType === 'machines'"
@@ -564,7 +564,7 @@ interface ImportResult {
               <div class="professional-content">
                 <div class="import-header">
                   <div class="import-icon-container tools-icon">
-                    <span class="import-emoji">🛠️</span>
+                    <span class="import-emoji"><i class="bi bi-tools"></i></span>
                   </div>
                   <h3 class="import-title">Importar Herramientas</h3>
                   <p class="import-subtitle">
@@ -573,7 +573,7 @@ interface ImportResult {
                 </div>
 
                 <div class="format-info" style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6;">
-                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">📋 Formato Requerido para Herramientas</h4>
+                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;"><i class="bi bi-clipboard-data-fill"></i> Formato Requerido para Herramientas</h4>
                   <ul style="margin: 0; padding-left: 1.5rem; color: #333;">
                     <li><strong>NOMBRE:</strong> Nombre de la herramienta (obligatorio)</li>
                     <li><strong>IMAGEN:</strong> URL completa de la imagen (opcional) - Ejemplos: https://ejemplo.com/herramienta.jpg, https://images.unsplash.com/photo-xxx</li>
@@ -615,7 +615,7 @@ interface ImportResult {
                   </div>
 
                   <div class="file-preview" *ngIf="toolsFile">
-                    <div class="file-icon">📄</div>
+                    <div class="file-icon"><i class="bi bi-file-earmark"></i></div>
                     <div class="file-info">
                       <div class="file-name">{{ toolsFile.name }}</div>
                       <div class="file-size">{{ getFileSize(toolsFile) }}</div>
@@ -624,7 +624,7 @@ interface ImportResult {
                       (click)="clearFile('tools'); $event.stopPropagation()"
                       class="file-remove"
                     >
-                      ✕
+                      <i class="bi bi-x-lg"></i>
                     </button>
                   </div>
                 </div>
@@ -640,7 +640,7 @@ interface ImportResult {
                 <app-touch-button
                   variant="warning"
                   size="xl"
-                  icon="🛠️"
+                  iconClass="bi bi-tools"
                   [fullWidth]="true"
                   [disabled]="!toolsFile || isProcessing"
                   [loading]="isProcessing && processingType === 'tools'"
@@ -667,7 +667,7 @@ interface ImportResult {
             >
               <div class="professional-content">
                 <div class="import-icon-container tools-icon">
-                  <span>⚙️</span>
+                  <span><i class="bi bi-gear-fill"></i></span>
                 </div>
                 <h3 class="import-title">Importar Tornillos</h3>
                 <p class="import-description">
@@ -675,7 +675,7 @@ interface ImportResult {
                 </p>
 
                 <div class="format-info">
-                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">📋 Formato Requerido para Tornillos</h4>
+                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;"><i class="bi bi-clipboard-data-fill"></i> Formato Requerido para Tornillos</h4>
                   <ul style="font-size: 0.85rem; color: #555;">
                     <li><strong>NOMBRE:</strong> Nombre del tornillo o fastener</li>
                     <li><strong>IMAGEN:</strong> URL de la imagen (opcional)</li>
@@ -717,7 +717,7 @@ interface ImportResult {
                   </div>
 
                   <div class="file-preview" *ngIf="fastenersFile">
-                    <div class="file-icon">📄</div>
+                    <div class="file-icon"><i class="bi bi-file-earmark"></i></div>
                     <div class="file-info">
                       <div class="file-name">{{ fastenersFile.name }}</div>
                       <div class="file-size">{{ getFileSize(fastenersFile) }}</div>
@@ -726,7 +726,7 @@ interface ImportResult {
                       (click)="clearFile('fasteners'); $event.stopPropagation()"
                       class="file-remove"
                     >
-                      ✕
+                      <i class="bi bi-x-lg"></i>
                     </button>
                   </div>
                 </div>
@@ -742,7 +742,7 @@ interface ImportResult {
                 <app-touch-button
                   variant="warning"
                   size="xl"
-                  icon="⚙️"
+                  iconClass="bi bi-gear-fill"
                   [fullWidth]="true"
                   [disabled]="!fastenersFile || isProcessing"
                   [loading]="isProcessing && processingType === 'fasteners'"
@@ -769,7 +769,7 @@ interface ImportResult {
             >
               <div class="professional-content">
                 <div class="import-icon-container tools-icon">
-                  <span>🧪</span>
+                  <span><i class="bi bi-droplet-half"></i></span>
                 </div>
                 <h3 class="import-title">Importar Químicos</h3>
                 <p class="import-description">
@@ -777,7 +777,7 @@ interface ImportResult {
                 </p>
 
                 <div class="format-info">
-                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">📋 Formato Requerido para Químicos</h4>
+                  <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;"><i class="bi bi-clipboard-data-fill"></i> Formato Requerido para Químicos</h4>
                   <ul style="font-size: 0.85rem; color: #555;">
                     <li><strong>NOMBRE:</strong> Nombre del químico</li>
                     <li><strong>IMAGEN:</strong> URL de la imagen (opcional)</li>
@@ -844,7 +844,7 @@ interface ImportResult {
                 <app-touch-button
                   variant="warning"
                   size="xl"
-                  icon="🧪"
+                  iconClass="bi bi-droplet-half"
                   [fullWidth]="true"
                   [disabled]="!chemicalsFile || isProcessing"
                   [loading]="isProcessing && processingType === 'chemicals'"
@@ -881,7 +881,7 @@ interface ImportResult {
                   class="result-card warning-card"
                   *ngIf="importResults.duplicates > 0"
                 >
-                  <div class="result-icon">⚠️</div>
+                  <div class="result-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
                   <div class="result-content">
                     <div class="result-number">
                       {{ importResults.duplicates }}
@@ -908,7 +908,7 @@ interface ImportResult {
                 *ngIf="importResults.errors.length > 0"
                 class="errors-section"
               >
-                <h4 class="errors-title">⚠️ Errores Encontrados</h4>
+                <h4 class="errors-title"><i class="bi bi-exclamation-triangle-fill"></i> Errores Encontrados</h4>
                 <div class="errors-container">
                   <div
                     *ngFor="let error of importResults.errors; let i = index"
@@ -925,7 +925,7 @@ interface ImportResult {
                 <app-touch-button
                   variant="primary"
                   size="lg"
-                  icon="🔄"
+                  iconClass="bi bi-arrow-clockwise"
                   (clicked)="resetImport()"
                 >
                   Nueva Importación
@@ -934,7 +934,7 @@ interface ImportResult {
                 <app-touch-button
                   variant="success"
                   size="lg"
-                  icon="🔍"
+                  iconClass="bi bi-search"
                   (clicked)="goToSearch()"
                 >
                   Buscar Refacciones
@@ -957,7 +957,7 @@ interface ImportResult {
         >
           <div class="modal-header danger-header">
             <div class="modal-title">
-              <span class="modal-icon danger-icon">⚠️</span>
+              <span class="modal-icon danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
               <h3>Confirmar Eliminación Total</h3>
             </div>
             <button class="modal-close" (click)="closeDeleteModal()">✕</button>
@@ -1007,7 +1007,7 @@ interface ImportResult {
                 </div>
 
                 <p class="warning-notice">
-                  <strong>⚠️ Esta acción no se puede deshacer.</strong>
+                  <strong><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer.</strong>
                 </p>
               </div>
             </div>
@@ -1017,7 +1017,7 @@ interface ImportResult {
             <app-touch-button
               variant="danger"
               size="lg"
-              icon="🗑️"
+              iconClass="bi bi-trash3-fill"
               [disabled]="!canConfirmDelete || isDeleting"
               [loading]="isDeleting"
               (clicked)="confirmDeleteAll()"
@@ -1028,7 +1028,7 @@ interface ImportResult {
             <app-touch-button
               variant="secondary"
               size="lg"
-              icon="✕"
+              iconClass="bi bi-x-lg"
               (clicked)="closeDeleteModal()"
               [disabled]="isDeleting"
             >
@@ -1078,7 +1078,7 @@ interface ImportResult {
                   class="summary-item warning-item"
                   *ngIf="importResults.duplicates > 0"
                 >
-                  <div class="summary-icon">⚠️</div>
+                  <div class="summary-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
                   <div class="summary-info">
                     <div class="summary-number">
                       {{ importResults.duplicates }}
@@ -1111,7 +1111,7 @@ interface ImportResult {
             <app-touch-button
               variant="primary"
               size="lg"
-              icon="👍"
+              iconClass="bi bi-hand-thumbs-up-fill"
               (clicked)="closeResultsModal()"
             >
               Entendido
@@ -1120,7 +1120,7 @@ interface ImportResult {
             <app-touch-button
               variant="success"
               size="lg"
-              icon="🔍"
+              iconClass="bi bi-search"
               (clicked)="goToSearchFromModal()"
               *ngIf="importResults?.success"
             >

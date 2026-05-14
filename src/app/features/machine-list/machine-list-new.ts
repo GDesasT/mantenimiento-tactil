@@ -22,7 +22,7 @@ import { firstValueFrom } from 'rxjs';
             <app-touch-button
               variant="secondary"
               size="md"
-              icon="←"
+              iconClass="bi bi-arrow-left"
               (clicked)="goBack()"
               class="back-btn"
             >
@@ -42,7 +42,7 @@ import { firstValueFrom } from 'rxjs';
                 *ngIf="!isAdminMode"
                 variant="secondary"
                 size="md"
-                icon="⚙️"
+                iconClass="bi bi-gear-fill"
                 (clicked)="toggleAdminMode()"
                 class="admin-gear"
               >
@@ -53,7 +53,7 @@ import { firstValueFrom } from 'rxjs';
                 *ngIf="isAdminMode"
                 variant="warning"
                 size="md"
-                icon="🔓"
+                iconClass="bi bi-unlock-fill"
                 (clicked)="exitAdminMode()"
                 class="admin-active"
               >
@@ -64,7 +64,7 @@ import { firstValueFrom } from 'rxjs';
             <app-touch-button
               variant="success"
               size="lg"
-              icon="+"
+              iconClass="bi bi-plus-lg"
               (clicked)="addMachine()"
             >
               Agregar Máquina
@@ -82,7 +82,7 @@ import { firstValueFrom } from 'rxjs';
           >
             <!-- Header de máquina -->
             <div class="machine-header">
-              <div class="machine-icon">{{ getAreaIcon() }}</div>
+              <div class="machine-icon"><i class="bi" [ngClass]="getAreaIcon()"></i></div>
               <h3 class="machine-name">{{ machine.name }}</h3>
               <span class="machine-badge">{{ getAreaLabel() }}</span>
             </div>
@@ -130,7 +130,7 @@ import { firstValueFrom } from 'rxjs';
               <app-touch-button
                 variant="primary"
                 size="md"
-                icon="🔧"
+                iconClass="bi bi-wrench"
                 [fullWidth]="true"
                 (clicked)="viewParts(machine)"
                 class="main-action"
@@ -143,7 +143,7 @@ import { firstValueFrom } from 'rxjs';
                   *ngIf="isAdminMode"
                   variant="warning"
                   size="sm"
-                  icon="✏️"
+                  iconClass="bi bi-pencil-fill"
                   (clicked)="editMachine(machine)"
                 >
                   Editar
@@ -153,7 +153,7 @@ import { firstValueFrom } from 'rxjs';
                   *ngIf="isAdminMode"
                   variant="danger"
                   size="sm"
-                  icon="🗑️"
+                  iconClass="bi bi-trash3-fill"
                   (clicked)="deleteMachine(machine)"
                 >
                   Eliminar
@@ -165,7 +165,7 @@ import { firstValueFrom } from 'rxjs';
 
         <!-- Estado vacío -->
         <div *ngIf="machines.length === 0 && !isLoading" class="empty-state">
-          <div class="empty-icon">{{ getAreaIcon() }}</div>
+          <div class="empty-icon"><i class="bi" [ngClass]="getAreaIcon()" style="font-size: 5rem; opacity: 0.6;"></i></div>
           <h3 class="empty-title">No hay máquinas registradas</h3>
           <p class="empty-message">
             Comienza agregando la primera máquina en
@@ -174,7 +174,7 @@ import { firstValueFrom } from 'rxjs';
           <app-touch-button
             variant="success"
             size="xl"
-            icon="🚀"
+            iconClass="bi bi-plus-circle-fill"
             (clicked)="addMachine()"
           >
             Agregar Primera Máquina
@@ -200,10 +200,10 @@ import { firstValueFrom } from 'rxjs';
         >
           <div class="modal-header danger-header">
             <div class="modal-title">
-              <span class="modal-icon danger-icon">⚠️</span>
+              <span class="modal-icon danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
               <h3>Confirmar Eliminación</h3>
             </div>
-            <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+            <button class="modal-close" (click)="closeDeleteModal()"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <div class="modal-content">
@@ -218,7 +218,7 @@ import { firstValueFrom } from 'rxjs';
 
               <div class="machine-stats-summary" *ngIf="machineToDelete">
                 <div class="summary-item">
-                  <span class="summary-icon">⚙️</span>
+                  <span class="summary-icon"><i class="bi bi-gear-fill"></i></span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
                       ? machineStats[machineToDelete.id!]['mecanica']
@@ -227,7 +227,7 @@ import { firstValueFrom } from 'rxjs';
                   <span class="summary-label">Mecánicas</span>
                 </div>
                 <div class="summary-item">
-                  <span class="summary-icon">⚡</span>
+                  <span class="summary-icon"><i class="bi bi-lightning-fill"></i></span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
                       ? machineStats[machineToDelete.id!]['electronica']
@@ -236,7 +236,7 @@ import { firstValueFrom } from 'rxjs';
                   <span class="summary-label">Electrónicas</span>
                 </div>
                 <div class="summary-item">
-                  <span class="summary-icon">🛠️</span>
+                  <span class="summary-icon"><i class="bi bi-wrench-adjustable"></i></span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
                       ? machineStats[machineToDelete.id!]['consumible']
@@ -268,7 +268,7 @@ import { firstValueFrom } from 'rxjs';
             <app-touch-button
               variant="danger"
               size="lg"
-              icon="🗑️"
+              iconClass="bi bi-trash3-fill"
               [disabled]="!canConfirmDelete || isDeleting"
               [loading]="isDeleting"
               (clicked)="confirmDeleteMachine()"
@@ -279,7 +279,7 @@ import { firstValueFrom } from 'rxjs';
             <app-touch-button
               variant="secondary"
               size="lg"
-              icon="✕"
+              iconClass="bi bi-x-lg"
               (clicked)="closeDeleteModal()"
               [disabled]="isDeleting"
             >
@@ -301,10 +301,10 @@ import { firstValueFrom } from 'rxjs';
         >
           <div class="modal-header">
             <div class="modal-title">
-              <span class="modal-icon">🔐</span>
+              <span class="modal-icon"><i class="bi bi-shield-lock-fill"></i></span>
               <h3>Acceso de Administrador</h3>
             </div>
-            <button class="modal-close" (click)="closeAdminModal()">✕</button>
+            <button class="modal-close" (click)="closeAdminModal()"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <div class="modal-content">
@@ -351,7 +351,7 @@ import { firstValueFrom } from 'rxjs';
         [class]="notificationType + '-notification'"
       >
         <div class="notification-content">
-          <span class="notification-icon">{{ getNotificationIcon() }}</span>
+          <span class="notification-icon"><i class="bi" [ngClass]="getNotificationIcon()"></i></span>
           <span class="notification-text">{{ notificationMessage }}</span>
         </div>
       </div>
@@ -1298,8 +1298,8 @@ export class MachineListComponent implements OnInit, OnDestroy {
 
   getAreaTitle(): string {
     return this.selectedArea === 'costura'
-      ? '🧵 ÁREA DE COSTURA'
-      : this.selectedArea === 'consumible' ? '💡 ÁREA DE CONSUMIBLES' : '✂️ ÁREA DE CORTE';
+      ? 'ÁREA DE COSTURA'
+      : this.selectedArea === 'consumible' ? 'ÁREA DE CONSUMIBLES' : 'ÁREA DE CORTE';
   }
 
   getAreaLabel(): string {
@@ -1309,7 +1309,7 @@ export class MachineListComponent implements OnInit, OnDestroy {
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'costura' ? '🧵' : this.selectedArea === 'consumible' ? '💡' : '✂️';
+    return this.selectedArea === 'costura' ? 'bi-hexagon' : this.selectedArea === 'consumible' ? 'bi-lightbulb-fill' : 'bi-scissors';
   }
 
   goBack() {
@@ -1431,13 +1431,13 @@ export class MachineListComponent implements OnInit, OnDestroy {
   getNotificationIcon(): string {
     switch (this.notificationType) {
       case 'success':
-        return '✅';
+        return 'bi-check-circle-fill';
       case 'error':
-        return '❌';
+        return 'bi-x-circle-fill';
       case 'warning':
-        return '⚠️';
+        return 'bi-exclamation-triangle-fill';
       default:
-        return '✅';
+        return 'bi-check-circle-fill';
     }
   }
 }

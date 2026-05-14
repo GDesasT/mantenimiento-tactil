@@ -24,8 +24,8 @@ type DriverStep = 'intro' | 'request' | 'confirm' | 'complete';
         <!-- Step: Intro -->
         <div class="step" *ngIf="currentStep === 'intro'">
           <div class="header">
-            <h2>🎙️ {{ currentLanguageConfig.name }}</h2>
-            <button (click)="closeDriver()" class="close-btn">✕</button>
+            <h2><i class="bi bi-mic-fill"></i> {{ currentLanguageConfig.name }}</h2>
+            <button (click)="closeDriver()" class="close-btn"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="content">
             <div class="introduction">
@@ -36,7 +36,7 @@ type DriverStep = 'intro' | 'request' | 'confirm' | 'complete';
             </div>
             <div class="audio-control">
               <button (click)="playIntroduction()" class="play-btn" [disabled]="isPlaying">
-                {{ isPlaying ? '⏳ Reproduciendo...' : '🔊 Escuchar' }}
+                {{ isPlaying ? 'Reproduciendo...' : 'Escuchar' }}
               </button>
             </div>
           </div>
@@ -49,8 +49,8 @@ type DriverStep = 'intro' | 'request' | 'confirm' | 'complete';
         <!-- Step: Request -->
         <div class="step" *ngIf="currentStep === 'request'">
           <div class="header">
-            <h2>🎙️ {{ currentLanguageConfig.name }}</h2>
-            <button (click)="closeDriver()" class="close-btn">✕</button>
+            <h2><i class="bi bi-mic-fill"></i> {{ currentLanguageConfig.name }}</h2>
+            <button (click)="closeDriver()" class="close-btn"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="content">
             <label>{{ currentLanguageConfig.requestLabel }}</label>
@@ -73,8 +73,8 @@ type DriverStep = 'intro' | 'request' | 'confirm' | 'complete';
         <!-- Step: Confirm -->
         <div class="step" *ngIf="currentStep === 'confirm'">
           <div class="header">
-            <h2>🎙️ {{ currentLanguageConfig.name }}</h2>
-            <button (click)="closeDriver()" class="close-btn">✕</button>
+            <h2><i class="bi bi-mic-fill"></i> {{ currentLanguageConfig.name }}</h2>
+            <button (click)="closeDriver()" class="close-btn"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="content">
             <div class="confirmation-card">
@@ -99,12 +99,12 @@ type DriverStep = 'intro' | 'request' | 'confirm' | 'complete';
         <!-- Step: Complete -->
         <div class="step complete-step" *ngIf="currentStep === 'complete'">
           <div class="header">
-            <h2>🎙️ {{ currentLanguageConfig.name }}</h2>
-            <button (click)="closeDriver()" class="close-btn">✕</button>
+            <h2><i class="bi bi-mic-fill"></i> {{ currentLanguageConfig.name }}</h2>
+            <button (click)="closeDriver()" class="close-btn"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="content">
             <div class="success">
-              <div class="success-icon">✅</div>
+              <div class="success-icon"><i class="bi bi-check-circle-fill" style="color: #22c55e;"></i></div>
               <h2>{{ currentLanguageConfig.successTitle }}</h2>
               <p class="success-message">{{ currentLanguageConfig.successMessage }}</p>
               <div class="success-card">

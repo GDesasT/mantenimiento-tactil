@@ -21,7 +21,7 @@ import { Machine, PartCategory } from '../../core/models';
             <app-touch-button
               variant="secondary"
               size="md"
-              icon="←"
+              iconClass="bi bi-arrow-left"
               (clicked)="goBack()"
               class="back-btn"
             >
@@ -38,7 +38,7 @@ import { Machine, PartCategory } from '../../core/models';
             <app-touch-button
               variant="success"
               size="lg"
-              icon="+"
+              iconClass="bi bi-plus-lg"
               (clicked)="addMachine()"
             >
               Agregar Máquina
@@ -57,7 +57,7 @@ import { Machine, PartCategory } from '../../core/models';
           >
             <!-- Header de máquina -->
             <div class="machine-header">
-              <div class="machine-icon">{{ getAreaIcon() }}</div>
+              <div class="machine-icon"><i class="bi" [ngClass]="getAreaIcon()"></i></div>
               <h3 class="machine-name">{{ machine.name }}</h3>
               <span class="machine-badge">{{ getAreaLabel() }}</span>
             </div>
@@ -103,7 +103,7 @@ import { Machine, PartCategory } from '../../core/models';
             <!-- Botones de acción -->
             <div class="machine-actions">
               <div class="main-action-info">
-                <span class="tap-hint">👆 Toca para ver refacciones</span>
+                <span class="tap-hint"><i class="bi bi-hand-index"></i> Toca para ver refacciones</span>
               </div>
             </div>
           </div>
@@ -111,7 +111,7 @@ import { Machine, PartCategory } from '../../core/models';
 
         <!-- Estado vacío -->
         <div *ngIf="machines.length === 0 && !isLoading" class="empty-state">
-          <div class="empty-icon">{{ getAreaIcon() }}</div>
+          <div class="empty-icon"><i class="bi" [ngClass]="getAreaIcon()" style="font-size: 5rem; opacity: 0.6;"></i></div>
           <h3 class="empty-title">No hay máquinas registradas</h3>
           <p class="empty-message">
             Comienza agregando la primera máquina en
@@ -120,7 +120,7 @@ import { Machine, PartCategory } from '../../core/models';
           <app-touch-button
             variant="success"
             size="xl"
-            icon="🚀"
+            iconClass="bi bi-plus-circle-fill"
             (clicked)="addMachine()"
           >
             Agregar Primera Máquina
@@ -146,10 +146,10 @@ import { Machine, PartCategory } from '../../core/models';
         >
           <div class="modal-header danger-header">
             <div class="modal-title">
-              <span class="modal-icon danger-icon">⚠️</span>
+              <span class="modal-icon danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
               <h3>Confirmar Eliminación</h3>
             </div>
-            <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+            <button class="modal-close" (click)="closeDeleteModal()"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <div class="modal-content">
@@ -164,7 +164,7 @@ import { Machine, PartCategory } from '../../core/models';
 
               <div class="machine-stats-summary" *ngIf="machineToDelete">
                 <div class="summary-item">
-                  <span class="summary-icon">⚙️</span>
+                  <span class="summary-icon"><i class="bi bi-gear-fill"></i></span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
                       ? machineStats[machineToDelete.id!]['mecanica']
@@ -173,7 +173,7 @@ import { Machine, PartCategory } from '../../core/models';
                   <span class="summary-label">Mecánicas</span>
                 </div>
                 <div class="summary-item">
-                  <span class="summary-icon">⚡</span>
+                  <span class="summary-icon"><i class="bi bi-lightning-fill"></i></span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
                       ? machineStats[machineToDelete.id!]['electronica']
@@ -182,7 +182,7 @@ import { Machine, PartCategory } from '../../core/models';
                   <span class="summary-label">Electrónicas</span>
                 </div>
                 <div class="summary-item">
-                  <span class="summary-icon">🛠️</span>
+                  <span class="summary-icon"><i class="bi bi-wrench-adjustable"></i></span>
                   <span class="summary-count">{{
                     machineToDelete && machineStats[machineToDelete.id!]
                       ? machineStats[machineToDelete.id!]['consumible']
@@ -214,7 +214,7 @@ import { Machine, PartCategory } from '../../core/models';
             <app-touch-button
               variant="danger"
               size="lg"
-              icon="🗑️"
+              iconClass="bi bi-trash3-fill"
               [disabled]="!canConfirmDelete || isDeleting"
               [loading]="isDeleting"
               (clicked)="confirmDeleteMachine()"
@@ -225,7 +225,7 @@ import { Machine, PartCategory } from '../../core/models';
             <app-touch-button
               variant="secondary"
               size="lg"
-              icon="✕"
+              iconClass="bi bi-x-lg"
               (clicked)="closeDeleteModal()"
               [disabled]="isDeleting"
             >
@@ -242,7 +242,7 @@ import { Machine, PartCategory } from '../../core/models';
         [class]="notificationType + '-notification'"
       >
         <div class="notification-content">
-          <span class="notification-icon">{{ getNotificationIcon() }}</span>
+          <span class="notification-icon"><i class="bi" [ngClass]="getNotificationIcon()"></i></span>
           <span class="notification-text">{{ notificationMessage }}</span>
         </div>
       </div>
@@ -1238,12 +1238,12 @@ export class MachineListComponent implements OnInit, OnDestroy {
 
   getAreaTitle(): string {
     const s = this.selectedArea.toLowerCase();
-    if(s.includes('corte')) return '✂️ ÁREA DE CORTE';
-    if(s.includes('costura')) return '🧵 ÁREA DE COSTURA';
-    if(s.includes('consumible')) return '💡 ÁREA DE CONSUMIBLES';
-    if(s.includes('limpieza')) return '🧹 ÁREA DE LIMPIEZA';
-    if(s.includes('herramienta')) return '🧰 ÁREA DE HERRAMIENTAS';
-    return '🏭 ' + this.selectedArea.toUpperCase();
+    if(s.includes('corte')) return 'ÁREA DE CORTE';
+    if(s.includes('costura')) return 'ÁREA DE COSTURA';
+    if(s.includes('consumible')) return 'ÁREA DE CONSUMIBLES';
+    if(s.includes('limpieza')) return 'ÁREA DE LIMPIEZA';
+    if(s.includes('herramienta')) return 'ÁREA DE HERRAMIENTAS';
+    return this.selectedArea.toUpperCase();
   }
 
   getAreaLabel(): string {
@@ -1258,12 +1258,12 @@ export class MachineListComponent implements OnInit, OnDestroy {
 
   getAreaIcon(): string {
     const s = this.selectedArea.toLowerCase();
-    if(s.includes('corte')) return '✂️';
-    if(s.includes('costura')) return '🧵';
-    if(s.includes('consumible')) return '💡';
-    if(s.includes('limpieza')) return '🧹';
-    if(s.includes('herramienta')) return '🧰';
-    return '📦';
+    if(s.includes('corte')) return 'bi-scissors';
+    if(s.includes('costura')) return 'bi-hexagon';
+    if(s.includes('consumible')) return 'bi-lightbulb-fill';
+    if(s.includes('limpieza')) return 'bi-droplet-fill';
+    if(s.includes('herramienta')) return 'bi-briefcase-fill';
+    return 'bi-box-seam-fill';
   }
 
   goBack() {
@@ -1346,13 +1346,13 @@ export class MachineListComponent implements OnInit, OnDestroy {
   getNotificationIcon(): string {
     switch (this.notificationType) {
       case 'success':
-        return '✅';
+        return 'bi-check-circle-fill';
       case 'error':
-        return '❌';
+        return 'bi-x-circle-fill';
       case 'warning':
-        return '⚠️';
+        return 'bi-exclamation-triangle-fill';
       default:
-        return '✅';
+        return 'bi-check-circle-fill';
     }
   }
 }

@@ -24,7 +24,7 @@ import { Machine } from '../../core/models';
           <app-touch-button
             variant="secondary"
             size="md"
-            icon="←"
+            iconClass="bi bi-arrow-left"
             (clicked)="goBack()"
             class="mr-4"
           >
@@ -148,7 +148,7 @@ import { Machine } from '../../core/models';
 
       <!-- Error al cargar -->
       <div *ngIf="loadError" class="error-state">
-        <div class="error-icon">❌</div>
+        <div class="error-icon"><i class="bi bi-x-circle-fill"></i></div>
         <h3 class="error-title">Error al cargar la máquina</h3>
         <p class="error-message">{{ loadError }}</p>
 
@@ -514,7 +514,7 @@ export class EditMachineComponent implements OnInit {
   }
 
   getAreaIcon(): string {
-    return this.selectedArea === 'corte' ? '✂️' : this.selectedArea === 'costura' ? '🧵' :  this.selectedArea === 'consumibles' ? '💡' : '';
+    return this.selectedArea === 'corte' ? 'bi-scissors' : this.selectedArea === 'costura' ? 'bi-hexagon' :  this.selectedArea === 'consumibles' ? 'bi-lightbulb-fill' : '';
   }
 
   goBack() {
@@ -546,7 +546,7 @@ export class EditMachineComponent implements OnInit {
   }
 
   getNotificationIcon(): string {
-    return this.notificationType === 'success' ? '✅' : '❌';
+    return this.notificationType === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
   }
 
   async onSubmit() {

@@ -7,33 +7,9 @@ export const routes: Routes = [
       import('./features/home/home').then((m) => m.HomeComponent),
     title: 'Inicio',
   },
+  // Rutas de refacciones por área (directas)
   {
-    path: 'machines/:area',
-    loadComponent: () =>
-      import('./features/machine-list/machine-list').then(
-        (m) => m.MachineListComponent
-      ),
-    title: 'Gestión de Máquinas',
-  },
-  {
-    path: 'machines/:area/add',
-    loadComponent: () =>
-      import('./features/add-machine/add-machine').then(
-        (m) => m.AddMachineComponent
-      ),
-    title: 'Agregar Máquina',
-  },
-  {
-    path: 'machines/:area/:machineId/edit',
-    loadComponent: () =>
-      import('./features/edit-machine/edit-machine').then(
-        (m) => m.EditMachineComponent
-      ),
-    title: 'Editar Máquina',
-  },
-  // Rutas de refacciones
-  {
-    path: 'machines/:area/:machineId/parts',
+    path: 'areas/:area/parts',
     loadComponent: () =>
       import('./features/part-category-selector/part-category-selector').then(
         (m) => m.PartCategorySelectorComponent
@@ -41,19 +17,19 @@ export const routes: Routes = [
     title: 'Seleccionar Categoría',
   },
   {
-    path: 'machines/:area/:machineId/parts/:category',
+    path: 'areas/:area/parts/:category',
     loadComponent: () =>
       import('./features/part-list/part-list').then((m) => m.PartListComponent),
     title: 'Listado de Refacciones',
   },
   {
-    path: 'machines/:area/:machineId/parts/:category/add',
+    path: 'areas/:area/parts/:category/add',
     loadComponent: () =>
       import('./features/add-part/add-part').then((m) => m.AddPartComponent),
     title: 'Agregar Refacción',
   },
   {
-    path: 'machines/:area/:machineId/parts/:category/:partId/edit',
+    path: 'areas/:area/parts/:category/:partId/edit',
     loadComponent: () =>
       import('./features/add-part/add-part').then((m) => m.AddPartComponent),
     title: 'Editar Refacción',

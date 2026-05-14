@@ -12,7 +12,8 @@ import { CommonModule } from '@angular/common';
       [disabled]="disabled || loading"
       (click)="onClick()"
     >
-      <span *ngIf="icon && !loading" class="button-icon">{{ icon }}</span>
+      <span *ngIf="iconClass && !loading" class="button-icon"><i [class]="iconClass"></i></span>
+      <span *ngIf="icon && !iconClass && !loading" class="button-icon">{{ icon }}</span>
 
       <span class="button-text">
         <ng-content></ng-content>
@@ -320,6 +321,7 @@ export class TouchButtonComponent {
   @Input() outline = false;
   @Input() ghost = false;
   @Input() icon = '';
+  @Input() iconClass = '';
   @Input() borderRadius = '0.5rem';
 
   @Output() clicked = new EventEmitter<void>();

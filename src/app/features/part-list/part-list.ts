@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TouchButtonComponent } from '../../shared/components/touch-button/touch-button';
 import { PartService } from '../../core/services/part';
+import { AreaService } from '../../core/services/area';
 import { CategoryService } from '../../core/services/category';
 import { Category } from '../../core/models/category.model';
 import { MachineService } from '../../core/services/machine';
@@ -16,11 +17,11 @@ import { firstValueFrom } from 'rxjs';
 
 // Visual maps for categories
 const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
-  'mecanica': { icon: '⚙️', variant: 'primary' },
-  'electronica': { icon: '⚡', variant: 'warning' },
-  'consumible': { icon: '💡', variant: 'success' },
-  'neumatica': { icon: '💨', variant: 'info' },
-  'hidraulica': { icon: '💧', variant: 'primary' }
+  'mecanica': { icon: 'bi-gear-fill', variant: 'primary' },
+  'electronica': { icon: 'bi-lightning-fill', variant: 'warning' },
+  'consumible': { icon: 'bi-lightbulb-fill', variant: 'success' },
+  'neumatica': { icon: 'bi-wind', variant: 'info' },
+  'hidraulica': { icon: 'bi-droplet-fill', variant: 'primary' }
 };
 
 @Component({
@@ -35,7 +36,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="secondary"
               size="md"
-              icon="←"
+              iconClass="bi bi-arrow-left"
               (clicked)="goBack()"
               class="back-btn"
             >
@@ -44,7 +45,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
 
             <div class="header-text">
               <h2 class="header-title">
-                🔧 {{ machine?.name || 'Cargando...' }}
+                <i class="bi bi-wrench"></i> {{ machine?.name || 'Cargando...' }}
               </h2>
               <p class="header-subtitle">
                 {{ getAreaTitle() }} • {{ getCategoryPageTitle() }}
@@ -57,7 +58,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
               *ngIf="isAdminMode"
               variant="warning"
               size="sm"
-              icon="🔧"
+              iconClass="bi bi-wrench"
               (clicked)="forceUpdatePartsWithImageField()"
               class="debug-btn"
               title="Fix Image Field"
@@ -70,7 +71,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
               *ngIf="!isAdminMode"
               variant="secondary"
               size="sm"
-              icon="⚙️"
+              iconClass="bi bi-gear-fill"
               (clicked)="openAdminModal()"
               class="admin-btn"
               title="Modo Administrador"
@@ -81,7 +82,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
               *ngIf="isAdminMode"
               variant="warning"
               size="sm"
-              icon="🔓"
+              iconClass="bi bi-unlock-fill"
               (clicked)="exitAdminMode()"
               class="admin-btn-active"
               title="Salir Modo Admin"
@@ -92,7 +93,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="success"
               size="lg"
-              icon="+"
+              iconClass="bi bi-plus-lg"
               (clicked)="addPart()"
               [disabled]="!machine"
             >
@@ -112,7 +113,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                     selectedCategory === 'all' ? 'primary' : 'secondary'
                   "
                   size="md"
-                  icon="🔍"
+                  iconClass="bi bi-search"
                   (clicked)="filterByCategory('all')"
                 >
                   Todas ({{ getTotalParts() }})
@@ -123,7 +124,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                     selectedCategory === 'mecanica' ? 'primary' : 'secondary'
                   "
                   size="md"
-                  icon="⚙️"
+                  iconClass="bi bi-gear-fill"
                   (clicked)="filterByCategory('mecanica')"
                 >
                   Mecánica ({{ getPartsByCategory('mecanica').length }})
@@ -134,7 +135,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                     selectedCategory === 'electronica' ? 'warning' : 'secondary'
                   "
                   size="md"
-                  icon="⚡"
+                  iconClass="bi bi-lightning-fill"
                   (clicked)="filterByCategory('electronica')"
                 >
                   Electrónica ({{ getPartsByCategory('electronica').length }})
@@ -145,7 +146,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                     selectedCategory === 'consumible' ? 'success' : 'secondary'
                   "
                   size="md"
-                  icon="📦"
+                  iconClass="bi bi-box-seam-fill"
                   (clicked)="filterByCategory('consumible')"
                 >
                   Consumible ({{ getPartsByCategory('consumible').length }})
@@ -155,9 +156,9 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
           </div>
         </div>
 
-        <div *ngIf="filteredParts.length > 0" class="parts-grid">
+        <div *ngIf="paginatedParts.length > 0" class="parts-grid">
           <div
-            *ngFor="let part of filteredParts; let i = index"
+            *ngFor="let part of paginatedParts; let i = index"
             class="part-card modern-card"
           >
             <div class="part-image-container">
@@ -177,9 +178,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                 class="part-image-placeholder"
                 [attr.data-category]="part.category"
               >
-                <span class="placeholder-icon">{{
-                  getCategoryIcon(part.category)
-                }}</span>
+                <span class="placeholder-icon"><i class="bi" [ngClass]="getCategoryIcon(part.category)"></i></span>
                 <span class="placeholder-text">{{
                   getCategoryName(part.category)
                 }}</span>
@@ -190,7 +189,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
               <div class="part-header-info">
                 <span class="part-sap">SAP: {{ part.sapNumber }}</span>
                 <span class="part-category-badge" [attr.data-category]="part.category">
-                  {{ getCategoryIcon(part.category) }} {{ getCategoryName(part.category) }}
+                  <i class="bi" [ngClass]="getCategoryIcon(part.category)"></i> {{ getCategoryName(part.category) }}
                 </span>
               </div>
               
@@ -198,7 +197,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
 
               <div class="part-details-grid">
                 <div class="detail-item">
-                  <span class="detail-icon">📍</span>
+                  <span class="detail-icon"><i class="bi bi-geo-alt-fill"></i></span>
                   <div class="detail-text">
                     <span class="detail-label">Ubicación</span>
                     <span class="detail-value">{{ part.location || 'N/A' }}</span>
@@ -206,7 +205,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                 </div>
 
                 <div class="detail-item">
-                  <span class="detail-icon">🔧</span>
+                  <span class="detail-icon"><i class="bi bi-wrench"></i></span>
                   <div class="detail-text">
                     <span class="detail-label">No. Parte</span>
                     <span class="detail-value" [title]="part.partNumber">{{ part.partNumber || 'N/A' }}</span>
@@ -214,7 +213,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                 </div>
 
                 <div class="detail-item">
-                  <span class="detail-icon">🏭</span>
+                  <span class="detail-icon"><i class="bi bi-building"></i></span>
                   <div class="detail-text">
                     <span class="detail-label">Máquina</span>
                     <span class="detail-value" [title]="machine?.name">{{ machine?.name || 'N/A' }}</span>
@@ -225,7 +224,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
               <!-- Botones de admin si está en modo admin -->
               <div *ngIf="isAdminMode" class="admin-controls">
                 <div class="add-image-btn" (click)="addImageToPart(part)">
-                  <span class="add-icon">📷</span>
+                  <span class="add-icon"><i class="bi bi-camera-fill"></i></span>
                   <span class="add-text"
                     >{{ part.image ? 'Cambiar' : 'Agregar' }} imagen</span
                   >
@@ -235,7 +234,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                   <app-touch-button
                     variant="warning"
                     size="sm"
-                    icon="✏️"
+                    iconClass="bi bi-pencil-fill"
                     (clicked)="editPart(part)"
                   >
                     Editar
@@ -244,7 +243,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                   <app-touch-button
                     variant="danger"
                     size="sm"
-                    icon="🗑️"
+                    iconClass="bi bi-trash3-fill"
                     (clicked)="requestDeletePart(part)"
                   >
                     Eliminar
@@ -256,16 +255,16 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
         </div>
 
         <div
-          *ngIf="filteredParts.length === 0 && !isLoading"
+          *ngIf="paginatedParts.length === 0 && !isLoading"
           class="empty-state-pro"
         >
-          <div class="empty-icon-pro">{{ getEmptyStateIcon() }}</div>
+          <div class="empty-icon-pro"><i class="bi" [ngClass]="getEmptyStateIcon()" style="font-size: 3rem;"></i></div>
           <h3 class="empty-title-pro">{{ getEmptyStateTitle() }}</h3>
           <p class="empty-description-pro">{{ getEmptyStateMessage() }}</p>
           <app-touch-button
             variant="success"
             size="xl"
-            icon="🚀"
+            iconClass="bi bi-plus-circle-fill"
             (clicked)="addPart()"
           >
             {{ getAddButtonText() }}
@@ -277,6 +276,45 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
           <span class="loading-text">Cargando refacciones...</span>
         </div>
 
+        <!-- Sidebar de paginación (derecha) -->
+        <div class="page-navigation-sidebar" *ngIf="totalPages > 1 && !isLoading">
+          <div class="navigation-controls-vertical">
+            <button class="nav-btn" (click)="goToFirstPage()" [disabled]="currentPage === 1" title="Primera página">
+              <i class="bi bi-chevron-double-up"></i>
+            </button>
+            <button class="nav-btn" (click)="previousPage()" [disabled]="currentPage === 1" title="Página anterior">
+              <i class="bi bi-chevron-up"></i>
+            </button>
+          </div>
+
+          <div class="page-numbers-vertical">
+            <ng-container *ngFor="let page of visiblePages">
+              <div
+                class="page-number-vertical"
+                [class.active]="page === currentPage"
+                [class.ellipsis]="page === '...'"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="navigation-controls-vertical">
+            <button class="nav-btn" (click)="nextPage()" [disabled]="currentPage === totalPages" title="Página siguiente">
+              <i class="bi bi-chevron-down"></i>
+            </button>
+            <button class="nav-btn" (click)="goToLastPage()" [disabled]="currentPage === totalPages" title="Última página">
+              <i class="bi bi-chevron-double-down"></i>
+            </button>
+          </div>
+
+          <div class="total-info">
+            <span>Total:</span>
+            <strong>{{ filteredParts.length }}</strong>
+          </div>
+        </div>
+
         <!-- Botón para subir arriba -->
         <button
           *ngIf="filteredParts.length > 0"
@@ -284,7 +322,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
           (click)="scrollToTop()"
           title="Ir arriba"
         >
-          ⬆️
+          <i class="bi bi-arrow-up-circle-fill"></i>
         </button>
       </div>
 
@@ -293,7 +331,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
         class="success-notification animate-slideInRight"
       >
         <div class="notification-content">
-          <span class="notification-icon">✅</span>
+          <span class="notification-icon"><i class="bi bi-check-circle-fill"></i></span>
           <span class="notification-text">{{ successMessage }}</span>
         </div>
       </div>
@@ -303,7 +341,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
         class="error-notification animate-slideInRight"
       >
         <div class="notification-content">
-          <span class="notification-icon">❌</span>
+          <span class="notification-icon"><i class="bi bi-x-circle-fill"></i></span>
           <span class="notification-text">{{ errorMessage }}</span>
         </div>
       </div>
@@ -319,10 +357,10 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
         >
           <div class="modal-header">
             <div class="modal-title">
-              <span class="modal-icon">🔐</span>
+              <span class="modal-icon"><i class="bi bi-shield-lock-fill"></i></span>
               <h3>Modo Administrador</h3>
             </div>
-            <button class="modal-close" (click)="closeAdminModal()">✕</button>
+            <button class="modal-close" (click)="closeAdminModal()"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <div class="modal-content">
@@ -357,7 +395,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="primary"
               size="lg"
-              icon="🔓"
+              iconClass="bi bi-unlock-fill"
               (clicked)="checkAdminPassword()"
               [disabled]="!adminPassword.trim()"
             >
@@ -367,7 +405,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="secondary"
               size="lg"
-              icon="✕"
+              iconClass="bi bi-x-lg"
               (clicked)="closeAdminModal()"
             >
               Cancelar
@@ -387,11 +425,11 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
         >
           <div class="modal-header danger-header">
             <div class="modal-title">
-              <span class="modal-icon danger-icon">⚠️</span>
+              <span class="modal-icon danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
               <h3>Confirmar Eliminación</h3>
             </div>
             <button class="modal-close" (click)="closePasswordDeleteModal()">
-              ✕
+              <i class="bi bi-x-lg"></i>
             </button>
           </div>
 
@@ -406,9 +444,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                 </p>
                 <div class="part-to-delete">
                   <div class="part-preview">
-                    <span class="preview-icon">{{
-                      getCategoryIcon(partToDelete.category)
-                    }}</span>
+                    <span class="preview-icon"><i class="bi" [ngClass]="getCategoryIcon(partToDelete.category)"></i></span>
                     <div class="preview-info">
                       <span class="preview-name">{{
                         partToDelete.description
@@ -452,7 +488,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="danger"
               size="lg"
-              icon="🗑️"
+              iconClass="bi bi-trash3-fill"
               (clicked)="confirmPasswordDelete()"
               [loading]="isDeleting"
               [disabled]="!deletePassword.trim() || isDeleting"
@@ -463,7 +499,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="secondary"
               size="lg"
-              icon="✕"
+              iconClass="bi bi-x-lg"
               (clicked)="closePasswordDeleteModal()"
               [disabled]="isDeleting"
             >
@@ -482,11 +518,11 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
         <div class="modal-container" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <div class="modal-title">
-              <span>🛒</span>
+              <span><i class="bi bi-cart3"></i></span>
               <h3>Pedir refacción</h3>
             </div>
             <!-- <button class="modal-close" (click)="closePetitionModal()"> -->
-              ✕
+              <i class="bi bi-x-lg"></i>
             <!-- </button> -->
           </div>
           <div class="modal-content" *ngIf="selectedPartForPetition as p">
@@ -548,7 +584,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                     class="numpad-key numpad-clear"
                     (click)="onNumpadClear()"
                   >
-                    🗑️
+                    <i class="bi bi-trash3-fill"></i>
                   </button>
                   <button class="numpad-key" (click)="onNumberPressed('0')">
                     0
@@ -557,13 +593,13 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
                     class="numpad-key numpad-backspace"
                     (click)="onNumpadBackspace()"
                   >
-                    ⌫
+                    <i class="bi bi-backspace-fill"></i>
                   </button>
                 </div>
               </div>
 
               <div *ngIf="employeeExists" class="employee-recognized">
-                ✅ Empleado: {{ employeeNameInput }} (reconocido)
+                <i class="bi bi-check-circle-fill"></i> Empleado: {{ employeeNameInput }} (reconocido)
               </div>
             </div>
           </div>
@@ -571,7 +607,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="primary"
               size="lg"
-              icon="✅"
+              iconClass="bi bi-check-circle-fill"
               (clicked)="submitPetition()"
               [loading]="isSubmittingPetition"
               [disabled]="!employeeNumberInput.trim() || isSubmittingPetition"
@@ -581,7 +617,7 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
             <app-touch-button
               variant="secondary"
               size="lg"
-              icon="✕"
+              iconClass="bi bi-x-lg"
               (clicked)="closePetitionModal()"
               [disabled]="isSubmittingPetition"
               >Cancelar</app-touch-button
@@ -726,8 +762,8 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
 
       .parts-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+        gap: 1.5rem;
         margin-bottom: 2rem;
       }
 
@@ -2156,9 +2192,10 @@ const CAT_VISUALS: Record<string, { icon: string, variant: string }> = {
   ],
 })
 export class PartListComponent implements OnInit {
-  selectedArea: 'corte' | 'costura' = 'costura';
-  machineId!: number;
-  machine: Machine | null = null;
+  selectedArea: string = 'costura';
+  machinesInArea: Machine[] = [];
+  machineId!: number; // Kept for backwards compatibility if needed for additions
+  machine: Machine | null = null; // Principal machine
   allParts: Part[] = [];
   filteredParts: Part[] = [];
   selectedCategory: string = 'all';
@@ -2169,6 +2206,7 @@ export class PartListComponent implements OnInit {
   itemsPerPage = 12;
   totalPages = 1;
   paginatedParts: Part[] = [];
+  visiblePages: (number | string)[] = [];
 
   partToDelete: Part | null = null;
   isDeleting = false;
@@ -2209,24 +2247,24 @@ export class PartListComponent implements OnInit {
     private machineService: MachineService,
     private databaseService: DatabaseService,
     private employeeService: EmployeeService,
-    private petitionService: PetitionService
+    private petitionService: PetitionService,
+    private areaService: AreaService
   ) {
     this.categories$ = this.categoryService.categories$;}
 
   async ngOnInit() {
+    console.log('>>> 0. ngOnInit started in PartListComponent');
     this.categoryService.loadCategories().subscribe();
 
-    this.route.params.subscribe(async (params) => {
-      this.selectedArea = params['area'] || 'costura';
-      this.machineId = +params['machineId'];
-      const categoryParam = params['category'] || 'all';
+    console.log('>>> 0.1 Subscribing to route.paramMap');
+    this.route.paramMap.subscribe(async (params) => {
+      console.log('>>> 0.2 route.paramMap fired', params);
+      this.selectedArea = params.get('area') || 'costura';
+      const categoryParam = params.get('category') || 'all';
 
       this.selectedCategory = categoryParam || 'all';
 
-      if (this.machineId) {
-        await this.loadMachine();
-        await this.loadParts();
-      }
+      await this.loadAreaMachinesAndParts();
     });
 
     try {
@@ -2342,48 +2380,94 @@ export class PartListComponent implements OnInit {
     }
   }
 
-  async loadMachine() {
+  async loadAreaMachinesAndParts() {
+    console.log('>>> 1. Starting loadAreaMachinesAndParts for area:', this.selectedArea);
+    this.isLoading = true;
     try {
-      this.machineService.getMachineById(this.machineId).subscribe({
-        next: (machine) => {
-          this.machine = machine || null;
+      // 1. Get the area ID by name
+      this.areaService.loadAreas().subscribe({
+        next: (areas) => {
+          const area = areas.find(a => 
+            (a.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === this.selectedArea.toLowerCase()
+          );
+          
+          if (!area) {
+            console.log('>>> 1b. Area not found in DB:', this.selectedArea);
+            this.allParts = [];
+            this.applyFilter();
+            this.isLoading = false;
+            return;
+          }
+
+          // La base de datos ahora guarda el ID del área en la columna machine_id de las refacciones
+          // Por lo tanto, el "machineId" de la refacción es directamente el "area.id"
+          this.machineId = area.id!;
+          
+          // Creamos un objeto de máquina falso para compatibilidad con la vista y peticiones
+          this.machine = {
+            id: area.id,
+            name: area.name,
+            area: area.name,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+
+          this.loadPartsForArea(area.id!);
         },
         error: (error) => {
-          console.error('Error loading machine:', error);
-        },
+          console.error('>>> ERROR loading areas:', error);
+          this.isLoading = false;
+        }
       });
     } catch (error) {
-      console.error('Error loading machine:', error);
+      console.error('>>> ERROR in loadAreaMachinesAndParts try/catch:', error);
+      this.isLoading = false;
     }
   }
 
-  async loadParts() {
-    this.isLoading = true;
-    try {
-      this.partService.getPartsByMachine(this.machineId).subscribe({
-        next: (parts) => {
-          this.allParts = parts;
-          this.applyFilter();
-          this.isLoading = false;
-
-          parts.forEach((part, index) => {
-            if (part.image && part.image.trim()) {
-              console.log(
-                `🖼️ Part ${index + 1} HAS IMAGE: ${part.description}`
-              );
-              console.log(`  - Image URL: "${part.image}"`);
-            } else {
-              console.log(`� Part ${index + 1} NO IMAGE: ${part.description}`);
+  loadPartsForArea(areaId: number) {
+    console.log('>>> 3. loadPartsForArea called with areaId:', areaId);
+    this.partService.parts$.subscribe({
+      next: (parts) => {
+        console.log('>>> 4. parts$ emitted:', parts.length, 'parts');
+        // Si no hay refacciones cargadas en el servicio, solicitarlas
+        if (parts.length === 0) {
+          console.log('>>> 5. parts.length is 0, calling loadParts()');
+          this.partService.loadParts().subscribe({
+            next: loadedParts => {
+              console.log('>>> 6. loadParts() finished with', loadedParts.length, 'parts');
+              this.processPartsForArea(loadedParts, areaId);
+            },
+            error: err => {
+              console.error('>>> ERROR loading parts from API:', err);
+              this.isLoading = false;
             }
           });
-        },
-        error: (error) => {
-          console.error('Error loading parts:', error);
-          this.isLoading = false;
-        },
-      });
-    } catch (error) {
-      console.error('Error loading parts:', error);
+        } else {
+          console.log('>>> 5b. parts already loaded, processing');
+          this.processPartsForArea(parts, areaId);
+        }
+      },
+      error: (error) => {
+         console.error('>>> ERROR subscribing to parts$:', error);
+         this.isLoading = false;
+      }
+    });
+  }
+
+  private processPartsForArea(allParts: Part[], areaId: number) {
+    console.log('>>> 7. processPartsForArea called with', allParts.length, 'total parts');
+    try {
+      // Filtrar refacciones donde el machineId (que en realidad es el areaId) coincide
+      this.allParts = allParts.filter((part) => part.machineId === areaId);
+      console.log('>>> 8. Parts filtered to', this.allParts.length);
+      this.allParts.sort((a, b) => a.description.localeCompare(b.description));
+      console.log('>>> 9. Parts sorted');
+      this.applyFilter();
+      console.log('>>> 10. Filter applied, setting isLoading to false');
+      this.isLoading = false;
+    } catch (err) {
+      console.error('>>> ERROR in processPartsForArea:', err);
       this.isLoading = false;
     }
   }
@@ -2419,7 +2503,42 @@ export class PartListComponent implements OnInit {
 
     this.paginatedParts = this.filteredParts.slice(startIndex, endIndex);
 
+    this.updateVisiblePages();
     this.restartGridAnimation();
+  }
+
+  updateVisiblePages() {
+    const pages: (number | string)[] = [];
+    const maxVisiblePages = 5;
+
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const startPage = Math.max(1, this.currentPage - 2);
+      const endPage = Math.min(this.totalPages, this.currentPage + 2);
+
+      if (startPage > 1) {
+        pages.push(1);
+        if (startPage > 2) {
+          pages.push('...');
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+
+      if (endPage < this.totalPages) {
+        if (endPage < this.totalPages - 1) {
+          pages.push('...');
+        }
+        pages.push(this.totalPages);
+      }
+    }
+
+    this.visiblePages = pages;
   }
 
   /** Reiniciar animación del grid para transiciones visuales */
@@ -2488,40 +2607,6 @@ export class PartListComponent implements OnInit {
     this.scrollToTop();
   }
 
-  getVisiblePages(): (number | string)[] {
-    const pages: (number | string)[] = [];
-    const maxVisiblePages = 5;
-
-    if (this.totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= this.totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      const startPage = Math.max(1, this.currentPage - 2);
-      const endPage = Math.min(this.totalPages, this.currentPage + 2);
-
-      if (startPage > 1) {
-        pages.push(1);
-        if (startPage > 2) {
-          pages.push('...');
-        }
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-
-      if (endPage < this.totalPages) {
-        if (endPage < this.totalPages - 1) {
-          pages.push('...');
-        }
-        pages.push(this.totalPages);
-      }
-    }
-
-    return pages;
-  }
-
   getPartsByCategory(category: PartCategory): Part[] {
     return this.allParts.filter((part) => part.category === category);
   }
@@ -2532,11 +2617,11 @@ export class PartListComponent implements OnInit {
 
   getCategoryIcon(category: PartCategory): string {
     const icons: Record<string, string> = {
-      mecanica: '⚙️',
-      electronica: '⚡',
-      consumible: '📦',
+      mecanica: 'bi-gear-fill',
+      electronica: 'bi-lightning-fill',
+      consumible: 'bi-box-seam-fill',
     };
-    return icons[category];
+    return icons[category] || 'bi-box-seam-fill';
   }
 
   getCategoryLabel(category: PartCategory): string {
@@ -2592,7 +2677,7 @@ export class PartListComponent implements OnInit {
 
   getEmptyStateIcon(): string {
     if (this.selectedCategory === 'all') {
-      return '📦';
+      return 'bi-box-seam-fill';
     }
     return this.getCategoryIcon(this.selectedCategory);
   }
@@ -2607,7 +2692,7 @@ export class PartListComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/machine-list', this.selectedArea]);
+    this.router.navigate(['/']);
   }
 
   /** Métodos de administración */
@@ -2658,9 +2743,8 @@ export class PartListComponent implements OnInit {
     const category =
       this.selectedCategory !== 'all' ? this.selectedCategory : 'mecanica';
     this.router.navigate([
-      '/machines',
+      '/areas',
       this.selectedArea,
-      this.machineId,
       'parts',
       category,
       'add',
@@ -2669,9 +2753,8 @@ export class PartListComponent implements OnInit {
 
   editPart(part: Part) {
     this.router.navigate([
-      '/machines',
+      '/areas',
       this.selectedArea,
-      this.machineId,
       'parts',
       part.category,
       part.id,
@@ -2697,7 +2780,7 @@ export class PartListComponent implements OnInit {
       this.partService.deletePart(this.partToDelete.id!).subscribe({
         next: () => {
           this.showSuccess('Refacción eliminada exitosamente');
-          this.loadParts();
+          this.loadAreaMachinesAndParts();
           this.closePasswordDeleteModal();
           this.isDeleting = false;
         },
@@ -2784,7 +2867,7 @@ export class PartListComponent implements OnInit {
           this.showSuccess('Imagen agregada exitosamente');
 
           setTimeout(() => {
-            this.loadParts();
+            this.loadAreaMachinesAndParts();
           }, 500);
         },
         error: (error) => {
@@ -2806,7 +2889,7 @@ export class PartListComponent implements OnInit {
         }
       }
 
-      this.loadParts();
+      this.loadAreaMachinesAndParts();
     } catch (error) {
       console.error('❌ Error updating parts:', error);
     }

@@ -12,7 +12,7 @@ import { VoiceDriverService, LanguageCode } from '../../../core/services/voice-d
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatRadioModule, FormsModule],
   template: `
     <div class="language-selector">
-      <h2 class="title">🌍 Selecciona tu idioma / Select your language</h2>
+      <h2 class="title"><i class="bi bi-globe2"></i> Selecciona tu idioma / Select your language</h2>
 
       <div class="language-options">
         <div class="option-group" *ngFor="let lang of languages">

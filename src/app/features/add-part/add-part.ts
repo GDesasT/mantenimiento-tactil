@@ -26,7 +26,7 @@ import { Machine, PartCategory } from '../../core/models';
             <app-touch-button
               variant="secondary"
               size="md"
-              icon="←"
+              iconClass="bi bi-arrow-left"
               (clicked)="goBack()"
               class="back-btn"
             >
@@ -35,11 +35,11 @@ import { Machine, PartCategory } from '../../core/models';
 
             <div class="header-text">
               <h2 class="header-title">
-                <span *ngIf="!isEditMode">➕ Agregar Refacción</span>
-                <span *ngIf="isEditMode">✏️ Editar Refacción</span>
+                <span *ngIf="!isEditMode"><i class="bi bi-plus-circle-fill"></i> Agregar Refacción</span>
+                <span *ngIf="isEditMode"><i class="bi bi-pencil-fill"></i> Editar Refacción</span>
               </h2>
               <p class="header-subtitle">
-                🔧 {{ machine?.name || 'Cargando máquina...' }}
+                <i class="bi bi-wrench"></i> {{ machine?.name || 'Cargando máquina...' }}
                 <span *ngIf="isPreselected()">
                   • {{ getSelectedCategoryLabel() }}
                 </span>
@@ -81,11 +81,11 @@ import { Machine, PartCategory } from '../../core/models';
             >
               <div class="professional-card">
                 <div class="professional-content">
-                  <h3 class="section-title">📋 Identificación</h3>
+                  <h3 class="section-title"><i class="bi bi-clipboard-data-fill"></i> Identificación</h3>
 
                   <!-- SAP Number -->
                   <div class="form-group">
-                    <label class="form-label">📦 Número SAP *</label>
+                    <label class="form-label"><i class="bi bi-box-seam-fill"></i> Número SAP *</label>
                     <input
                       type="text"
                       formControlName="sapNumber"
@@ -124,7 +124,7 @@ import { Machine, PartCategory } from '../../core/models';
 
                   <!-- Part Number -->
                   <div class="form-group">
-                    <label class="form-label">🔖 Part Number *</label>
+                    <label class="form-label"><i class="bi bi-tag-fill"></i> Part Number *</label>
                     <input
                       type="text"
                       formControlName="partNumber"
@@ -159,7 +159,7 @@ import { Machine, PartCategory } from '../../core/models';
                   <!-- Categoría -->
                   <div class="form-group">
                     <label class="form-label">
-                      📂 Categoría *
+                      <i class="bi bi-folder2-open"></i> Categoría *
                       <span *ngIf="isPreselected()" class="preselected-label">
                         (Preseleccionada)
                       </span>
@@ -172,9 +172,9 @@ import { Machine, PartCategory } from '../../core/models';
                       [disabled]="isPreselected()"
                     >
                       <option value="">Selecciona una categoría</option>
-                      <option value="mecanica">🔩 Mecánica</option>
-                      <option value="electronica">⚡ Electrónica</option>
-                      <option value="consumible">🔄 Consumible</option>
+                      <option value="mecanica">Mecánica</option>
+                      <option value="electronica">Electrónica</option>
+                      <option value="consumible">Consumible</option>
                     </select>
                     <div *ngIf="isFieldInvalid('category')" class="field-error">
                       Debes seleccionar una categoría
@@ -183,7 +183,7 @@ import { Machine, PartCategory } from '../../core/models';
                       ✓ Categoría seleccionada
                     </div>
                     <div *ngIf="isPreselected()" class="preselected-info">
-                      💡 Esta categoría fue seleccionada automáticamente
+                      <i class="bi bi-lightbulb-fill"></i> Esta categoría fue seleccionada automáticamente
                     </div>
                   </div>
                 </div>
@@ -197,11 +197,11 @@ import { Machine, PartCategory } from '../../core/models';
             >
               <div class="professional-card">
                 <div class="professional-content">
-                  <h3 class="section-title">📝 Detalles</h3>
+                  <h3 class="section-title"><i class="bi bi-pencil-square"></i> Detalles</h3>
 
                   <!-- Descripción -->
                   <div class="form-group">
-                    <label class="form-label">📄 Descripción *</label>
+                    <label class="form-label"><i class="bi bi-file-text-fill"></i> Descripción *</label>
                     <textarea
                       formControlName="description"
                       placeholder="Describe la refacción detalladamente..."
@@ -235,7 +235,7 @@ import { Machine, PartCategory } from '../../core/models';
 
                   <!-- Ubicación -->
                   <div class="form-group">
-                    <label class="form-label">📍 Ubicación *</label>
+                    <label class="form-label"><i class="bi bi-geo-alt-fill"></i> Ubicación *</label>
                     <input
                       type="text"
                       formControlName="location"
@@ -304,9 +304,9 @@ import { Machine, PartCategory } from '../../core/models';
           >
             <div class="professional-card">
               <div class="professional-content">
-                <h3 class="section-title">📸 Imagen (Opcional)</h3>
+                <h3 class="section-title"><i class="bi bi-camera-fill"></i> Imagen (Opcional)</h3>
                 <div class="form-group">
-                  <label class="form-label">🖼️ URL de Imagen</label>
+                  <label class="form-label"><i class="bi bi-image"></i> URL de Imagen</label>
                   <input
                     type="url"
                     formControlName="image"
@@ -314,7 +314,7 @@ import { Machine, PartCategory } from '../../core/models';
                     class="form-input"
                   />
                   <div class="field-hint">
-                    💡 Puedes agregar una URL de imagen para ayudar a
+                    <i class="bi bi-lightbulb-fill"></i> Puedes agregar una URL de imagen para ayudar a
                     identificar la refacción
                   </div>
                 </div>
@@ -334,7 +334,7 @@ import { Machine, PartCategory } from '../../core/models';
                     type="button"
                     variant="secondary"
                     size="xl"
-                    icon="❌"
+                    iconClass="bi bi-x-circle-fill"
                     [fullWidth]="true"
                     (clicked)="goBack()"
                   >
@@ -345,7 +345,7 @@ import { Machine, PartCategory } from '../../core/models';
                     type="submit"
                     variant="success"
                     size="xl"
-                    icon="💾"
+                    iconClass="bi bi-floppy-fill"
                     [fullWidth]="true"
                     [disabled]="partForm.invalid || isSubmitting"
                     [loading]="isSubmitting"
@@ -819,7 +819,6 @@ export class AddPartComponent implements OnInit {
   async ngOnInit() {
     // Obtener parámetros de la URL
     this.route.params.subscribe((params) => {
-      this.machineId = +params['machineId'];
       this.selectedArea = params['area'] || 'costura';
       this.selectedCategory = params['category'] || '';
       this.partId = params['partId'] ? +params['partId'] : undefined;
@@ -832,7 +831,7 @@ export class AddPartComponent implements OnInit {
         this.partForm.patchValue({ category: this.selectedCategory });
       }
 
-      this.loadMachine();
+      this.loadMachineForArea();
 
       // Si estamos editando, cargar los datos de la refacción
       if (this.isEditMode && this.partId) {
@@ -851,13 +850,18 @@ export class AddPartComponent implements OnInit {
     this.setupSapValidation();
   }
 
-  loadMachine() {
-    this.machineService.getMachineById(this.machineId).subscribe({
-      next: (machine) => {
-        this.machine = machine || null;
+  loadMachineForArea() {
+    this.machineService.getMachinesByArea(this.selectedArea).subscribe({
+      next: (machines) => {
+        if (machines.length > 0) {
+          this.machine = machines[0];
+          this.machineId = this.machine.id!;
+        } else {
+          this.machine = null;
+        }
       },
       error: (error) => {
-        console.error('Error loading machine:', error);
+        console.error('Error loading machines:', error);
       },
     });
   }
@@ -905,7 +909,7 @@ export class AddPartComponent implements OnInit {
   }
 
   getAreaIcon(): string {
-    return this.machine?.area === 'corte' ? '✂️' : '🧵';
+    return this.machine?.area === 'corte' ? 'bi-scissors' : 'bi-hexagon';
   }
 
   getAreaLabel(): string {
@@ -916,9 +920,9 @@ export class AddPartComponent implements OnInit {
 
   getCategoryIcon(category: PartCategory): string {
     const icons: Record<string, string> = {
-      mecanica: '🔩',
-      electronica: '⚡',
-      consumible: '🔄',
+      mecanica: 'bi-gear-fill',
+      electronica: 'bi-lightning-fill',
+      consumible: 'bi-box-seam-fill',
     };
     return icons[category];
   }
@@ -956,7 +960,7 @@ export class AddPartComponent implements OnInit {
   }
 
   getNotificationIcon(): string {
-    return this.notificationType === 'success' ? '✅' : '❌';
+    return this.notificationType === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
   }
 
   showNotificationMessage(
@@ -975,17 +979,15 @@ export class AddPartComponent implements OnInit {
   goBack() {
     if (this.isPreselected()) {
       this.router.navigate([
-        '/machines',
+        '/areas',
         this.selectedArea,
-        this.machineId,
         'parts',
         this.selectedCategory,
       ]);
     } else {
       this.router.navigate([
-        '/machines',
+        '/areas',
         this.selectedArea,
-        this.machineId,
         'parts',
       ]);
     }

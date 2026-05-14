@@ -51,8 +51,7 @@ import { DatabaseService } from '../../core/services/database';
   ],
 })
 export class PartCategorySelectorComponent implements OnInit {
-  machineId!: number;
-  selectedArea: 'corte' | 'costura' | 'consumible' = 'costura';
+  selectedArea: string = 'costura';
 
   constructor(
     private route: ActivatedRoute,
@@ -68,13 +67,11 @@ export class PartCategorySelectorComponent implements OnInit {
     }
 
     this.route.params.subscribe((params) => {
-      this.machineId = +params['machineId'];
       this.selectedArea = params['area'] || 'costura';
       // Redirigir directamente a la vista de refacciones mecánicas
       this.router.navigate([
-        '/machines',
+        '/areas',
         this.selectedArea,
-        this.machineId,
         'parts',
         'mecanica',
       ]);
